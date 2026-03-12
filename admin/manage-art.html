@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Art — Admin Panel</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+
+<body onload="checkAuth(); renderArtworks();">
+
+  <div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">A</div>
+        <div>
+          <h2>Abhilasha</h2>
+          <small>Admin Panel</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+        <a href="manage-art.html" class="active"><span class="nav-icon">🎨</span> Personal Art</a>
+        <a href="published-works.html"><span class="nav-icon">📚</span> Published Works</a>
+        <a href="digital-prints.html"><span class="nav-icon">🖼️</span> Digital Prints</a>
+        <a href="orders.html"><span class="nav-icon">📦</span> Orders</a>
+        <a href="testimonials.html"><span class="nav-icon">💬</span> Testimonials</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="#" onclick="logout()">🚪 Sign Out</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+      <header class="top-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+          <h1>Personal Art</h1>
+        </div>
+
+        <div class="header-right">
+          <div class="admin-profile">
+            <div class="admin-avatar">A</div>
+            <span class="admin-name">Abhilasha</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-area">
+
+        <div class="section-header">
+          <h2>All Artworks</h2>
+          <button class="btn btn-primary" onclick="openModal('add-art-modal')">+ Add New Artwork</button>
+        </div>
+
+        <!-- ART GRID -->
+        <div class="cards-grid" id="artworks-grid"></div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ADD ART MODAL -->
+  <div class="modal-overlay" id="add-art-modal">
+    <div class="modal">
+
+      <h2>Add New Artwork</h2>
+
+      <form onsubmit="addArt(event)">
+
+        <div class="form-group">
+          <label>Artwork Image</label>
+
+          <div class="file-upload" onclick="document.getElementById('art-image').click()">
+            <div class="upload-icon">📁</div>
+            <p>Click to upload image</p>
+          </div>
+
+          <input type="file" id="art-image" accept="image/*" style="display:none">
+        </div>
+
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="art-title" placeholder="Artwork title" required>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="art-desc" placeholder="Describe this artwork..." required></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-danger" onclick="closeModal('add-art-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Artwork</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+
+  <script src="admin.js"></script>
+
+  <div class="modal-overlay" id="view-art-modal">
+  <div class="modal">
+    <h2 id="view-art-title"></h2>
+    <img id="view-art-img" style="width:100%;border-radius:12px;margin-bottom:15px;">
+   <p id="view-art-desc"></p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="closeModal('view-art-modal')">Close</button>
+    </div>
+
+  </div>
+</div>
+</body>
+
+</html>

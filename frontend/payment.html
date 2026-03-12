@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Checkout | AK Art</title>
+
+        <link rel="stylesheet" href="style.css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    </head>
+
+    <html>
+
+        <!-- HEADER -->
+
+        <header class="header">
+
+            <div class="logo-container">
+                <img src="Personal work/logo.gif" alt="AK Art Logo" class="logo">
+            </div>
+
+            <nav class="navbar">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="explore.html">Explore</a></li>
+                    <li><a href="shop.html">Digital Prints</a></li>
+                </ul>
+            </nav>
+
+        </header>
+
+
+
+        <!-- CHECKOUT SECTION -->
+
+        <section class="checkout-section">
+
+            <div class="checkout-container" id="checkoutContainer">
+
+                <!-- ART IMAGE -->
+
+                <div class="checkout-image">
+                    <img id="artImage" alt="Artwork">
+                </div>
+
+
+                <!-- CHECKOUT DETAILS -->
+
+                <div class="checkout-details">
+
+                    <h2 id="artName"></h2>
+
+                    <p class="price" id="artPrice"></p>
+
+
+                    <label>Select Size</label>
+
+                    <select id="size">
+                        <option value="A4">A4</option>
+                        <option value="A3">A3</option>
+                        <option value="A2">A2</option>
+                    </select>
+
+
+                    <label>Payment Method</label>
+
+                    <div class="payment-methods">
+
+                        <label>
+                            <input type="radio" name="payment" value="UPI" checked>
+                            UPI
+                        </label>
+
+                        <label>
+                            <input type="radio" name="payment" value="Card">
+                            Debit / Credit Card
+                        </label>
+
+                        <label>
+                            <input type="radio" name="payment" value="NetBanking">
+                            Net Banking
+                        </label>
+
+                    </div>
+
+
+                    <button class="pay-btn" onclick="payNow()">
+                        Proceed to Payment
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- PAYMENT PROCESSING SCREEN -->
+
+        <section class="payment-processing" id="paymentProcessing">
+
+            <div class="processing-container">
+
+                <h2>Processing Payment</h2>
+
+                <p>Please wait while we confirm your transaction...</p>
+
+                <div class="loader"></div>
+
+            </div>
+
+        </section>
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script src="script.js"></script>
+
+<div id="errorModal" class="error-modal">
+
+    <div class="error-box">
+
+        <h2>Payment Error</h2>
+
+        <p id="errorMessage"></p>
+
+        <button onclick="closeErrorModal()">Try Again</button>
+
+    </div>
+
+</div>
+        </body>
+
+        </html>

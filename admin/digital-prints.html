@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Prints — Admin</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+
+<body onload="checkAuth(); renderPrints();">
+
+<div class="admin-layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+<div class="sidebar-brand">
+<div class="sidebar-brand-icon">A</div>
+<div>
+<h2>Abhilasha Khatri</h2>
+<small>Admin Panel</small>
+</div>
+</div>
+
+<nav class="sidebar-nav">
+<a href="dashboard.html">📊 Dashboard</a>
+<a href="manage-art.html">🎨 Personal Art</a>
+<a href="published-works.html">📚 Published Works</a>
+<a href="digital-prints.html" class="active">🖼️ Digital Prints</a>
+<a href="orders.html">📦 Orders</a>
+<a href="testimonials.html">💬 Testimonials</a>
+</nav>
+
+<div class="sidebar-footer">
+<a href="#" onclick="logout()">🚪 Logout</a>
+</div>
+
+</aside>
+
+
+<!-- MAIN -->
+<div class="main-content">
+
+<header class="top-header">
+
+<div class="header-left">
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<h1>Digital Prints</h1>
+</div>
+
+<div class="admin-profile">
+<div class="admin-avatar">A</div>
+<span>Abhilasha</span>
+</div>
+
+</header>
+
+
+<!-- CONTENT -->
+<div class="content-area">
+
+<div class="section-header">
+<h2>All Digital Prints</h2>
+
+<button class="btn btn-primary" onclick="openModal('add-print-modal')">
++ Add Print
+</button>
+
+</div>
+
+<div class="cards-grid" id="prints-grid"></div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ADD PRINT MODAL -->
+
+<div class="modal-overlay" id="add-print-modal">
+
+<div class="modal">
+
+<h2>Add Digital Print</h2>
+
+<form onsubmit="addPrint(event)">
+
+<div class="form-group">
+<label>Print Image</label>
+<input type="file" id="print-image" accept="image/*" required>
+</div>
+
+<div class="form-group">
+<label>Title</label>
+<input type="text" id="print-title" placeholder="Enter print title" required>
+</div>
+
+<div class="form-group">
+<label>Price (₹)</label>
+<input type="number" id="print-price" placeholder="499" required>
+</div>
+
+<div class="modal-actions">
+
+<button type="button" class="btn btn-danger"
+onclick="closeModal('add-print-modal')">
+Cancel
+</button>
+
+<button type="submit" class="btn btn-primary">
+Add Print
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<script src="admin.js"></script>
+
+</body>
+</html>

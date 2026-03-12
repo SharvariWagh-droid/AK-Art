@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Published Works — Admin Panel</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+
+<body onload="checkAuth(); renderPublished();">
+
+<div class="admin-layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+<div class="sidebar-brand">
+<div class="sidebar-brand-icon">A</div>
+<div>
+<h2>Abhilasha Khatri</h2>
+<small>Admin Panel</small>
+</div>
+</div>
+
+<nav class="sidebar-nav">
+<a href="dashboard.html">📊 Dashboard</a>
+<a href="manage-art.html">🎨 Personal Art</a>
+<a href="published-works.html" class="active">📚 Published Works</a>
+<a href="digital-prints.html">🖼️ Digital Prints</a>
+<a href="orders.html">📦 Orders</a>
+<a href="testimonials.html">💬 Testimonials</a>
+
+</nav>
+
+<div class="sidebar-footer">
+<a href="#" onclick="logout()">🚪 Sign Out</a>
+</div>
+
+</aside>
+
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+<header class="top-header">
+
+<div style="display:flex;align-items:center;gap:10px;">
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<h1>Published Works</h1>
+</div>
+
+<div class="admin-profile">
+<div class="admin-avatar">A</div>
+<span>Abhilasha</span>
+</div>
+
+</header>
+
+
+<div class="content-area">
+
+<div class="section-header">
+<h2>Book Illustrations</h2>
+
+<button class="btn btn-primary"
+onclick="openModal('add-pub-modal')">
++ Add Published Work
+</button>
+
+</div>
+
+<div class="cards-grid" id="published-grid"></div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ADD MODAL -->
+
+<div class="modal-overlay" id="add-pub-modal">
+
+<div class="modal">
+
+<h2>Add Published Work</h2>
+
+<form onsubmit="addPublished(event)">
+
+<div class="form-group">
+<label>Book Cover Image</label>
+
+<input type="file"
+id="pub-image"
+accept="image/*"
+required
+onchange="previewPubImage(event)">
+
+<img id="pub-preview"
+style="display:none;margin-top:10px;width:120px;border-radius:6px;">
+</div>
+
+
+<div class="form-group">
+<label>Book Title</label>
+<input type="text" id="pub-title"
+placeholder="Book title"
+required>
+</div>
+
+
+<div class="form-group">
+<label>Publisher</label>
+<input type="text"
+id="pub-publisher"
+placeholder="Publisher name"
+required>
+</div>
+
+
+<div class="form-group">
+<label>Year</label>
+<input type="number"
+id="pub-year"
+placeholder="2024"
+required>
+</div>
+
+
+<div class="modal-actions">
+
+<button type="button"
+class="btn btn-danger"
+onclick="closeModal('add-pub-modal')">
+Cancel
+</button>
+
+<button type="submit"
+class="btn btn-primary">
+Add Work
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<script src="admin.js"></script>
+
+</body>
+</html>

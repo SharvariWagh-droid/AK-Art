@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders — Admin Panel</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body onload="checkAuth()">
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">A</div>
+        <div><h2>Abhilasha</h2><small>Admin Panel</small></div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+        <a href="manage-art.html"><span class="nav-icon">🎨</span> Personal Art</a>
+        <a href="published-works.html"><span class="nav-icon">📚</span> Published Works</a>
+        <a href="digital-prints.html"><span class="nav-icon">🖼️</span> Digital Prints</a>
+        <a href="orders.html" class="active"><span class="nav-icon">📦</span> Orders</a>
+        <a href="testimonials.html"><span class="nav-icon">💬</span> Testimonials</a>
+      </nav>
+      <div class="sidebar-footer"><a href="#" onclick="logout()">🚪 Sign Out</a></div>
+    </aside>
+    <div class="main-content">
+      <header class="top-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+          <h1>Orders</h1>
+        </div>
+        <div class="header-right">
+          <div class="admin-profile"><div class="admin-avatar">A</div><span class="admin-name">Abhilasha</span></div>
+        </div>
+      </header>
+      <div class="content-area">
+        <div class="section-header">
+          <h2>All Orders</h2>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Item</th>
+                <th>Date</th>
+                <th>Payment</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#ORD-1042</td>
+                <td>Priya Sharma</td>
+                <td>Sunset Palette (Print)</td>
+                <td>Mar 6, 2026</td>
+                <td><span class="badge badge-success">Paid</span></td>
+                <td><span class="badge badge-success">Completed</span></td>
+              </tr>
+              <tr>
+                <td>#ORD-1041</td>
+                <td>Rahul Verma</td>
+                <td>Floral Symphony (Print)</td>
+                <td>Mar 5, 2026</td>
+                <td><span class="badge badge-success">Paid</span></td>
+                <td><span class="badge badge-warning">Processing</span></td>
+              </tr>
+              <tr>
+                <td>#ORD-1040</td>
+                <td>Anita Desai</td>
+                <td>Abstract Mind (Print)</td>
+                <td>Mar 4, 2026</td>
+                <td><span class="badge badge-success">Paid</span></td>
+                <td><span class="badge badge-success">Completed</span></td>
+              </tr>
+              <tr>
+                <td>#ORD-1039</td>
+                <td>Vikram Singh</td>
+                <td>Mountain Serenity (Print)</td>
+                <td>Mar 3, 2026</td>
+                <td><span class="badge badge-warning">Pending</span></td>
+                <td><span class="badge badge-warning">Processing</span></td>
+              </tr>
+              <tr>
+                <td>#ORD-1038</td>
+                <td>Meera Patel</td>
+                <td>Cosmic Bloom (Print)</td>
+                <td>Mar 2, 2026</td>
+                <td><span class="badge badge-success">Paid</span></td>
+                <td><span class="badge badge-success">Completed</span></td>
+              </tr>
+              <tr>
+                <td>#ORD-1037</td>
+                <td>Sarah Johnson</td>
+                <td>Ocean Dreams (Print)</td>
+                <td>Mar 1, 2026</td>
+                <td><span class="badge badge-success">Paid</span></td>
+                <td><span class="badge badge-success">Completed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="admin.js"></script>
+</body>
+</html>

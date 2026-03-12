@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Prints | AK Art</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+</html>
+
+    <!-- HEADER -->
+    <header class="header">
+
+        <div class="logo-container">
+            <img src="Personal work/logo.gif" alt="Abhilasha Khatri Logo" class="logo">
+        </div>
+
+        <nav class="navbar">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="explore.html">Explore</a></li>
+                <li><a href="shop.html">Digital Prints</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+            <div class="user-profile">
+                <i class="fas fa-user-circle" id="profileIcon"></i>
+            </div>
+        </nav>
+
+    </header>
+    <h1>Digital Prints</h1>
+    <p>
+        A curated collection of premium illustrations for your modern space.
+        Each piece is digitally crafted with meticulous detail.
+    </p>
+
+
+    <section class="shop-grid">
+
+        <div class="shop-card">
+            <img src="Personal work/12.png">
+            <h3>Golden Hour Bloom</h3>
+            <p class="price">₹45</p>
+            <button class="buy-btn" onclick="buyPrint('Golden Hour Bloom',45,'Personal work/12.png')">BUY PRINT</button>
+        </div>
+
+        <div class="shop-card">
+            <img src="Personal work/03.png">
+            <h3>The Silent Forest</h3>
+            <p class="price">₹52</p>
+            <button class="buy-btn" onclick="buyPrint('The Silent Forest',52,'Personal work/03.png')">BUY PRINT</button>
+        </div>
+
+        <div class="shop-card">
+            <img src="Personal work/02.png">
+            <h3>Ethereal Gaze</h3>
+            <p class="price">₹48</p>
+            <button class="buy-btn" onclick="buyPrint('Ethereal Gaze',48,'Personal work/02.png')">BUY PRINT</button>
+        </div>
+
+        <div class="shop-card">
+            <img src="Personal work/Artwork27.jpg">
+            <h3>Midnight Serenade</h3>
+            <p class="price">₹45</p>
+            <button class="buy-btn" onclick="buyPrint('Midnight Serenade',45,'Personal work/Artwork27.jpg')">BUY
+                PRINT</button>
+        </div>
+
+        <div class="shop-card">
+            <img src="Personal work/Artwork26.jpg">
+            <h3>Azure Fluidity</h3>
+            <p class="price">₹55</p>
+            <button class="buy-btn" onclick="buyPrint('Azure Fluidity',55,'Personal work/Artwork26.jpg')">BUY
+                PRINT</button>
+        </div>
+
+        <div class="shop-card">
+            <img src="Personal work/Artwork29.jpg">
+            <h3>Urban Pulse</h3>
+            <p class="price">₹60</p>
+            <button class="buy-btn" onclick="buyPrint('Urban Pulse',60,'Personal work/Artwork29.jpg')">BUY
+                PRINT</button>
+        </div>
+
+    </section>
+
+    <div class="pagination">
+
+        <button>‹</button>
+        <button class="active">1</button>
+        <button>2</button>
+        <button>3</button>
+        <button>›</button>
+
+    </div>
+    <div class="profile-panel" id="profilePanel">
+    <h3 id="profileName"></h3>
+    <h4>Your Prints</h4>
+    <ul id="profilePrints"></ul>
+    <p id="totalPrints"></p>
+    <button onclick="logout()">Logout</button>
+
+</div>
+        <footer class="footer">
+        <div class="footer-container">
+
+
+            <div class="footer-about">
+                <h3>Abhilasha Khatri</h3>
+                <p>
+                    Creating magical worlds and unforgettable characters
+                    for the next generation of dreamers.
+                    Let’s work together on your next project.
+                </p>
+
+
+                <div class="social-icons">
+                    <a href="#" target="_blank">
+                        <i class="fab fa-behance"></i>
+                    </a>
+                    <a href="#" target="_blank">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" target="_blank">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+
+
+        </div>
+
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 Abhilasha Khatri. All Rights Reserved.</p>
+            <div>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+<script src="script.js"></script>
+</body>
+
+</html>
