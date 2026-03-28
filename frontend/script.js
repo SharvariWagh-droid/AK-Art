@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ==============================
        SHOW / HIDE PASSWORD
     ============================== */
-
     const passwordField = document.querySelector("input[type='password']");
 
     if (passwordField) {
@@ -20,24 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
     /* ==============================
-       PROFILE PANEL TOGGLE
+       PROFILE PANEL
     ============================== */
     const icon = document.getElementById("profileIcon");
     const panel = document.getElementById("profilePanel");
 
     if (icon && panel) {
-
         icon.addEventListener("click", (e) => {
             e.stopPropagation();
             panel.classList.toggle("active");
             loadProfile();
         });
 
-        panel.addEventListener("click", (e) => {
-            e.stopPropagation();
-        });
+        panel.addEventListener("click", (e) => e.stopPropagation());
 
         document.addEventListener("click", () => {
             panel.classList.remove("active");
@@ -45,148 +40,113 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* ==============================
-       REGISTER USER
+       REGISTER
     ============================== */
-
     const registerForm = document.getElementById("registerForm");
 
     if (registerForm) {
-
-        registerForm.addEventListener("submit", async function (e) {
+        registerForm.addEventListener("submit", async (e) => {
 
             e.preventDefault();
 
             const name = document.getElementById("registerName").value;
             const email = document.getElementById("registerEmail").value;
-            const password = document.getElementById("registerPassword").value;
-            const confirmPassword = document.getElementById("confirmPassword").value;
+            const password = document.getElementById("password").value;
 
-            if (password !== confirmPassword) {
-                alert("Passwords do not match");
-                return;
+            try {
+                const res = await fetch("http://localhost:5000/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await res.json();
+                alert(data.message);
+
+                if (data.message === "Registration successful") {
+                    window.location.href = "login.html";
+                }
+
+            } catch {
+                alert("Registration failed");
             }
-
-            const res = await fetch("http://localhost:5000/api/auth/register", {
-
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    name,
-                    email,
-                    password
-                })
-
-            });
-
-            const data = await res.json();
-
-            alert(data.message);
-
-            if (data.message === "Registration successful") {
-                window.location.href = "login.html";
-            }
-
         });
-
     }
 
-
     /* ==============================
-       LOGIN USER
+       LOGIN
     ============================== */
-
     const loginForm = document.getElementById("loginForm");
 
     if (loginForm) {
-
-        loginForm.addEventListener("submit", async function (e) {
+        loginForm.addEventListener("submit", async (e) => {
 
             e.preventDefault();
 
             const email = document.getElementById("loginEmail").value;
             const password = document.getElementById("loginPassword").value;
 
-            const res = await fetch("http://localhost:5000/api/auth/login", {
+            try {
+                const res = await fetch("http://localhost:5000/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
 
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                const data = await res.json();
+                alert(data.message);
 
-                body: JSON.stringify({
-                    email,
-                    password
-                })
+                if (data.message === "Login successful") {
+                    localStorage.setItem("loggedIn", "true");
+                    localStorage.setItem("userName", data.user);
+                    window.location.href = "index.html";
+                }
 
-            });
-
-            const data = await res.json();
-
-            alert(data.message);
-
-            if (data.message === "Login successful") {
-
-                localStorage.setItem("loggedIn", "true");
-                localStorage.setItem("userName", data.user);
-
-                window.location.href = "index.html";
-
+            } catch {
+                alert("Login failed");
             }
-
         });
-
     }
 
     /* ==============================
-       IMAGE MODAL
+       LOAD PAYMENT PAGE
     ============================== */
+    const artNameEl = document.getElementById("artName");
+    const artPriceEl = document.getElementById("artPrice");
+    const artImageEl = document.getElementById("artImage");
 
-    const modal = document.getElementById("imageModal");
-    const modalImg = document.getElementById("modalImage");
-    const images = document.querySelectorAll(".art-item img");
-    const closeBtn = document.querySelector(".close");
+    if (artNameEl && artPriceEl && artImageEl) {
+        artNameEl.innerText = localStorage.getItem("artName");
+        artPriceEl.innerText = "₹" + localStorage.getItem("artPrice");
+        artImageEl.src = localStorage.getItem("artImage");
+    }
 
-    if (modal && modalImg && images.length > 0) {
+    /* ==============================
+       LOAD SUCCESS PAGE
+    ============================== */
+    const preview = document.getElementById("artPreview");
 
-        images.forEach(img => {
+    if (preview) {
+        preview.src = localStorage.getItem("artImage");
+        document.getElementById("artName").innerText = localStorage.getItem("artName");
+        document.getElementById("artPrice").innerText = "₹" + localStorage.getItem("artPrice");
+    }
 
-            img.addEventListener("click", () => {
+    /* ==============================
+       LOAD ADMIN ORDERS
+    ============================== */
+    const table = document.getElementById("ordersTable");
 
-                modal.style.display = "flex";
-                modalImg.src = img.src;
-
-            });
-
-        });
-
-        if (closeBtn) {
-
-            closeBtn.addEventListener("click", () => {
-                modal.style.display = "none";
-            });
-
-        }
-
-        modal.addEventListener("click", (e) => {
-
-            if (e.target === modal) {
-                modal.style.display = "none";
-            }
-
-        });
+    if (table) {
+        loadOrders();
     }
 
 });
 
 
-
 /* ===================================
-   BUY PRINT (REAL FLOW)
+   BUY PRINT
 =================================== */
-
 function buyPrint(name, price, image) {
 
     localStorage.setItem("artName", name);
@@ -196,245 +156,107 @@ function buyPrint(name, price, image) {
     const loggedIn = localStorage.getItem("loggedIn");
 
     if (loggedIn === "true") {
-
         window.location.href = "payment.html";
-
     } else {
-
         window.location.href = "login.html";
-
     }
-
 }
 
 
-
 /* ===================================
-   SAVE PURCHASE AFTER PAYMENT
+   PAYMENT (SAVE TO MONGODB)
 =================================== */
+function payNow() {
 
-function completePurchase() {
+    document.getElementById("paymentProcessing").style.display = "flex";
 
-    let prints = JSON.parse(localStorage.getItem("purchasedPrints")) || [];
+    const orderData = {
+        userName: localStorage.getItem("userName"),
+        email: "demo@gmail.com",
+        artName: localStorage.getItem("artName"),
+        price: localStorage.getItem("artPrice"),
+        image: localStorage.getItem("artImage")
+    };
 
-    const artName = localStorage.getItem("artName");
-
-    if (artName) {
-
-        prints.push(artName);
-
-        localStorage.setItem(
-            "purchasedPrints",
-            JSON.stringify(prints)
-        );
-
-    }
-
+    fetch("http://localhost:5000/api/orders/create", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(res => res.json())
+    .then(() => {
+        setTimeout(() => {
+            window.location.href = "success.html";
+        }, 1500);
+    })
+    .catch(() => {
+        alert("Order failed");
+    });
 }
 
 
+/* ===================================
+   LOAD ORDERS (ADMIN)
+=================================== */
+async function loadOrders() {
+
+    const res = await fetch("http://localhost:5000/api/orders");
+    const orders = await res.json();
+
+    const table = document.getElementById("ordersTable");
+
+    orders.forEach(order => {
+        const row = `
+            <tr>
+                <td>${order.userName}</td>
+                <td>${order.artName}</td>
+                <td>₹${order.price}</td>
+            </tr>
+        `;
+        table.innerHTML += row;
+    });
+}
+
 
 /* ===================================
-   LOAD PROFILE PANEL
+   PROFILE
 =================================== */
-
 function loadProfile() {
 
     const name = localStorage.getItem("userName") || "User";
 
     const nameEl = document.getElementById("profileName");
+    if (nameEl) nameEl.innerText = name;
 
-    if (nameEl) {
-        nameEl.innerText = name;
-    }
-
-
-    const prints = JSON.parse(
-        localStorage.getItem("purchasedPrints")
-    ) || [];
-
+    const prints = JSON.parse(localStorage.getItem("purchasedPrints")) || [];
     const list = document.getElementById("profilePrints");
 
     if (list) {
-
         list.innerHTML = "";
-
         prints.forEach(print => {
-
             const li = document.createElement("li");
             li.innerText = print;
-
             list.appendChild(li);
-
         });
-
     }
-
-
-    const total = document.getElementById("totalPrints");
-
-    if (total) {
-        total.innerText =
-            "Total Prints Bought: " + prints.length;
-    }
-
 }
-
 
 
 /* ===================================
    LOGOUT
 =================================== */
-
 function logout() {
-
     localStorage.removeItem("loggedIn");
     localStorage.removeItem("userName");
-
     window.location.href = "index.html";
-
 }
 
 
-/* ===============================
-   PAYMENT PAGE LOGIC
-================================ */
-
-const artNameElement = document.getElementById("artName");
-const artPriceElement = document.getElementById("artPrice");
-const artImageElement = document.getElementById("artImage");
-
-if (artNameElement && artPriceElement && artImageElement) {
-
-    const name = localStorage.getItem("artName");
-    const price = localStorage.getItem("artPrice");
-    const image = localStorage.getItem("artImage");
-
-    if (name && price && image) {
-        artNameElement.innerText = name;
-        artPriceElement.innerText = "₹" + price;
-        artImageElement.src = image;
-    }
-}
-function payNow() {
-
-    const processingScreen = document.getElementById("paymentProcessing");
-
-    const name = localStorage.getItem("artName");
-    const price = localStorage.getItem("artPrice");
-    const image = localStorage.getItem("artImage");
-
-    if (!name || !price) {
-        showErrorModal("Artwork information missing.");
-        return;
-    }
-
-    /* SHOW PROCESSING SCREEN */
-
-    if (processingScreen) {
-        processingScreen.style.display = "flex";
-    }
-
-    const options = {
-        key: "YOUR_RAZORPAY_KEY",
-        amount: price * 100,
-        currency: "INR",
-        name: "AK Art Studio",
-        description: name,
-        image: "Personal work/logo.gif",
-
-        handler: function (response) {
-            const orderID = "AK" + Date.now();
-
-            localStorage.setItem("orderID", orderID);
-
-            let purchased = JSON.parse(localStorage.getItem("purchasedPrints")) || [];
-            purchased.push(name);
-            localStorage.setItem("purchasedPrints", JSON.stringify(purchased));
-            window.location.href = "success.html";
-
-        },
-        modal: {
-            ondismiss: function () {
-                if (processingScreen) {
-                    processingScreen.style.display = "none";
-                }
-            }
-        }
-    };
-    const rzp = new Razorpay(options);
-    rzp.open();
-}
-/*SUCCESS PAGE LOGIC*/
-
-const artPreview = document.getElementById("artPreview");
-const successName = document.getElementById("artName");
-const successPrice = document.getElementById("artPrice");
-
-if (artPreview && successName && successPrice) {
-
-    const name = localStorage.getItem("artName");
-    const price = localStorage.getItem("artPrice");
-    const image = localStorage.getItem("artImage");
-
-    if (name && price && image) {
-
-        successName.innerText = name;
-
-        successPrice.innerText = "₹" + price;
-
-        artPreview.src = image;
-
-    }
-}
-
-function downloadArt() {
-
-    const image = localStorage.getItem("artImage");
-    const name = localStorage.getItem("artName");
-
-    if (!image) return;
-
-    const link = document.createElement("a");
-
-    link.href = image;
-
-    link.download = name + ".jpg";
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
-}
-function showErrorModal(message) {
-
-    const modal = document.getElementById("errorModal");
-    const text = document.getElementById("errorMessage");
-
-    if (modal && text) {
-        text.innerText = message;
-        modal.style.display = "flex";
-    }
-}
-
-function closeErrorModal() {
-
-    const modal = document.getElementById("errorModal");
-
-    if (modal) {
-        modal.style.display = "none";
-    }
-
-}
-const orderElement = document.getElementById("orderID");
-
-if (orderElement) {
-
-    const orderID = localStorage.getItem("orderID");
-
-    if (orderID) {
-        orderElement.innerText = "Order ID: " + orderID;
-    }
-
-}
+/* ===================================
+   GLOBAL FUNCTIONS
+=================================== */
+window.buyPrint = buyPrint;
+window.payNow = payNow;
+window.logout = logout;

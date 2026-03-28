@@ -579,3 +579,23 @@ function deleteTestimonial(id) {
   renderTestimonials();
 
 }
+async function loadOrders() {
+
+    const res = await fetch("http://localhost:5000/api/orders");
+    const orders = await res.json();
+
+    const table = document.getElementById("ordersTable");
+
+    orders.forEach(order => {
+        const row = `
+            <tr>
+                <td>${order.userName}</td>
+                <td>${order.artName}</td>
+                <td>₹${order.price}</td>
+            </tr>
+        `;
+        table.innerHTML += row;
+    });
+}
+
+loadOrders();
