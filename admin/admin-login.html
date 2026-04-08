@@ -19,7 +19,10 @@
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Enter password" required>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" id="password" placeholder="Enter password" required style="width: 100%; padding-right: 40px; box-sizing: border-box;">
+            <i class="far fa-eye" onclick="togglePasswordVisibility()" id="togglePasswordIcon" style="position: absolute; right: 15px; font-size: 18px; color: #666; cursor: pointer; user-select: none;" title="Toggle Password Visibility"></i>
+          </div>
         </div>
         <button type="submit" class="btn btn-primary btn-login">Sign In</button>
       </form>

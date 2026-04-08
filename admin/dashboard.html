@@ -6,7 +6,7 @@
   <title>Dashboard — Admin Panel</title>
   <link rel="stylesheet" href="admin.css">
 </head>
-<body onload="checkAuth()">
+<body onload="checkAuth(); loadDashboardStats();">
   <div class="admin-layout">
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -47,17 +47,17 @@
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon blue">🎨</div>
-            <div class="stat-number">24</div>
+            <div class="stat-number" id="dash-total-art">0</div>
             <div class="stat-label">Total Artworks</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon green">🖼️</div>
-            <div class="stat-number">12</div>
+            <div class="stat-number" id="dash-total-prints">0</div>
             <div class="stat-label">Digital Prints</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon orange">📦</div>
-            <div class="stat-number">38</div>
+            <div class="stat-number" id="dash-total-orders">0</div>
             <div class="stat-label">Recent Orders</div>
           </div>
         </div>
@@ -66,25 +66,7 @@
           <h2>Recent Artworks</h2>
           <a href="manage-art.html" class="btn btn-primary btn-sm">View All →</a>
         </div>
-        <div class="cards-grid" style="margin-bottom:40px;">
-          <div class="art-card">
-            <div class="art-card-img">
-              <img src="/frontend/Personal work/Artwork11.png " alt="Artwork11">
-            </div>
-            <div class="art-card-body"><h3>Midnight Garden</h3></div>
-          </div>
-          <div class="art-card">
-            <div class="art-card-img">
-              <img src="/frontend/Personal work/Artwork21.jpg" alt="Artwork21">
-            </div>
-            <div class="art-card-body"><h3>Waiting</h3></div>
-          </div>
-          <div class="art-card">
-            <div class="art-card-img">
-              <img src="/frontend/Personal work/Artwork23.jpg" alt="Artwork23">
-            </div>
-            <div class="art-card-body"><h3>Forest Spirit</h3></div>
-          </div>
+        <div class="cards-grid" id="dash-recent-art" style="margin-bottom:40px;">
         </div>
         <!-- Recent Orders -->
         <div class="section-header">
@@ -102,28 +84,7 @@
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>#ORD-1042</td>
-                <td>Priya Sharma</td>
-                <td>Sunset Palette (Print)</td>
-                <td>Mar 6, 2026</td>
-                <td><span class="badge badge-success">Completed</span></td>
-              </tr>
-              <tr>
-                <td>#ORD-1041</td>
-                <td>Rahul Verma</td>
-                <td>Floral Symphony (Print)</td>
-                <td>Mar 5, 2026</td>
-                <td><span class="badge badge-warning">Processing</span></td>
-              </tr>
-              <tr>
-                <td>#ORD-1040</td>
-                <td>Anita Desai</td>
-                <td>Abstract Mind (Print)</td>
-                <td>Mar 4, 2026</td>
-                <td><span class="badge badge-success">Completed</span></td>
-              </tr>
+            <tbody id="dash-recent-orders">
             </tbody>
           </table>
         </div>

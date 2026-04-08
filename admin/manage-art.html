@@ -7,8 +7,7 @@
   <title>Personal Art — Admin Panel</title>
   <link rel="stylesheet" href="admin.css">
 </head>
-
-<body onload="checkAuth(); renderArtworks();">
+<body onload="checkAuth(); loadArtworks()">
 
   <div class="admin-layout">
 
@@ -88,13 +87,8 @@
         </div>
 
         <div class="form-group">
-          <label>Title</label>
-          <input type="text" id="art-title" placeholder="Artwork title" required>
-        </div>
-
-        <div class="form-group">
-          <label>Description</label>
-          <textarea id="art-desc" placeholder="Describe this artwork..." required></textarea>
+          <label>Title (Optional)</label>
+          <input type="text" id="art-title" placeholder="Artwork title">
         </div>
 
         <div class="modal-actions">

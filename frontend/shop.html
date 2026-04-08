@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <!DOCTYPE html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,102 +12,55 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
-</html>
+<!-- HEADER -->
+<header class="header">
 
-    <!-- HEADER -->
-    <header class="header">
+    <div class="logo-container">
+        <img src="Personal work/logo.gif" alt="Abhilasha Khatri Logo" class="logo">
+    </div>
 
-        <div class="logo-container">
-            <img src="Personal work/logo.gif" alt="Abhilasha Khatri Logo" class="logo">
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="explore.html">Explore</a></li>
+            <li><a href="shop.html">Digital Prints</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+        <div class="user-profile">
+            <i class="fas fa-user-circle" id="profileIcon"></i>
         </div>
+    </nav>
 
-        <nav class="navbar">
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="explore.html">Explore</a></li>
-                <li><a href="shop.html">Digital Prints</a></li>
-                <li><a href="about.html">About</a></li>
-            </ul>
-            <div class="user-profile">
-                <i class="fas fa-user-circle" id="profileIcon"></i>
-            </div>
-        </nav>
-
-    </header>
-    <h1>Digital Prints</h1>
-    <p>
-        A curated collection of premium illustrations for your modern space.
-        Each piece is digitally crafted with meticulous detail.
-    </p>
+</header>
+<h1>Digital Prints</h1>
+<p>
+    A curated collection of premium illustrations for your modern space.
+    Each piece is digitally crafted with meticulous detail.
+</p>
 
 
-    <section class="shop-grid">
+<body onload="loadPrints()">
 
-        <div class="shop-card">
-            <img src="Personal work/12.png">
-            <h3>Golden Hour Bloom</h3>
-            <p class="price">₹45</p>
-            <button class="buy-btn" onclick="buyPrint('Golden Hour Bloom',45,'Personal work/12.png')">BUY PRINT</button>
-        </div>
-
-        <div class="shop-card">
-            <img src="Personal work/03.png">
-            <h3>The Silent Forest</h3>
-            <p class="price">₹52</p>
-            <button class="buy-btn" onclick="buyPrint('The Silent Forest',52,'Personal work/03.png')">BUY PRINT</button>
-        </div>
-
-        <div class="shop-card">
-            <img src="Personal work/02.png">
-            <h3>Ethereal Gaze</h3>
-            <p class="price">₹48</p>
-            <button class="buy-btn" onclick="buyPrint('Ethereal Gaze',48,'Personal work/02.png')">BUY PRINT</button>
-        </div>
-
-        <div class="shop-card">
-            <img src="Personal work/Artwork27.jpg">
-            <h3>Midnight Serenade</h3>
-            <p class="price">₹45</p>
-            <button class="buy-btn" onclick="buyPrint('Midnight Serenade',45,'Personal work/Artwork27.jpg')">BUY
-                PRINT</button>
-        </div>
-
-        <div class="shop-card">
-            <img src="Personal work/Artwork26.jpg">
-            <h3>Azure Fluidity</h3>
-            <p class="price">₹55</p>
-            <button class="buy-btn" onclick="buyPrint('Azure Fluidity',55,'Personal work/Artwork26.jpg')">BUY
-                PRINT</button>
-        </div>
-
-        <div class="shop-card">
-            <img src="Personal work/Artwork29.jpg">
-            <h3>Urban Pulse</h3>
-            <p class="price">₹60</p>
-            <button class="buy-btn" onclick="buyPrint('Urban Pulse',60,'Personal work/Artwork29.jpg')">BUY
-                PRINT</button>
-        </div>
-
-    </section>
+    <section class=" prints-grid"> </section>
 
     <div class="pagination">
 
         <button>‹</button>
-        <button class="active">1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>›</button>
+
+        <button onclick="changePage(1)">1</button>
+        <button onclick="changePage(2)">2</button>
+        <button onclick="changePage(3)">3</button>
 
     </div>
     <div class="profile-panel" id="profilePanel">
-    <h3 id="profileName"></h3>
-    <h4>Your Prints</h4>
-    <ul id="profilePrints"></ul>
-    <p id="totalPrints"></p>
-    <button onclick="logout()">Logout</button>
+        <h3 id="profileName"></h3>
+        <h4>Your Prints</h4>
+        <ul id="profilePrints"></ul>
+        <p id="totalPrints"></p>
+        <button onclick="logout()">Logout</button>
 
-</div>
-        <footer class="footer">
+    </div>
+    <footer class="footer">
         <div class="footer-container">
 
 
@@ -144,7 +98,8 @@
             </div>
         </div>
     </footer>
-<script src="script.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>

@@ -48,8 +48,32 @@
             <form id="registerForm">
                 <input type="text"  id="registerName" placeholder="Full Name" required>
                 <input type="email"  id="registerEmail" placeholder="Email Address" required>
-                <input type="password"  id="password" placeholder="Password" required>
-                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                <div style="position: relative; margin-bottom: 15px; display: flex; align-items: center;">
+                    <input type="password" id="password" placeholder="Password" required style="width: 100%; padding-right: 40px; box-sizing: border-box; margin: 0;">
+                    <i class="far fa-eye" onclick="togglePasswordVisibility('password', this)" style="position: absolute; right: 15px; font-size: 18px; color: #666; cursor: pointer; user-select: none;"></i>
+                </div>
+                <div style="position: relative; margin-bottom: 15px; display: flex; align-items: center;">
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required style="width: 100%; padding-right: 40px; box-sizing: border-box; margin: 0;">
+                    <i class="far fa-eye" onclick="togglePasswordVisibility('confirmPassword', this)" style="position: absolute; right: 15px; font-size: 18px; color: #666; cursor: pointer; user-select: none;"></i>
+                </div>
+                <script>
+                    function togglePasswordVisibility(inputId, iconElement) {
+                        var input = document.getElementById(inputId);
+                        if (input.type === "password") {
+                            input.type = "text";
+                            if (iconElement) {
+                                iconElement.classList.remove("fa-eye");
+                                iconElement.classList.add("fa-eye-slash");
+                            }
+                        } else {
+                            input.type = "password";
+                            if (iconElement) {
+                                iconElement.classList.remove("fa-eye-slash");
+                                iconElement.classList.add("fa-eye");
+                            }
+                        }
+                    }
+                </script>
                 <button type="submit">Register</button>
             </form>
             <div class="divider">

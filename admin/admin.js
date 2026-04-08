@@ -1,4 +1,3 @@
-
 // ===== SIDEBAR =====
 function toggleSidebar() {
   var sidebar = document.querySelector('.sidebar');
@@ -13,8 +12,17 @@ document.addEventListener('click', function (e) {
   }
 });
 
-
 // ===== LOGIN =====
+function togglePasswordVisibility() {
+  var passwordInput = document.getElementById('password');
+  var icon = document.getElementById('togglePasswordIcon');
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+  } else {
+    passwordInput.type = 'password';
+  }
+}
+
 function handleLogin(e) {
   e.preventDefault();
 
@@ -40,7 +48,6 @@ function logout() {
   window.location.href = 'admin-login.html';
 }
 
-
 // ===== MODALS =====
 function openModal(id) {
   var modal = document.getElementById(id);
@@ -58,544 +65,572 @@ document.addEventListener('click', function (e) {
   }
 });
 
+// ======================================================
+// 🚀 ARTWORKS (DB BASED - ALL TYPES)
+// ======================================================
 
-// ===== STORAGE HELPERS =====
-function getData(key, defaults) {
-  var data = localStorage.getItem('admin_' + key);
-  return data ? JSON.parse(data) : defaults;
+function getType() {
+  const page = window.location.pathname.toLowerCase();
+
+  if (page.includes("published-works")) return "book";
+  if (page.includes("digital-prints")) return "print";
+
+  return "art";
 }
 
-function setData(key, value) {
-  localStorage.setItem('admin_' + key, JSON.stringify(value));
-}
+// LOAD
+async function loadArtworks() {
 
+  const type = getType();
 
+  const res = await fetch(`http://localhost:5000/api/artworks?type=${type}`);
+  let artworks = await res.json();
+  
+  // Apply filtering on the frontend
+  artworks = artworks.filter(item => item.type === type);
 
-var defaultArtworks = [
-  { id: 1, title: 'Midnight Garden', desc: 'Watercolor', img: '/frontend/Personal work/Artwork10.png' },
-  { id: 2, title: 'Midnight Garden', desc: 'Illustration', img: '/frontend/Personal work/Artwork2.png' },
-  { id: 3, title: 'Waiting', desc: 'Mixed Media', img: '../frontend/Personal work/Artwork17.png' }
-];
+var container =
+  document.getElementById('artworks-grid') ||
+  document.getElementById('prints-grid') ||
+  document.getElementById('published-grid');
 
-function renderArtworks() {
+if (!container) return;
 
-  var container = document.getElementById('artworks-grid');
-  if (!container) return;
-
-  var artworks = getData('artworks', defaultArtworks);
-
-  container.innerHTML = artworks.map(function (a) {
-
+  container.innerHTML = artworks.map(a => {
+    const safeTitle = a.title ? a.title.replace(/'/g, "\\'") : "";
+    const safeDesc = a.description ? a.description.replace(/'/g, "\\'") : "";
     return `
     <div class="art-card">
-
       <div class="art-card-img">
-      <img src="${a.img}" alt="${a.title}" onclick="viewArt(${a.id})">
+        <img src="${a.image || 'pic/default.png'}">
       </div>
-
       <div class="art-card-body">
         <h3>${a.title}</h3>
-        <p>${a.desc}</p>
-
-        <div class="art-card-actions">
-          <button class="btn btn-primary btn-sm" onclick="editArt(${a.id})">✏️ Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteArt(${a.id})">🗑️ Delete</button>
+        <p>${a.description || ""}</p>
+        <div style="margin-top: 10px; display: flex; gap: 10px;">
+          <button class="btn btn-primary btn-sm" onclick="editArtwork('${a._id}', '${safeTitle}', '${safeDesc}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteArtwork('${a._id}')">Delete</button>
         </div>
-
       </div>
-
     </div>
-    `;
-
-  }).join('');
-
+  `}).join('');
 }
 
-function addArt(e) {
+// 🚀 LOCAL FILE UPLOADER SYSTEM
+// (Uses new FileReader hooks instead of mock Cloudinary)
 
+
+// ADD ART (manage-art.html)
+async function addArt(e) {
   e.preventDefault();
 
-  var artworks = getData('artworks', defaultArtworks);
+  const titleElem = document.getElementById('art-title');
+  const title = titleElem ? titleElem.value : "";
+  const fileInput = document.getElementById('art-image');
+  const submitBtn = e.target.querySelector('button[type="submit"]');
 
-  var newArt = {
-    id: Date.now(),
-    title: document.getElementById('art-title').value,
-    desc: document.getElementById('art-desc').value,
-    img: ''
-  };
-
-  var fileInput = document.getElementById('art-image');
-
-  if (fileInput.files[0]) {
-
-    var reader = new FileReader();
-
-    reader.onload = function (ev) {
-
-      newArt.img = ev.target.result;
-
-      artworks.push(newArt);
-
-      setData('artworks', artworks);
-
-      closeModal('add-art-modal');
-
-      e.target.reset();
-
-      renderArtworks();
-    };
-
-    reader.readAsDataURL(fileInput.files[0]);
-
+  if (!fileInput.files[0]) {
+    alert("Upload image 😭");
+    return;
   }
 
+  const reader = new FileReader();
+  reader.onload = async function (ev) {
+    const base64Image = ev.target.result;
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Processing...";
+    }
+
+    console.log("ADDING TYPE: art");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/artworks/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title,
+          description: "",
+          image: base64Image,
+          type: "art"
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) alert(data.error || "Failed to add art");
+      else {
+        alert("Artwork added 🎨");
+        closeModal('add-art-modal');
+        e.target.reset();
+        loadArtworks();
+      }
+    } catch (error) {
+      alert("Network error. Please try again.");
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Add Artwork";
+      }
+    }
+  };
+  reader.readAsDataURL(fileInput.files[0]);
 }
 
-function deleteArt(id) {
+// ADD PRINT (digital-prints.html)
+async function addPrint(e) {
+  e.preventDefault();
 
-  if (!confirm('Delete artwork?')) return;
+  const title = document.getElementById('art-title').value;
+  const price = document.getElementById('print-price').value;
+  const fileInput = document.getElementById('art-image');
+  const submitBtn = e.target.querySelector('button[type="submit"]');
 
-  var artworks = getData('artworks', defaultArtworks);
+  if (!fileInput.files[0]) {
+    alert("Upload image 😭");
+    return;
+  }
 
-  artworks = artworks.filter(a => a.id !== id);
+  const reader = new FileReader();
 
-  setData('artworks', artworks);
+  reader.onload = async function (ev) {
+    const base64Image = ev.target.result;
 
-  renderArtworks();
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Processing...";
+    }
+
+    console.log("ADDING TYPE: print");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/artworks/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title: title,
+          description: "₹" + price,
+          image: base64Image,
+          type: "print"
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Failed to add print");
+      } else {
+        alert("Print added 🔥");
+        closeModal('add-print-modal');
+        e.target.reset();
+        loadArtworks();
+      }
+    } catch (error) {
+      alert("Network error. Please try again.");
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Add Print";
+      }
+    }
+  };
+
+  reader.readAsDataURL(fileInput.files[0]);
+}
+//published work
+async function addPublished(e) {
+  e.preventDefault();
+
+  const title = document.getElementById('pub-title').value;
+  const publisher = document.getElementById('pub-publisher').value;
+  const year = document.getElementById('pub-year').value;
+  const fileInput = document.getElementById('pub-image');
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+
+  if (!fileInput.files[0]) {
+    alert("Upload image 😭");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = async function (ev) {
+    const base64Image = ev.target.result;
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Processing...";
+    }
+
+    console.log("ADDING TYPE: book");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/artworks/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title,
+          description: `${publisher} (${year})`,
+          image: base64Image,
+          type: "book"
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Failed to add book");
+      } else {
+        alert("Book added 📚✨");
+        closeModal('add-pub-modal');
+        e.target.reset();
+        loadArtworks();
+      }
+    } catch (error) {
+      alert("Network error. Please try again.");
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Add Book";
+      }
+    }
+  };
+
+  reader.readAsDataURL(fileInput.files[0]);
 }
 
-function editArt(id) {
+window.addPublished = addPublished;
 
-  var artworks = getData('artworks', defaultArtworks);
+function previewPubImage(event) {
+  const file = event.target.files[0];
+  const preview = document.getElementById("pub-preview");
 
-  var art = artworks.find(a => a.id === id);
+  if (!file || !preview) return;
 
-  if (!art) return;
+  const reader = new FileReader();
 
-  var newTitle = prompt('Title', art.title);
-  if (newTitle === null) return;
+  reader.onload = function(e) {
+    preview.src = e.target.result;
+    preview.style.display = "block";
+  };
 
-  var newDesc = prompt('Description', art.desc);
+  reader.readAsDataURL(file);
+}
+
+window.previewPubImage = previewPubImage;
+
+// ======================================================
+// 💬 TESTIMONIALS (NOW DB)
+// ======================================================
+
+// LOAD TESTIMONIALS
+async function loadTestimonials() {
+  try {
+    const res = await fetch("http://localhost:5000/api/testimonials");
+    
+    const text = await res.text();
+    console.log("Raw Testimonial Admin Response:", text);
+    
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error("Invalid JSON from Testimonials API:", e);
+      return;
+    }
+
+    const container = document.getElementById("testimonials-grid");
+    if (!container) return;
+
+    container.innerHTML = data.map(t => `
+      <div class="testimonial-card">
+        <p>"${t.message}"</p>
+        <h4>${t.name}</h4>
+        <div style="margin-top: 10px; display: flex; gap: 10px;">
+          <button class="btn btn-danger btn-sm" onclick="deleteTestimonial('${t._id}')">Delete</button>
+        </div>
+      </div>
+    `).join("");
+  } catch (err) {
+    console.error("Error loading testimonials:", err);
+  }
+}
+
+// ADD TESTIMONIAL
+async function addTestimonial(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("test-name").value;
+  const message = document.getElementById("test-message").value;
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Processing...";
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/testimonials", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: name,
+        message: message,
+        image: "https://via.placeholder.com/300?text=Testimonial"
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Failed to add testimonial");
+    } else {
+      alert("Testimonial added 💬✨");
+      e.target.reset();
+      loadTestimonials();
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error: " + error.message);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Add Testimonial";
+    }
+  }
+}
+
+// ======================================================
+// 📦 ORDERS (DB)
+// ======================================================
+
+async function loadOrders() {
+  const res = await fetch("http://localhost:5000/api/orders");
+  const orders = await res.json();
+
+  const table = document.getElementById("ordersTableBody") || document.getElementById("ordersTable");
+  if (!table) return;
+
+  table.innerHTML = "";
+
+  orders.forEach(order => {
+    const statusClass = order.status === "Completed" ? "badge-success" : "badge-warning";
+    const dateStr = order.date ? new Date(order.date).toLocaleDateString() : "N/A";
+    const statusStr = order.status || "Processing";
+    const paymentStr = order.paymentId || "N/A";
+    const priceStr = order.price ? `₹${order.price}` : "";
+
+    table.innerHTML += `
+      <tr>
+        <td>#${order._id ? order._id.slice(-6).toUpperCase() : 'ORD'}</td>
+        <td>${order.userName}</td>
+        <td>${order.artName} ${priceStr}</td>
+        <td>${dateStr}</td>
+        <td><span class="badge badge-info">${paymentStr}</span></td>
+        <td><span class="badge ${statusClass}">${statusStr}</span></td>
+      </tr>
+    `;
+  });
+}
+
+// ======================================================
+// ✏️ EDIT & DELETE ARTWORKS
+// ======================================================
+
+async function editArtwork(id, currentTitle, currentDesc) {
+  const newTitle = prompt("Enter new title:", currentTitle);
+  if (newTitle === null) return; // User cancelled
+  
+  const newDesc = prompt("Enter new description/price:", currentDesc);
   if (newDesc === null) return;
 
-  art.title = newTitle;
-  art.desc = newDesc;
-
-  setData('artworks', artworks);
-
-  renderArtworks();
-}
-
-
-
-// ======================================================
-// PUBLISHED WORKS
-// ======================================================
-// ======================================================
-// PUBLISHED WORKS
-// ======================================================
-
-// default works (first load)
-var defaultPublished = [
-  {
-    id: 1,
-    title: "Storybook Dreams",
-    publisher: "Penguin Kids",
-    year: "2023",
-    img: "../frontend/Personal work/Artwork3.png"
-  },
-  {
-    id: 2,
-    title: "Moonlight Tales",
-    publisher: "HarperCollins",
-    year: "2022",
-    img: "../frontend/Personal work/Artwork4.png"
-  }
-];
-
-
-// ======================
-// RENDER WORKS
-// ======================
-function renderPublished() {
-
-  var container = document.getElementById("published-grid");
-  if (!container) return;
-
-  var works = getData("published", defaultPublished);
-
-  container.innerHTML = works.map(function (w) {
-
-    return `
-      <div class="art-card">
-
-        <div class="art-card-img">
-          <img src="${w.img}" alt="${w.title}">
-        </div>
-
-        <div class="art-card-body">
-          <h3>${w.title}</h3>
-          <p>${w.publisher} • ${w.year}</p>
-
-          <div class="art-card-actions">
-            <button class="btn btn-primary btn-sm" onclick="editPublished(${w.id})">✏️ Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="deletePublished(${w.id})">🗑️ Delete</button>
-          </div>
-
-        </div>
-
-      </div>
-    `;
-
-  }).join("");
-
-}
-
-
-// ======================
-// ADD WORK
-// ======================
-function addPublished(e) {
-
-  e.preventDefault();
-
-  var works = getData("published", defaultPublished);
-
-  var title = document.getElementById("pub-title").value;
-  var publisher = document.getElementById("pub-publisher").value;
-  var year = document.getElementById("pub-year").value;
-  var fileInput = document.getElementById("pub-image");
-
-  if (!fileInput.files[0]) {
-    alert("Please upload an image");
-    return;
-  }
-
-  var reader = new FileReader();
-
-  reader.onload = function (event) {
-
-    var newWork = {
-      id: Date.now(),
-      title: title,
-      publisher: publisher,
-      year: year,
-      img: event.target.result
-    };
-
-    works.push(newWork);
-
-    setData("published", works);
-
-    closeModal("add-pub-modal");
-
-    e.target.reset();
-
-    renderPublished();
-  };
-
-  reader.readAsDataURL(fileInput.files[0]);
-}
-
-
-// ======================
-// DELETE WORK
-// ======================
-function deletePublished(id) {
-
-  if (!confirm("Delete work?")) return;
-
-  var works = getData("published", defaultPublished);
-
-  works = works.filter(function (w) {
-    return w.id !== id;
-  });
-
-  setData("published", works);
-
-  renderPublished();
-}
-
-
-// ======================
-// EDIT WORK
-// ======================
-function editPublished(id) {
-
-  var works = getData("published", defaultPublished);
-
-  var w = works.find(function (x) {
-    return x.id === id;
-  });
-
-  if (!w) return;
-
-  var newTitle = prompt("Edit Title", w.title);
-  if (newTitle === null) return;
-
-  var newPublisher = prompt("Edit Publisher", w.publisher);
-  if (newPublisher === null) return;
-
-  var newYear = prompt("Edit Year", w.year);
-  if (newYear === null) return;
-
-  w.title = newTitle;
-  w.publisher = newPublisher;
-  w.year = newYear;
-
-  setData("published", works);
-
-  renderPublished();
-}
-// ======================================================
-// DIGITAL PRINTS
-// ======================================================
-
-// default prints (first load only)
-var defaultPrints = [
-  { id: 1, title: "Dreamscape", price: 499, img: "../frontend/Personal work/Artwork6.png" },
-  { id: 2, title: "Moon Garden", price: 699, img: "../frontend/Personal work/Artwork7.png" }
-];
-
-
-// ======================
-// RENDER PRINTS
-// ======================
-function renderPrints() {
-
-  var container = document.getElementById("prints-grid");
-  if (!container) return;
-
-  var prints = getData("prints", defaultPrints);
-
-  container.innerHTML = prints.map(function (p) {
-    return `
-      <div class="art-card">
-
-        <div class="art-card-img">
-          <img src="${p.img}" alt="${p.title}">
-        </div>
-
-        <div class="art-card-body">
-          <h3>${p.title}</h3>
-
-          <p class="price-tag">
-            ₹${Number(p.price).toLocaleString("en-IN")}
-          </p>
-
-          <div class="art-card-actions">
-            <button class="btn btn-primary btn-sm" onclick="editPrint(${p.id})">✏️ Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="deletePrint(${p.id})">🗑️ Delete</button>
-          </div>
-
-        </div>
-
-      </div>
-    `;
-  }).join("");
-}
-
-
-// ======================
-// ADD PRINT
-// ======================
-function addPrint(e) {
-
-  e.preventDefault();
-
-  var prints = getData("prints", defaultPrints);
-
-  var title = document.getElementById("print-title").value;
-  var price = document.getElementById("print-price").value;
-  var fileInput = document.getElementById("print-image");
-
-  if (!fileInput.files[0]) {
-    alert("Please upload an image");
-    return;
-  }
-
-  var reader = new FileReader();
-
-  reader.onload = function (ev) {
-
-    var newPrint = {
-      id: Date.now(),
-      title: title,
-      price: Number(price),
-      img: ev.target.result
-    };
-
-    prints.push(newPrint);
-
-    setData("prints", prints);
-
-    closeModal("add-print-modal");
-
-    e.target.reset();
-
-    renderPrints();
-  };
-
-  reader.readAsDataURL(fileInput.files[0]);
-}
-
-
-// ======================
-// DELETE PRINT
-// ======================
-function deletePrint(id) {
-
-  if (!confirm("Delete this print?")) return;
-
-  var prints = getData("prints", defaultPrints);
-
-  prints = prints.filter(function (p) {
-    return p.id !== id;
-  });
-
-  setData("prints", prints);
-
-  renderPrints();
-}
-
-
-// ======================
-// EDIT PRINT
-// ======================
-function editPrint(id) {
-
-  var prints = getData("prints", defaultPrints);
-
-  var p = prints.find(function (x) {
-    return x.id === id;
-  });
-
-  if (!p) return;
-
-  var newTitle = prompt("Edit Title", p.title);
-  if (newTitle === null) return;
-
-  var newPrice = prompt("Edit Price (in ₹)", p.price);
-  if (newPrice === null) return;
-
-  p.title = newTitle;
-  p.price = Number(newPrice);
-
-  setData("prints", prints);
-
-  renderPrints();
-}
-
-/* ===============================
-   TESTIMONIALS SYSTEM
-================================ */
-
-var defaultTestimonials = [
-  {
-    id: 1,
-    name: "Ananya Mehta",
-    message: "Working with Abhilasha was a beautiful experience. Her illustrations brought warmth and personality to every page of my book."
-  },
-  {
-    id: 2,
-    name: "Rahul Sharma",
-    message: "Abhilasha’s art style is expressive and emotional. She transforms ideas into stunning visual storytelling."
-  }
-];
-
-
-/* Render testimonials */
-function renderTestimonials() {
-
-  var container = document.getElementById("testimonials-grid");
-  if (!container) return;
-
-  var tests = JSON.parse(localStorage.getItem("testimonials")) || defaultTestimonials;
-
-  container.innerHTML = tests.map(function (t) {
-
-    return `
-<div class="testimonial-card">
-
-<p class="testimonial-message">"${t.message}"</p>
-
-<h4 class="testimonial-name">— ${t.name}</h4>
-
-<div class="art-card-actions">
-<button onclick="deleteTestimonial(${t.id})">🗑️</button>
-</div>
-
-</div>
-`;
-
-  }).join("");
-
-}
-
-
-/* Add testimonial */
-
-function addTestimonial(e) {
-
-  e.preventDefault();
-
-  var tests = JSON.parse(localStorage.getItem("testimonials")) || defaultTestimonials;
-
-  var newTest = {
-
-    id: Date.now(),
-    name: document.getElementById("test-name").value,
-    message: document.getElementById("test-message").value
-
-  };
-
-  tests.push(newTest);
-
-  localStorage.setItem("testimonials", JSON.stringify(tests));
-
-  renderTestimonials();
-
-  document.getElementById("testimonial-form").reset();
-
-  closeModal("add-test-modal");
-
-}
-
-
-/* Delete testimonial */
-
-function deleteTestimonial(id) {
-
-  if (!confirm("Delete testimonial?")) return;
-
-  var tests = JSON.parse(localStorage.getItem("testimonials")) || defaultTestimonials;
-
-  tests = tests.filter(function (t) {
-    return t.id !== id;
-  });
-
-  localStorage.setItem("testimonials", JSON.stringify(tests));
-
-  renderTestimonials();
-
-}
-async function loadOrders() {
-
-    const res = await fetch("http://localhost:5000/api/orders");
-    const orders = await res.json();
-
-    const table = document.getElementById("ordersTable");
-
-    orders.forEach(order => {
-        const row = `
-            <tr>
-                <td>${order.userName}</td>
-                <td>${order.artName}</td>
-                <td>₹${order.price}</td>
-            </tr>
-        `;
-        table.innerHTML += row;
+  try {
+    const res = await fetch(`http://localhost:5000/api/artworks/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: newTitle, description: newDesc })
     });
+    
+    if (res.ok) {
+      loadArtworks();
+    } else {
+      const data = await res.json();
+      alert(data.error || "Failed to edit artwork");
+    }
+  } catch (err) {
+    alert("Network Error");
+  }
 }
 
-loadOrders();
+async function deleteArtwork(id) {
+  if (!confirm("Are you sure you want to delete this artwork?")) return;
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/artworks/${id}`, {
+      method: "DELETE"
+    });
+    
+    if (res.ok) {
+      loadArtworks();
+    } else {
+      const data = await res.json();
+      alert(data.error || "Failed to delete artwork");
+    }
+  } catch (err) {
+    alert("Network Error");
+  }
+}
+
+async function deleteTestimonial(id) {
+  if (!confirm("Are you sure you want to delete this testimonial?")) return;
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/testimonials/${id}`, {
+      method: "DELETE"
+    });
+    
+    if (res.ok) {
+      loadTestimonials();
+    } else {
+      const data = await res.json();
+      alert(data.error || "Failed to delete testimonial");
+    }
+  } catch (err) {
+    alert("Network Error");
+  }
+}
+
+// ======================================================
+// 🌍 GLOBAL
+// ======================================================
+
+/* ========================
+   DYNAMIC DASHBOARD
+   ======================== */
+async function loadDashboardStats() {
+    try {
+        const [artRes, ordersRes] = await Promise.all([
+            fetch('http://localhost:5000/api/artworks'),
+            fetch('http://localhost:5000/api/orders')
+        ]);
+        const artworks = await artRes.json();
+        const orders = await ordersRes.json();
+
+        const prints = artworks.filter(a => a.type === 'print');
+        
+        const elArt = document.getElementById('dash-total-art');
+        const elPrint = document.getElementById('dash-total-prints');
+        const elOrd = document.getElementById('dash-total-orders');
+        
+        if(elArt) elArt.textContent = artworks.length;
+        if(elPrint) elPrint.textContent = prints.length;
+        if(elOrd) elOrd.textContent = orders.length;
+
+        // Recent artworks
+        const dashArtGrid = document.getElementById('dash-recent-art');
+        if (dashArtGrid) {
+            const recentArt = artworks.slice(-3).reverse(); // get last 3
+            dashArtGrid.innerHTML = recentArt.map(a => `
+              <div class="art-card">
+                <div class="art-card-img" style="background:#f4f6ff; padding:10px; display:flex; justify-content:center; align-items:center;">
+                  <img src="${a.image || 'pic/default.png'}" style="max-height:150px; border-radius:8px; object-fit:contain;">
+                </div>
+                <div class="art-card-body"><h3>${a.title || 'Untitled'}</h3></div>
+              </div>
+            `).join('');
+        }
+
+        // Recent orders
+        const dashOrdGrid = document.getElementById('dash-recent-orders');
+        if (dashOrdGrid) {
+            const recentOrd = orders.slice(-3).reverse();
+            dashOrdGrid.innerHTML = recentOrd.map(order => {
+                const statusClass = order.status === "Completed" ? "badge-success" : "badge-warning";
+                const dateStr = order.date ? new Date(order.date).toLocaleDateString() : "N/A";
+                const statusStr = order.status || "Processing";
+                return `
+                  <tr>
+                    <td>#${order._id ? order._id.slice(-6).toUpperCase() : 'ORD'}</td>
+                    <td>${order.userName}</td>
+                    <td>${order.artName}</td>
+                    <td>${dateStr}</td>
+                    <td><span class="badge ${statusClass}">${statusStr}</span></td>
+                  </tr>
+                `;
+            }).join('');
+        }
+    } catch(err) {
+        console.error("Error loading dashboard", err);
+    }
+}
+window.loadDashboardStats = loadDashboardStats;
+
+/* ========================
+   PROFILE IMAGE
+   ======================== */
+function updateProfileImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const base64 = ev.target.result;
+    localStorage.setItem('adminProfileImage', base64);
+    loadProfileImage();
+  }
+  reader.readAsDataURL(file);
+}
+window.updateProfileImage = updateProfileImage;
+
+function loadProfileImage() {
+  const imgData = localStorage.getItem('adminProfileImage');
+  if (imgData) {
+    const avatars = document.querySelectorAll('.admin-avatar');
+    avatars.forEach(av => {
+      av.innerHTML = `<img src="${imgData}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadProfileImage();
+    const headers = document.querySelectorAll('.admin-profile');
+    headers.forEach(h => {
+       const avatar = h.querySelector('.admin-avatar');
+       if(avatar) {
+           avatar.style.cursor = 'pointer';
+           avatar.title = 'Change Profile Picture';
+           avatar.onclick = () => {
+              let fileInput = document.getElementById('profile-upload-global');
+              if(!fileInput) {
+                 fileInput = document.createElement('input');
+                 fileInput.type = 'file';
+                 fileInput.id = 'profile-upload-global';
+                 fileInput.accept = 'image/*';
+                 fileInput.style.display = 'none';
+                 fileInput.onchange = updateProfileImage;
+                 document.body.appendChild(fileInput);
+              }
+              fileInput.click();
+           };
+       }
+    });
+});
+
+window.loadArtworks = loadArtworks;
+window.loadOrders = loadOrders;
+window.checkAuth = checkAuth;
+window.logout = logout;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.loadTestimonials = loadTestimonials;
+window.addTestimonial = addTestimonial;
+window.editArtwork = editArtwork;
+window.deleteArtwork = deleteArtwork;
+window.deleteTestimonial = deleteTestimonial;
+window.togglePasswordVisibility = togglePasswordVisibility;

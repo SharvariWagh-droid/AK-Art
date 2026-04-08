@@ -661,31 +661,46 @@ tr:hover td {
 }
 
 /* ===== TESTIMONIAL CARD ===== */
+/* ==============================
+   TESTIMONIAL CARD (ADMIN)
+============================== */
+
 .testimonial-card {
     background: #fff;
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+    transition: 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden; /* prevents overflow */
 }
 
+/* HOVER */
 .testimonial-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
-.testimonial-card .tc-header {
+
+/* ==============================
+   HEADER (AVATAR + NAME)
+============================== */
+
+.tc-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
-.testimonial-card .tc-avatar {
+/* AVATAR */
+.tc-avatar {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2d5bff, #6b8cff);
+    background: linear-gradient(135deg, #6c63ff, #8f86ff); /* purple theme */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -695,23 +710,70 @@ tr:hover td {
     flex-shrink: 0;
 }
 
-.testimonial-card .tc-name {
+/* NAME */
+.tc-name {
     font-size: 14px;
     font-weight: 600;
     color: #1a1a2e;
 }
 
-.testimonial-card .tc-message {
+.tc-message {
     font-size: 13px;
-    color: #666;
+    color: #555;
     line-height: 1.6;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
     font-style: italic;
+
+    white-space: normal;      
+    word-break: normal;       
+    overflow-wrap: normal;    
 }
 
-.testimonial-card .tc-actions {
+.tc-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
+}
+
+/* DELETE BUTTON (assuming) */
+.tc-actions button {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1px solid #ff4d4d;
+    background: transparent;
+    color: #ff4d4d;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.tc-actions button:hover {
+    background: #ff4d4d;
+    color: #fff;
+}
+
+
+/* ==============================
+   GRID (IMPORTANT)
+============================== */
+
+.testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+    .testimonial-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .testimonial-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ===== FILE UPLOAD ===== */
@@ -810,4 +872,17 @@ tr:hover td {
     font-size: 16px;
     font-weight: 700;
     color: #2d5bff;
+}
+
+/* ===== Hide Number Input Arrows ===== */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
