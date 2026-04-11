@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<!DOCTYPE html>
+
 
 <head>
     <meta charset="UTF-8">
@@ -12,36 +12,35 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
-<!-- HEADER -->
-<header class="header">
+<body>
+    <!-- HEADER -->
+    <header class="header">
 
-    <div class="logo-container">
-        <img src="Personal work/logo.gif" alt="Abhilasha Khatri Logo" class="logo">
-    </div>
-
-    <nav class="navbar">
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="explore.html">Explore</a></li>
-            <li><a href="shop.html">Digital Prints</a></li>
-            <li><a href="about.html">About</a></li>
-        </ul>
-        <div class="user-profile">
-            <i class="fas fa-user-circle" id="profileIcon"></i>
+        <div class="logo-container">
+            <img src="Personal work/logo.gif" alt="Abhilasha Khatri Logo" class="logo">
         </div>
-    </nav>
 
-</header>
-<h1>Digital Prints</h1>
-<p>
-    A curated collection of premium illustrations for your modern space.
-    Each piece is digitally crafted with meticulous detail.
-</p>
+        <nav class="navbar">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="explore.html">Explore</a></li>
+                <li><a href="shop.html">Digital Prints</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+            <div class="user-profile">
+                <i class="fas fa-user-circle" id="profileIcon"></i>
+            </div>
+        </nav>
+
+    </header>
+    <h1>Digital Prints</h1>
+    <p>
+        A curated collection of premium illustrations for your modern space.
+        Each piece is digitally crafted with meticulous detail.
+    </p>
 
 
-<body onload="loadPrints()">
-
-    <section class=" prints-grid"> </section>
+    <section class="prints-grid"></section>
 
     <div class="pagination">
 
@@ -55,9 +54,9 @@
     <div class="profile-panel" id="profilePanel">
         <h3 id="profileName"></h3>
         <h4>Your Prints</h4>
-        <ul id="profilePrints"></ul>
+        <ul class="nav-links"></ul>
         <p id="totalPrints"></p>
-        <button onclick="logout()">Logout</button>
+        <button onclick="logoutUser()">Logout</button>
 
     </div>
     <footer class="footer">

@@ -411,32 +411,40 @@ async function addTestimonial(e) {
 // ======================================================
 
 async function loadOrders() {
-  const res = await fetch("http://localhost:5000/api/orders");
-  const orders = await res.json();
+  try {
+    const res = await fetch("http://localhost:5000/api/orders");
+    const orders = await res.json();
 
-  const table = document.getElementById("ordersTableBody") || document.getElementById("ordersTable");
-  if (!table) return;
+    const table = document.getElementById("ordersTableBody");
+    if (!table) return;
 
-  table.innerHTML = "";
+    table.innerHTML = "";
 
-  orders.forEach(order => {
-    const statusClass = order.status === "Completed" ? "badge-success" : "badge-warning";
-    const dateStr = order.date ? new Date(order.date).toLocaleDateString() : "N/A";
-    const statusStr = order.status || "Processing";
-    const paymentStr = order.paymentId || "N/A";
-    const priceStr = order.price ? `₹${order.price}` : "";
+    orders.reverse().forEach(order => {
+      let statusClass = "badge-warning";
+      if (order.status === "Paid" || order.status === "Completed") {
+        statusClass = "badge-success";
+      }
 
-    table.innerHTML += `
-      <tr>
-        <td>#${order._id ? order._id.slice(-6).toUpperCase() : 'ORD'}</td>
-        <td>${order.userName}</td>
-        <td>${order.artName} ${priceStr}</td>
-        <td>${dateStr}</td>
-        <td><span class="badge badge-info">${paymentStr}</span></td>
-        <td><span class="badge ${statusClass}">${statusStr}</span></td>
-      </tr>
-    `;
-  });
+      const dateStr = order.date ? new Date(order.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : "N/A";
+      const statusStr = order.status || "Paid";
+      const paymentStr = order.paymentId || "N/A";
+      const priceStr = order.price ? `₹${order.price}` : "";
+
+      table.innerHTML += `
+        <tr>
+          <td><strong style="color:var(--primary);">#${order._id ? order._id.slice(-6).toUpperCase() : 'ORD'}</strong></td>
+          <td>${order.userName || 'Guest'}<br><small>${order.email || ''}</small></td>
+          <td>${order.artName} <span style="color:var(--success); font-weight:600;">${priceStr}</span></td>
+          <td>${dateStr}</td>
+          <td><code style="background:#f0f0f0; padding:2px 5px; border-radius:4px;">${paymentStr}</code></td>
+          <td><span class="badge ${statusClass}">${statusStr}</span></td>
+        </tr>
+      `;
+    });
+  } catch (err) {
+    console.error("Error loading orders:", err);
+  }
 }
 
 // ======================================================

@@ -6,11 +6,78 @@ document.addEventListener("DOMContentLoaded", () => {
     loadGalleryFromDB();
     loadBooks();
     loadPrints();
+    setupProfilePanel();
+    loadTestimonials();
 
-    if (typeof loadTestimonialsFrontend === "function") {
-        loadTestimonialsFrontend();
+    if (window.location.pathname.includes("success.html")) {
+        loadSuccessPage();
     }
 });
+function setupProfilePanel() {
+    const profileIcon = document.getElementById("profileIcon");
+    const profilePanel = document.getElementById("profilePanel");
+
+    if (!profileIcon || !profilePanel) return;
+
+    profileIcon.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        const user = JSON.parse(localStorage.getItem("user"));
+
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        // Toggle panel
+        profilePanel.classList.toggle("active");
+
+        if (profilePanel.classList.contains("active")) {
+
+            // 👤 Set username
+            document.getElementById("profileName").innerText =
+                user.name || "User";
+
+            // 🔥 FETCH REAL ORDERS FROM BACKEND
+            fetch("http://localhost:5000/api/orders")
+                .then(res => res.json())
+                .then(orders => {
+
+                    const userOrders = orders.filter(
+                        o => o.userId === user._id
+                    );
+
+                    const list = document.getElementById("profilePrints");
+
+                    if (userOrders.length === 0) {
+                        list.innerHTML = "<li>No prints purchased yet</li>";
+                    } else {
+                        list.innerHTML = userOrders.map(order =>
+                            `<li>${order.artName} - ₹${order.price}</li>`
+                        ).join("");
+                    }
+
+                    document.getElementById("totalPrints").innerText =
+                        "Total Prints: " + userOrders.length;
+                })
+                .catch(err => {
+                    console.log("PROFILE FETCH ERROR:", err);
+                });
+        }
+    });
+
+
+    document.addEventListener("click", (e) => {
+        if (
+            profilePanel.classList.contains("active") &&
+            !profilePanel.contains(e.target) &&
+            !profileIcon.contains(e.target)
+        ) {
+            profilePanel.classList.remove("active");
+        }
+    });
+}
+
 
 // ==============================
 // 🔥 BASE API
@@ -85,7 +152,7 @@ async function loadPrints() {
 }
 
 function displayPrints() {
-    const containers = document.querySelectorAll(".prints-grid, #explore-print-grid");
+    const containers = document.querySelectorAll(".prints-grid");
     if (!containers.length) return;
 
     const start = (currentPage - 1) * itemsPerPage;
@@ -119,16 +186,13 @@ function setupPagination() {
     pagination.innerHTML = "";
 
     for (let i = 1; i <= total; i++) {
-        pagination.innerHTML += `
-            <button onclick="changePage(${i})">${i}</button>
-        `;
+        pagination.innerHTML += `<button onclick="changePage(${i})">${i}</button>`;
     }
 }
 
 function changePage(page) {
     currentPage = page;
     displayPrints();
-    setupPagination();
 }
 
 // ==============================
@@ -136,120 +200,211 @@ function changePage(page) {
 // ==============================
 function buyPrint(name, price, image) {
 
-    localStorage.setItem("artName", name);
-    localStorage.setItem("artPrice", price);
-    localStorage.setItem("artImage", image);
-
     if (localStorage.getItem("loggedIn") !== "true") {
+        alert("Please login first!");
         window.location.href = "login.html";
         return;
     }
 
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    localStorage.setItem("artName", name);
+    localStorage.setItem("artPrice", price);
+    localStorage.setItem("artImage", image);
+
     fetch("http://localhost:5000/api/payment/create-order", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({amount: price})
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: price })
     })
-    .then(res => res.json())
-    .then(order => {
-        const options = {
-            key: "rzp_test_SWwx1VajdB2nHb",
-            amount: order.amount,
-            currency: "INR",
-            name: "AK Art",
-            description: name,
-            image: image,
-            order_id: order.id,
-            handler: () => window.location.href = "success.html"
-        };
+        .then(res => res.json())
+        .then(order => {
 
-        new Razorpay(options).open();
-    })
-    .catch(() => alert("Payment failed"));
+            const options = {
+                key: "rzp_test_SWwx1VajdB2nHb",
+                amount: order.amount,
+                currency: "INR",
+                name: "AK Art",
+                description: name,
+                order_id: order.id,
+
+                handler: async function (response) {
+
+                    // ✅ SAVE TO LOCAL STORAGE
+                    const existingOrders = JSON.parse(localStorage.getItem("orders")) || [];
+
+                    existingOrders.push({
+                        userId: user._id,
+                        artName: name,
+                        price: price,
+                        paymentId: response.razorpay_payment_id
+                    });
+
+                    localStorage.setItem("orders", JSON.stringify(existingOrders));
+
+                    await fetch("http://localhost:5000/api/orders/create", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            userId: user._id,
+                            userName: user.name,
+                            email: user.email,
+                            artName: name,
+                            price: price,
+                            image: image,
+                            paymentId: response.razorpay_payment_id,
+                            status: "Paid"
+                        })
+                    });
+
+                    window.location.href = "success.html";
+                }
+            };
+
+            new Razorpay(options).open();
+        });
 }
 
+// ==============================
+// 💬 TESTIMONIALS (FRONTEND)
+// ==============================
+async function loadTestimonials() {
+    try {
+        const res = await fetch("http://localhost:5000/api/testimonials");
+        const data = await res.json();
+
+        const container = document.getElementById("testimonial-grid");
+        if (!container) return;
+
+        container.innerHTML = data.map(t => `
+            <div class="testimonial-card">
+                <p>"${t.message}"</p>
+                <h4>${t.name}</h4>
+            </div>
+        `).join("");
+
+    } catch (err) {
+        console.log("TESTIMONIAL ERROR:", err);
+    }
+}
 // ==============================
 // 🔐 AUTH
 // ==============================
 function setupAuth() {
+
     const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
 
     if (loginForm) {
         loginForm.addEventListener("submit", async e => {
             e.preventDefault();
 
-            const email = loginEmail.value;
-            const password = loginPassword.value;
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
 
             const res = await fetch("http://localhost:5000/api/auth/login", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({email, password})
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await res.json();
+
+            if (data.message === "Login successful") {
+                localStorage.setItem("loggedIn", "true");
+                localStorage.setItem("user", JSON.stringify(data.user));
+                window.location.href = "shop.html";
+            } else {
+                alert(data.message);
+            }
+        });
+    }
+
+    if (registerForm) {
+        registerForm.addEventListener("submit", async e => {
+            e.preventDefault();
+
+            const name = document.getElementById("registerName").value;
+            const email = document.getElementById("registerEmail").value;
+            const password = document.getElementById("password").value;
+            const confirm = document.getElementById("confirmPassword").value;
+
+            if (password !== confirm) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            const res = await fetch("http://localhost:5000/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password })
             });
 
             const data = await res.json();
             alert(data.message);
 
-            if (data.message === "Login successful") {
-                localStorage.setItem("loggedIn", "true");
-                window.location.href = "index.html";
+            if (data.message.toLowerCase().includes("register")) {
+                window.location.href = "login.html";
             }
         });
     }
 }
+// ==============================
+// 🎉 SUCCESS PAGE
+// ==============================
+function loadSuccessPage() {
+    const img = document.querySelector("#artPreview");
+    const name = document.querySelector("#artName");
+    const price = document.querySelector("#artPrice");
+
+    const artName = localStorage.getItem("artName");
+    const artPrice = localStorage.getItem("artPrice");
+    const artImage = localStorage.getItem("artImage");
+
+    if (img) img.src = artImage;
+    if (name) name.innerText = artName;
+    if (price) price.innerText = "₹" + artPrice;
+}
+function downloadArt() {
+    const image = localStorage.getItem("artImage");
+
+    if (!image) {
+        alert("No artwork found!");
+        return;
+    }
+
+    // extract filename from URL
+    const filename = image.split("/").pop();
+
+    // redirect to backend download route
+    window.location.href = `http://localhost:5000/api/orders/download/${filename}`;
+}
 
 // ==============================
-// 🖼 IMAGE MODAL
+// 🖼 MODAL FIX (IMPORTANT)
 // ==============================
 function openModal(img) {
-    const modal = document.createElement("div");
-    modal.style = `
-        position:fixed;top:0;left:0;width:100%;height:100%;
-        background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;
-    `;
-
-    modal.innerHTML = `<img src="${img.src}" style="max-width:80%;border-radius:10px;">`;
-    modal.onclick = () => modal.remove();
-
-    document.body.appendChild(modal);
+    alert("Preview coming soon");
 }
 
+function logoutUser() {
+    // clear user session
+    localStorage.removeItem("user");
+    localStorage.removeItem("loggedIn");
 
-// ==============================
-// 💬 TESTIMONIALS
-// ==============================
-async function loadTestimonialsFrontend() {
-    try {
-        const res = await fetch("http://localhost:5000/api/testimonials");
-        const data = await res.json();
+    // optional cleanup
+    localStorage.removeItem("artName");
+    localStorage.removeItem("artPrice");
+    localStorage.removeItem("artImage");
 
-        console.log("Testimonials:", data); // DEBUG
-
-        const container = document.getElementById("testimonial-grid");
-        if (!container) return;
-
-        if (data.length === 0) {
-            container.innerHTML = "<p>No testimonials yet</p>";
-            return;
-        }
-
-        const html = data.map(t => `
-            <div class="testimonial-card">
-                <p>"${t.message}"</p>
-                <h4>— ${t.name}</h4>
-            </div>
-        `).join("");
-
-        container.innerHTML = html;
-
-    } catch (err) {
-        console.error("Testimonial Error:", err);
-    }
+    // redirect
+    window.location.href = "index.html";
 }
-
 // ==============================
-// 🌍 GLOBAL EXPORTS
+// 🌍 GLOBAL
 // ==============================
 window.changePage = changePage;
 window.buyPrint = buyPrint;
+window.logoutUser = logoutUser;
 window.openModal = openModal;
+window.downloadArt = downloadArt;

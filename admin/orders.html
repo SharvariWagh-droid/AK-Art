@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Orders — Admin Panel</title>
   <link rel="stylesheet" href="admin.css">
 </head>
-<body onload="checkAuth()">
+
+<body onload="checkAuth(); loadOrders();">
   <div class="admin-layout">
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="sidebar-brand-icon">A</div>
-        <div><h2>Abhilasha</h2><small>Admin Panel</small></div>
+        <div>
+          <h2>Abhilasha</h2><small>Admin Panel</small>
+        </div>
       </div>
       <nav class="sidebar-nav">
         <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
@@ -30,7 +34,9 @@
           <h1>Orders</h1>
         </div>
         <div class="header-right">
-          <div class="admin-profile"><div class="admin-avatar">A</div><span class="admin-name">Abhilasha</span></div>
+          <div class="admin-profile">
+            <div class="admin-avatar">A</div><span class="admin-name">Abhilasha</span>
+          </div>
         </div>
       </header>
       <div class="content-area">
@@ -58,4 +64,5 @@
   </div>
   <script src="admin.js"></script>
 </body>
+
 </html>
