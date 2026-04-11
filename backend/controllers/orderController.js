@@ -104,7 +104,7 @@ exports.downloadArtworkResized = async (req, res) => {
 
     res.set({
       "Content-Type": `image/${targetFormat}`,
-      "Content-Disposition": `attachment; filename="${filename.split('.')[0]}_${size}.${format}"`
+      "Content-Disposition": `attachment; filename="resized-image.${format}"`
     });
 
     res.send(buffer);

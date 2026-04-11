@@ -152,7 +152,7 @@ async function loadPrints() {
 }
 
 function displayPrints() {
-    const containers = document.querySelectorAll(".prints-grid");
+    const containers = document.querySelectorAll(".prints-grid, #explore-print-grid");
     if (!containers.length) return;
 
     const start = (currentPage - 1) * itemsPerPage;
@@ -384,8 +384,23 @@ function downloadArt() {
 // 🖼 MODAL FIX (IMPORTANT)
 // ==============================
 function openModal(img) {
-    alert("Preview coming soon");
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+
+    modal.style.display = "flex";
+    modalImg.src = img.src;
 }
+// close modal
+document.querySelector(".close")?.addEventListener("click", () => {
+    document.getElementById("imageModal").style.display = "none";
+});
+
+// close on outside click
+document.getElementById("imageModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "imageModal") {
+        e.target.style.display = "none";
+    }
+});
 
 function logoutUser() {
     // clear user session
