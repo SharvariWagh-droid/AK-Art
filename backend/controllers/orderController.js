@@ -7,17 +7,17 @@ const sharp = require("sharp");
 exports.createOrder = async (req, res) => {
   try {
 
-    const { userId, userName, email, artName, price, image, paymentId, status } = req.body;
+    const { userId, userName, email, artName, artworkName, price, image, paymentId, status } = req.body;
 
     const order = new Order({
-      userId,
+      userId: userId, // Link to user
       userName,
       email,
-      artName,
+      artName: artworkName || artName, // Support both names
       price,
       image,
       paymentId,
-      status: status || "Paid"
+      status: "Paid" // Default to Paid
     });
 
     await order.save();
@@ -38,6 +38,17 @@ exports.getOrders = async (req, res) => {
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: "Error fetching orders" });
+  }
+};
+
+// GET ORDERS FOR SINGLE USER (NEW)
+exports.getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ userId: req.params.userId });
+    res.json(orders);
+  } catch (err) {
+    console.error("User orders fetch error:", err);
+    res.status(500).json({ message: "Error fetching user orders" });
   }
 };
 
@@ -102,9 +113,11 @@ exports.downloadArtworkResized = async (req, res) => {
       .toFormat(targetFormat)
       .toBuffer();
 
+    const title = req.query.title || "artwork";
+
     res.set({
       "Content-Type": `image/${targetFormat}`,
-      "Content-Disposition": `attachment; filename="resized-image.${format}"`
+      "Content-Disposition": `attachment; filename="${title}.${format}"`
     });
 
     res.send(buffer);

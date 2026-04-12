@@ -1,3 +1,6 @@
+/* ==============================
+   GLOBAL STYLES
+============================== */
 * {
     margin: 0;
     padding: 0;
@@ -21,6 +24,9 @@ body {
 }
 
 
+/* ==============================
+   NAVBAR / HEADER
+============================== */
 .header {
     display: flex;
     align-items: center;
@@ -51,10 +57,10 @@ body {
 
 .navbar {
     display: flex;
-    align-items: center;
-    gap: 30px;
+    justify-content: center;
+    padding: 30px 40px 10px;
+    /* Added top padding */
     width: 100%;
-    padding: 0 40px;
 }
 
 .navbar ul {
@@ -62,7 +68,7 @@ body {
     align-items: center;
     gap: 30px;
     list-style: none;
-    margin-left: auto; 
+    justify-content: center;
 }
 
 .navbar a {
@@ -102,6 +108,9 @@ body {
     background: #1f45cc;
 }
 
+/* ==============================
+   HOME PAGE (Hero Section)
+============================== */
 .hero {
     display: flex;
     align-items: center;
@@ -213,6 +222,9 @@ body {
 /* ==============================
    ART GALLERY FIX
 ============================== */
+/* ==============================
+   ART GRID / CARDS
+============================== */
 .art-grid {
     display: grid;
     width: 100%;
@@ -281,6 +293,9 @@ body {
     color: #777
 }
 
+/* ==============================
+   MODALS / ERRORS
+============================== */
 .image-modal {
     display: none;
     position: fixed;
@@ -327,6 +342,9 @@ body {
     right: 40px;
 }
 
+/* ==============================
+   EXPLORE PAGE
+============================== */
 .storybook {
     padding: 60px 8%
 }
@@ -350,10 +368,12 @@ body {
     font-size: 1.1rem;
     color: #555
 }
+
 .explore-nav {
     text-align: center;
     padding: 20px;
-    background: #f5f8ff; /* light soft blue */
+    background: #f5f8ff;
+    /* light soft blue */
 }
 
 .explore-nav ul {
@@ -445,30 +465,97 @@ body {
     border-radius: 25px
 }
 
+/* ==============================
+   ABOUT PAGE
+============================== */
 .about-container {
     display: flex;
-    align-items: flex-start;
-    gap: 40px;
-    padding: 50px;
-    margin-top: 50px;
-    font-size: 20px
+    align-items: center;
+    gap: 60px;
+    padding: 80px 10%;
+    max-width: 1300px;
+    margin: 40px auto;
 }
 
 .artist-image {
-    flex: 0 0 550px;
-    max-width: 40%
+    flex: 0 0 400px;
+    max-width: 400px;
 }
 
 .artist-image img {
     width: 100%;
-    border-radius: 70px
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 50%;
+    /* Circular image */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .about-artist {
-    flex: 1.5;
-    text-align: left
+    flex: 1;
+    text-align: left;
 }
 
+#aboutName {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1a1a1a;
+}
+
+#aboutBio {
+    line-height: 1.7;
+    max-width: 600px;
+    font-size: 15px;
+    /* Matched to testimonial readability */
+    color: #444;
+    margin-bottom: 30px;
+}
+
+.section-heading {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #222;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#publishedWorksList,
+#agenciesList {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+#publishedWorksList li,
+#agenciesList li {
+    margin-bottom: 15px;
+    font-size: 15px;
+}
+
+.work-link {
+    font-weight: 600;
+    text-decoration: underline;
+    color: #2d5bff;
+    transition: 0.3s;
+}
+
+.work-link:hover {
+    color: #1f45cc;
+}
+
+.work-meta {
+    font-size: 0.9rem;
+    color: #777;
+    margin-top: 2px;
+    display: block;
+}
+
+/* ==============================
+   TESTIMONIALS SECTION
+============================== */
 .testimonials {
     padding: 80px 10%;
     background: #f8f9ff;
@@ -523,6 +610,9 @@ body {
     font-size: 14px;
 }
 
+/* ==============================
+   SHOP / DIGITAL PRINTS PAGE
+============================== */
 .shop-hero {
     padding: 80px 10%;
     text-align: center;
@@ -672,6 +762,9 @@ body {
     border-color: #2d5bff
 }
 
+/* ==============================
+   CHECKOUT PAGE
+============================== */
 .checkout-section {
     padding: 80px 10%;
     display: flex;
@@ -764,8 +857,9 @@ body {
     text-align: center;
 }
 
-/* ===== FOOTER ===== */
-
+/* ==============================
+   FOOTER
+============================== */
 .footer {
     background: #f8f8f8;
     padding: 70px 8% 30px;
@@ -863,6 +957,9 @@ body {
 
 
 
+/* ==============================
+   LOGIN / AUTH PAGES
+============================== */
 .login-section {
     min-height: 70vh;
     display: flex;
@@ -941,6 +1038,9 @@ body {
     text-decoration: underline
 }
 
+/* ==============================
+   PROFILE PANEL
+============================== */
 .user-profile {
     display: flex;
     align-items: center;
@@ -1020,6 +1120,124 @@ body {
     transform: scale(1.1);
 }
 
+/* 🔥 ENHANCED PROFILE SYSTEM */
+.profile-panel {
+    position: fixed;
+    right: -320px;
+    top: 80px;
+    width: 280px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-panel.active {
+    right: 20px;
+    /* Slide in with gap */
+}
+
+.avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #BF335D;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(191, 51, 93, 0.3);
+}
+
+#profileGreeting {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #1a1a1a;
+}
+
+#totalPrints {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+#profilePrints {
+    list-style: none;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding: 0;
+}
+
+#profilePrints li {
+    padding: 12px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+#profilePrints li:hover {
+    background: #fdfdfd;
+}
+
+#profilePrints strong {
+    color: #222;
+}
+
+#profilePrints small {
+    color: #999;
+}
+
+.status {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.status.paid {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+
+.status.pending {
+    background: #fff4e5;
+    color: #b45d00;
+}
+
+.status.failed {
+    background: #fce8e6;
+    color: #c5221f;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: #1a1a1a;
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.logout-btn:hover {
+    background: #333;
+    transform: translateY(-2px);
+}
 
 @media(max-width:900px) {
     .shop-hero h1 {
@@ -1118,8 +1336,10 @@ body {
     transform: scale(1.1);
 }
 
-/* ===== SUCCESS PAGE ===== */
 
+/* ==============================
+   SUCCESS PAGE
+============================== */
 .success-section {
     display: flex;
     justify-content: center;
@@ -1213,18 +1433,17 @@ body {
     color: #fff;
     border-color: #2d5bff;
 }
+
 /* ==============================
-   GLOBAL RESPONSIVE SYSTEM
+   RESPONSIVE MEDIA QUERIES (Legacy)
 ============================== */
 
 /* TABLET */
 @media (max-width: 900px) {
-
     .header {
         flex-direction: column;
         gap: 10px;
     }
-
 
     .hero {
         flex-direction: column;
@@ -1234,6 +1453,22 @@ body {
     .about-container {
         flex-direction: column;
         text-align: center;
+        gap: 30px;
+        padding: 40px 5%;
+    }
+
+    .artist-image {
+        flex: 0 0 300px;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    .about-artist {
+        text-align: center;
+    }
+
+    #aboutBio {
+        margin: 0 auto 30px;
     }
 
     .checkout-container {
@@ -1243,14 +1478,44 @@ body {
 }
 
 /* MOBILE */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+    .navbar {
+        padding: 20px;
+    }
 
+    .navbar ul {
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .about-container {
+        padding: 40px 16px;
+    }
+
+    #aboutName {
+        font-size: 2.2rem;
+    }
+
+    .section-heading {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
     body {
         font-size: 14px;
     }
 
     .hero-content h1 {
         font-size: 2rem;
+    }
+
+    #aboutName {
+        font-size: 1.8rem;
+    }
+
+    #aboutBio {
+        font-size: 14px;
     }
 
     .section-header h2 {
@@ -1264,7 +1529,6 @@ body {
         grid-template-columns: 1fr;
         padding: 30px;
     }
-
 
     /* PROFILE PANEL FULL WIDTH */
     .profile-panel {
@@ -1281,5 +1545,134 @@ body {
         flex-direction: column;
         text-align: center;
         gap: 10px;
+    }
+}
+
+/* ==============================
+   NEW RESPONSIVE IMPROVEMENTS
+============================== */
+
+/* ?? SMALL LAPTOP (1024px) */
+@media (max-width: 1024px) {
+    .header {
+        padding: 20px 5%;
+    }
+
+    .hero-content h1 {
+        font-size: 2.8rem;
+    }
+
+    .about-container {
+        gap: 30px;
+        padding: 60px 8%;
+    }
+
+    .artist-image {
+        flex: 0 0 320px;
+    }
+}
+
+/* ?? TABLET (768px) */
+@media (max-width: 768px) {
+    .navbar ul {
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 0 10px;
+    }
+
+    .hero {
+        flex-direction: column-reverse;
+        text-align: center;
+        padding: 40px 10%;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-content p {
+        margin: 0 auto 30px;
+    }
+
+    .hero-buttons {
+        justify-content: center;
+    }
+
+    .about-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .artist-image {
+        max-width: 250px;
+        margin: 0 auto;
+    }
+
+    .about-artist {
+        text-align: center;
+    }
+
+    #aboutBio {
+        margin: 0 auto 30px;
+    }
+
+    /* Responsive Grid Modernization */
+    .art-grid,
+    .explore-grid,
+    .shop-grid,
+    .prints-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+        gap: 20px;
+    }
+}
+
+/* ?? MOBILE (480px) */
+@media (max-width: 480px) {
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+
+    #aboutName {
+        font-size: 2.2rem;
+    }
+
+    .navbar a {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+
+    .profile-panel {
+        width: 100% !important;
+        height: 100% !important;
+        top: 0 !important;
+        right: -100% !important;
+        border-radius: 0 !important;
+    }
+
+    .profile-panel.active {
+        right: 0 !important;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    /* Grid forced to single column on small mobile */
+    .art-grid,
+    .explore-grid,
+    .shop-grid,
+    .prints-grid {
+        grid-template-columns: 1fr !important;
+        padding: 20px;
+    }
+
+    .checkout-container {
+        padding: 20px;
+    }
+
+    .success-container {
+        padding: 30px 20px;
     }
 }

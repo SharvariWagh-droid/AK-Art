@@ -22,6 +22,9 @@
             <li><a href="shop.html">Buy Prints</a></li>
             <li><a href="about.html">About</a></li>
         </ul>
+        <div class="user-profile">
+            <i class="fas fa-user-circle" id="profileIcon"></i>
+        </div>
     </nav>
 </header>
 
@@ -36,14 +39,15 @@
     <!-- TEXT -->
     <div class="about-artist">
 
+        <h2 class="section-heading">Meet The Artist</h2>
         <h1 id="aboutName"></h1>
 
         <p id="aboutBio"></p>
 
-        <h3>Published Works:</h3>
+        <h2 class="section-heading">Published Works:</h2>
         <ul id="publishedWorksList"></ul>
 
-        <h3 style="margin-top:20px;">Represented By:</h3>
+        <h2 class="section-heading" style="margin-top:20px;">Artist’s Worked With:</h2>
         <ul id="agenciesList"></ul>
 
     </div>
@@ -55,6 +59,14 @@
     <h2>What Authors Say</h2>
     <div id="testimonial-grid" class="testimonial-grid"></div>
 </section>
+
+<div class="profile-panel" id="profilePanel">
+    <div class="avatar" id="profileAvatar"></div>
+    <h3 id="profileGreeting"></h3>
+    <p id="totalPrints"></p>
+    <ul id="profilePrints"></ul>
+    <button class="logout-btn" onclick="logoutUser()">Logout</button>
+</div>
 
 <!-- ================= FOOTER ================= -->
 <footer class="footer">

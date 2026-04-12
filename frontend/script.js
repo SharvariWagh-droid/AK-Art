@@ -13,6 +13,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.location.pathname.includes("success.html")) {
         loadSuccessPage();
     }
+
+    // 👤 Profile Icon Visibility Fix
+    const isShopPage = window.location.pathname.includes("shop.html");
+    const profileIcon = document.getElementById("profileIcon");
+    if (profileIcon) {
+        profileIcon.style.display = isShopPage ? "flex" : "none";
+    }
+
+    // 👤 Initialize Avatar on Load
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && user.name) {
+        const avatar = document.getElementById("profileAvatar");
+        if (avatar) {
+            avatar.innerText = user.name.charAt(0).toUpperCase();
+        }
+    }
 });
 function setupProfilePanel() {
     const profileIcon = document.getElementById("profileIcon");
@@ -20,7 +36,7 @@ function setupProfilePanel() {
 
     if (!profileIcon || !profilePanel) return;
 
-    profileIcon.addEventListener("click", (e) => {
+    profileIcon.addEventListener("click", async (e) => {
         e.stopPropagation();
 
         const user = JSON.parse(localStorage.getItem("user"));
@@ -34,39 +50,53 @@ function setupProfilePanel() {
         profilePanel.classList.toggle("active");
 
         if (profilePanel.classList.contains("active")) {
+            // 👤 Dynamic User Data
+            const greeting = document.getElementById("profileGreeting");
+            const total = document.getElementById("totalPrints");
+            const list = document.getElementById("profilePrints");
+            const avatar = document.getElementById("profileAvatar");
 
-            // 👤 Set username
-            document.getElementById("profileName").innerText =
-                user.name || "User";
+            if (greeting) greeting.innerText = `Hey ${user.name} 👋`;
+            if (avatar) avatar.innerText = user.name.charAt(0).toUpperCase();
 
-            // 🔥 FETCH REAL ORDERS FROM BACKEND
-            fetch("http://localhost:5000/api/orders")
-                .then(res => res.json())
-                .then(orders => {
+            try {
+                // 🔥 FETCH ALL ORDERS & FILTER (Support Legacy Data)
+                const response = await fetch(`http://localhost:5000/api/orders`);
+                const allOrders = await response.json();
+                
+                const userOrders = allOrders.filter(o => 
+                    String(o.userId) === String(user._id) || 
+                    o.userName === user.name
+                );
 
-                    const userOrders = orders.filter(
-                        o => o.userId === user._id
-                    );
-
-                    const list = document.getElementById("profilePrints");
+                if (total) total.innerText = `Your Prints: ${userOrders.length}`;
+                if (list) {
+                    list.innerHTML = "";
 
                     if (userOrders.length === 0) {
-                        list.innerHTML = "<li>No prints purchased yet</li>";
+                        list.innerHTML = "<p style='text-align:center;'>No prints yet 🥺</p>";
                     } else {
-                        list.innerHTML = userOrders.map(order =>
-                            `<li>${order.artName} - ₹${order.price}</li>`
-                        ).join("");
+                        userOrders.forEach(order => {
+                            const li = document.createElement("li");
+                            const statusClass = order.status ? order.status.toLowerCase() : "paid";
+                            
+                            li.innerHTML = `
+                                <strong>${order.artName}</strong><br>
+                                <small>${new Date(order.date).toLocaleDateString()}</small><br>
+                                <span class="status ${statusClass}">
+                                    ${order.status || "Paid"}
+                                </span>
+                            `;
+                            list.appendChild(li);
+                        });
                     }
-
-                    document.getElementById("totalPrints").innerText =
-                        "Total Prints: " + userOrders.length;
-                })
-                .catch(err => {
-                    console.log("PROFILE FETCH ERROR:", err);
-                });
+                }
+            } catch (err) {
+                console.log("PROFILE FETCH ERROR:", err);
+                if (list) list.innerHTML = "<p>Error loading prints</p>";
+            }
         }
     });
-
 
     document.addEventListener("click", (e) => {
         if (
@@ -304,7 +334,7 @@ async function loadAboutData() {
         const bioEl = document.getElementById("aboutBio");
         const worksList = document.getElementById("publishedWorksList");
 
-        if (nameEl) nameEl.innerText = about.name || "";
+        nameEl.innerHTML = `<strong>${about.name}</strong>`;
 
         if (imgEl) {
             if (about.image) {
@@ -322,9 +352,18 @@ async function loadAboutData() {
         }
 
         if (worksList && about.publishedWorks) {
-            worksList.innerHTML = about.publishedWorks
-                .map(w => `<li>${w}</li>`)
-                .join("");
+            worksList.innerHTML = about.publishedWorks.map(w => {
+                const parts = w.split("(");
+                const title = parts[0];
+                const rest = parts[1] ? "(" + parts[1] : "";
+
+                return `
+                    <li>
+                        <a href="#" class="work-link">${title.trim()}</a><br>
+                        <span class="work-meta">${rest}</span>
+                    </li>
+                `;
+            }).join("");
         }
 
         // ✅ AGENCIES FIX
@@ -438,8 +477,15 @@ function downloadArt() {
     const format =
         document.querySelector(".format-btn.active")?.dataset.format || "jpg";
 
+    const title = localStorage.getItem("artName") || "artwork";
+
     window.location.href =
-        `http://localhost:5000/api/orders/download/${filename}/${size}/${format}`;
+        `http://localhost:5000/api/orders/download/${filename}/${size}/${format}?title=${encodeURIComponent(title)}`;
+}
+
+function closeModal() {
+    const modal = document.getElementById("imageModal");
+    if (modal) modal.style.display = "none";
 }
 // size selection
 document.querySelectorAll(".size-btn").forEach(btn => {
@@ -464,13 +510,11 @@ function openModal(img) {
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("modalImage");
 
-    modal.style.display = "flex";
-    modalImg.src = img.src;
+    if (modal) modal.style.display = "flex";
+    if (modalImg) modalImg.src = img.src;
 }
 // close modal
-document.querySelector(".close")?.addEventListener("click", () => {
-    document.getElementById("imageModal").style.display = "none";
-});
+document.querySelector(".close")?.addEventListener("click", closeModal);
 
 // close on outside click
 document.getElementById("imageModal")?.addEventListener("click", (e) => {
@@ -499,4 +543,5 @@ window.changePage = changePage;
 window.buyPrint = buyPrint;
 window.logoutUser = logoutUser;
 window.openModal = openModal;
+window.closeModal = closeModal;
 window.downloadArt = downloadArt;

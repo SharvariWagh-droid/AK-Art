@@ -352,7 +352,17 @@ async function loadAbout() {
 
       
       const worksList = document.getElementById("about-works-display");
-      worksList.innerHTML = (data.publishedWorks || []).map(w => `<li>${w}</li>`).join("");
+      worksList.innerHTML = (data.publishedWorks || []).map(w => {
+        const parts = w.split("(");
+        const title = parts[0];
+        const rest = parts[1] ? "(" + parts[1] : "";
+        return `
+          <li>
+            <a href="#" class="work-link">${title.trim()}</a><br>
+            <span class="work-meta">${rest}</span>
+          </li>
+        `;
+      }).join("");
       
       // Hidden data for modal
       document.getElementById("about-name").value = data.name;
