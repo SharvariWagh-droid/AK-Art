@@ -9,6 +9,8 @@ const orderRoutes = require("./routes/orderRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const artworkRoutes = require("./routes/artworkRoutes");
 const testimonialRoutes = require("./routes/testimonialRoutes");
+const aboutRoutes = require("./routes/aboutRoutes");
+const agencyRoutes = require("./routes/agencyRoutes");
 
 // ==============================
 // MIDDLEWARE
@@ -31,6 +33,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/artworks", artworkRoutes);
 app.use("/api/testimonials", testimonialRoutes);
+app.use("/api/about", aboutRoutes);
+app.use("/api/agencies", agencyRoutes);
 
 // ==============================
 // MONGODB CONNECTION (FIXED)

@@ -102,7 +102,7 @@ if (!container) return;
     return `
     <div class="art-card">
       <div class="art-card-img">
-        <img src="${a.image || 'pic/default.png'}">
+        <img src="${a.image || ''}">
       </div>
       <div class="art-card-body">
         <h3>${a.title}</h3>
@@ -324,49 +324,232 @@ function previewPubImage(event) {
 window.previewPubImage = previewPubImage;
 
 // ======================================================
-// 💬 TESTIMONIALS (NOW DB)
+// 💬 ABOUT, AGENCIES & TESTIMONIALS (NOW DB)
 // ======================================================
 
-// LOAD TESTIMONIALS
+function initTestimonialsPage() {
+  loadAbout();
+  loadAgencies();
+  loadTestimonials();
+}
+
+// --- ABOUT ---
+
+async function loadAbout() {
+  try {
+    const res = await fetch("http://localhost:5000/api/about");
+    const data = await res.json();
+
+    if (data && data.name) {
+      document.getElementById("about-name-display").innerText = data.name;
+      document.getElementById("about-bio-display").innerText = data.bio;
+      if (data.image) {
+        document.getElementById("about-img-preview").src = data.image;
+        document.getElementById("about-img-preview").style.display = "block";
+      } else {
+        document.getElementById("about-img-preview").style.display = "none";
+      }
+
+      
+      const worksList = document.getElementById("about-works-display");
+      worksList.innerHTML = (data.publishedWorks || []).map(w => `<li>${w}</li>`).join("");
+      
+      // Hidden data for modal
+      document.getElementById("about-name").value = data.name;
+      document.getElementById("about-bio").value = data.bio;
+      document.getElementById("about-image-data").value = data.image || "";
+      document.getElementById("about-works").value = (data.publishedWorks || []).join(", ");
+      if(data.image) {
+        document.getElementById("about-modal-preview").src = data.image;
+        document.getElementById("about-modal-preview").style.display = "block";
+      }
+    }
+  } catch (err) {
+    console.error("Error loading about data:", err);
+  }
+}
+
+function openAboutModal() {
+  openModal("about-modal");
+}
+
+function previewAboutImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const base64 = ev.target.result;
+    document.getElementById("about-image-data").value = base64;
+    const preview = document.getElementById("about-modal-preview");
+    preview.src = base64;
+    preview.style.display = "block";
+  }
+  reader.readAsDataURL(file);
+}
+
+async function handleAboutSubmit(e) {
+  e.preventDefault();
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  
+  const name = document.getElementById("about-name").value;
+  const bio = document.getElementById("about-bio").value;
+  const image = document.getElementById("about-image-data").value;
+  const publishedWorks = document.getElementById("about-works").value.split(",").map(w => w.trim()).filter(w => w !== "");
+
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = "Saving..."; }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/about", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, bio, image, publishedWorks })
+    });
+
+    if (res.ok) {
+      alert("About section updated! ✨");
+      closeModal("about-modal");
+      loadAbout();
+    } else {
+      const data = await res.json();
+      alert(data.error || "Update failed");
+    }
+  } catch (err) {
+    alert("Network Error");
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = "Save Changes"; }
+  }
+}
+
+// --- AGENCIES ---
+
+async function loadAgencies() {
+  try {
+    const res = await fetch("http://localhost:5000/api/agencies");
+    const data = await res.json();
+    const list = document.getElementById("agencies-list");
+    if(!list) return;
+
+    list.innerHTML = data.map(a => `
+      <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+        <span>${a.name}</span>
+        <div>
+          <button class="btn btn-primary btn-sm" onclick="editAgency('${a._id}', '${a.name}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteAgency('${a._id}')">Delete</button>
+        </div>
+      </li>
+    `).join("");
+  } catch (err) {
+    console.error("Error loading agencies:", err);
+  }
+}
+
+function editAgency(id, name) {
+  document.getElementById("agency-id").value = id;
+  document.getElementById("agency-name").value = name;
+  document.getElementById("agency-modal-title").innerText = "Edit Agency";
+  document.getElementById("agency-submit-btn").innerText = "Update Agency";
+  openModal("add-agency-modal");
+}
+
+async function handleAgencySubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById("agency-id").value;
+  const name = document.getElementById("agency-name").value;
+  const submitBtn = document.getElementById("agency-submit-btn");
+
+  const method = id ? "PUT" : "POST";
+  const url = id ? `http://localhost:5000/api/agencies/${id}` : "http://localhost:5000/api/agencies";
+
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = "Processing..."; }
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name })
+    });
+
+    if (res.ok) {
+      alert(`Agency ${id ? 'updated' : 'added'}!`);
+      closeModal("add-agency-modal");
+      e.target.reset();
+      document.getElementById("agency-id").value = "";
+      loadAgencies();
+    } else {
+      const data = await res.json();
+      alert(data.error || "Operation failed");
+    }
+  } catch (err) {
+    alert("Network Error");
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = "Save Agency"; }
+  }
+}
+
+async function deleteAgency(id) {
+  if (!confirm("Remove this agency?")) return;
+  try {
+    const res = await fetch(`http://localhost:5000/api/agencies/${id}`, { method: "DELETE" });
+    if (res.ok) loadAgencies();
+  } catch (err) { alert("Network Error"); }
+}
+
+// --- TESTIMONIALS ---
+
 async function loadTestimonials() {
   try {
     const res = await fetch("http://localhost:5000/api/testimonials");
-    
-    const text = await res.text();
-    console.log("Raw Testimonial Admin Response:", text);
-    
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      console.error("Invalid JSON from Testimonials API:", e);
-      return;
-    }
+    const data = await res.json();
 
     const container = document.getElementById("testimonials-grid");
     if (!container) return;
 
-    container.innerHTML = data.map(t => `
+    container.innerHTML = data.map(t => {
+      const safeName = t.name ? t.name.replace(/'/g, "\\'") : "";
+      const safeMsg = t.message ? t.message.replace(/'/g, "\\'").replace(/\n/g, "\\n") : "";
+      
+      return `
       <div class="testimonial-card">
         <p>"${t.message}"</p>
         <h4>${t.name}</h4>
         <div style="margin-top: 10px; display: flex; gap: 10px;">
+          <button class="btn btn-primary btn-sm" onclick="editTestimonial('${t._id}', '${safeName}', '${safeMsg}')">Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deleteTestimonial('${t._id}')">Delete</button>
         </div>
       </div>
-    `).join("");
+    `}).join("");
   } catch (err) {
     console.error("Error loading testimonials:", err);
   }
 }
 
-// ADD TESTIMONIAL
-async function addTestimonial(e) {
+function openAddTestimonialModal() {
+  document.getElementById("testimonial-form").reset();
+  document.getElementById("test-id").value = "";
+  document.getElementById("testimonial-modal-title").innerText = "Add Testimonial";
+  document.getElementById("test-submit-btn").innerText = "Add Testimonial";
+  openModal("testimonial-modal");
+}
+
+function editTestimonial(id, name, message) {
+  document.getElementById("test-id").value = id;
+  document.getElementById("test-name").value = name;
+  document.getElementById("test-message").value = message;
+  document.getElementById("testimonial-modal-title").innerText = "Edit Testimonial";
+  document.getElementById("test-submit-btn").innerText = "Update Testimonial";
+  openModal("testimonial-modal");
+}
+
+async function handleTestimonialSubmit(e) {
   e.preventDefault();
 
+  const id = document.getElementById("test-id").value;
   const name = document.getElementById("test-name").value;
   const message = document.getElementById("test-message").value;
-  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const submitBtn = document.getElementById("test-submit-btn");
+
+  const method = id ? "PUT" : "POST";
+  const url = id ? `http://localhost:5000/api/testimonials/${id}` : "http://localhost:5000/api/testimonials";
 
   if (submitBtn) {
     submitBtn.disabled = true;
@@ -374,34 +557,29 @@ async function addTestimonial(e) {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/testimonials", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: name,
-        message: message,
-        image: "https://via.placeholder.com/300?text=Testimonial"
+        message: message
       })
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.error || "Failed to add testimonial");
-    } else {
-      alert("Testimonial added 💬✨");
-      e.target.reset();
+    if (res.ok) {
+      alert(`Testimonial ${id ? 'updated' : 'added'} 💬✨`);
+      closeModal("testimonial-modal");
       loadTestimonials();
+    } else {
+      const data = await res.json();
+      alert(data.error || "Operation failed");
     }
   } catch (error) {
-    console.error(error);
-    alert("Error: " + error.message);
+    alert("Network Error");
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerText = "Add Testimonial";
+      submitBtn.innerText = "Save Testimonial";
     }
   }
 }
@@ -547,7 +725,7 @@ async function loadDashboardStats() {
             dashArtGrid.innerHTML = recentArt.map(a => `
               <div class="art-card">
                 <div class="art-card-img" style="background:#f4f6ff; padding:10px; display:flex; justify-content:center; align-items:center;">
-                  <img src="${a.image || 'pic/default.png'}" style="max-height:150px; border-radius:8px; object-fit:contain;">
+                  <img src="${a.image || ''}" style="max-height:150px; border-radius:8px; object-fit:contain;">
                 </div>
                 <div class="art-card-body"><h3>${a.title || 'Untitled'}</h3></div>
               </div>
@@ -637,8 +815,18 @@ window.logout = logout;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.loadTestimonials = loadTestimonials;
-window.addTestimonial = addTestimonial;
 window.editArtwork = editArtwork;
 window.deleteArtwork = deleteArtwork;
 window.deleteTestimonial = deleteTestimonial;
 window.togglePasswordVisibility = togglePasswordVisibility;
+// New Exports
+window.initTestimonialsPage = initTestimonialsPage;
+window.openAboutModal = openAboutModal;
+window.previewAboutImage = previewAboutImage;
+window.handleAboutSubmit = handleAboutSubmit;
+window.handleAgencySubmit = handleAgencySubmit;
+window.editAgency = editAgency;
+window.deleteAgency = deleteAgency;
+window.openAddTestimonialModal = openAddTestimonialModal;
+window.editTestimonial = editTestimonial;
+window.handleTestimonialSubmit = handleTestimonialSubmit;

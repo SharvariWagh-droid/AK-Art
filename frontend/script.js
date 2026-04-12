@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadPrints();
     setupProfilePanel();
     loadTestimonials();
+    loadAboutData();
 
     if (window.location.pathname.includes("success.html")) {
         loadSuccessPage();
@@ -288,6 +289,62 @@ async function loadTestimonials() {
     }
 }
 // ==============================
+// 💬 ABOUT PAGE DYNAMIC (NEW)
+// ==============================
+async function loadAboutData() {
+    if (!window.location.pathname.includes("about.html")) return;
+
+    try {
+        const aboutRes = await fetch("http://localhost:5000/api/about");
+        const about = await aboutRes.json();
+
+        // ✅ NEW CORRECT IDs
+        const nameEl = document.getElementById("aboutName");
+        const imgEl = document.getElementById("aboutImage");
+        const bioEl = document.getElementById("aboutBio");
+        const worksList = document.getElementById("publishedWorksList");
+
+        if (nameEl) nameEl.innerText = about.name || "";
+
+        if (imgEl) {
+            if (about.image) {
+                imgEl.src = about.image; // ✅ BASE64 DIRECT
+            } else {
+                imgEl.style.display = "none";
+            }
+        }
+
+        if (bioEl && about.bio) {
+            bioEl.innerHTML = about.bio
+                .split("\n")
+                .map(p => p.trim() ? `<p>${p}</p>` : "")
+                .join("");
+        }
+
+        if (worksList && about.publishedWorks) {
+            worksList.innerHTML = about.publishedWorks
+                .map(w => `<li>${w}</li>`)
+                .join("");
+        }
+
+        // ✅ AGENCIES FIX
+        const agencyRes = await fetch("http://localhost:5000/api/agencies");
+        const agencies = await agencyRes.json();
+
+        const agencyList = document.getElementById("agenciesList");
+
+        if (agencyList) {
+            agencyList.innerHTML = agencies.length
+                ? agencies.map(a => `<li>${a.name}</li>`).join("")
+                : "<li>Independent Artist</li>";
+        }
+
+    } catch (err) {
+        console.log("ABOUT PAGE ERROR:", err);
+    }
+}
+
+// ==============================
 // 🔐 AUTH
 // ==============================
 function setupAuth() {
@@ -373,12 +430,32 @@ function downloadArt() {
         return;
     }
 
-    // extract filename from URL
     const filename = image.split("/").pop();
 
-    // redirect to backend download route
-    window.location.href = `http://localhost:5000/api/orders/download/${filename}`;
+    const size =
+        document.querySelector(".size-btn.active")?.dataset.size || "6x7";
+
+    const format =
+        document.querySelector(".format-btn.active")?.dataset.format || "jpg";
+
+    window.location.href =
+        `http://localhost:5000/api/orders/download/${filename}/${size}/${format}`;
 }
+// size selection
+document.querySelectorAll(".size-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelectorAll(".size-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+    });
+});
+
+// format selection
+document.querySelectorAll(".format-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelectorAll(".format-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+    });
+});
 
 // ==============================
 // 🖼 MODAL FIX (IMPORTANT)

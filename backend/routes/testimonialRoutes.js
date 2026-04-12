@@ -29,6 +29,24 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Update testimonial
+router.put("/:id", async (req, res) => {
+  try {
+    const { name, message, image } = req.body;
+    const updatedTestimonial = await Testimonial.findByIdAndUpdate(
+      req.params.id,
+      { name, message, image },
+      { new: true, runValidators: true }
+    );
+    if (!updatedTestimonial) {
+      return res.status(404).json({ error: "Testimonial not found" });
+    }
+    res.json({ message: "Testimonial updated successfully", testimonial: updatedTestimonial });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Delete testimonial
 router.delete("/:id", async (req, res) => {
   try {
