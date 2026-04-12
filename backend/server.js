@@ -11,19 +11,19 @@ const artworkRoutes = require("./routes/artworkRoutes");
 const testimonialRoutes = require("./routes/testimonialRoutes");
 const aboutRoutes = require("./routes/aboutRoutes");
 const agencyRoutes = require("./routes/agencyRoutes");
+const homepageRoutes = require("./routes/homepageRoutes");
 
 // ==============================
 // MIDDLEWARE
 // ==============================
+app.use(cors()); // Prioritize CORS
 const fs = require('fs');
 const path = require('path');
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
-
-app.use('/uploads', express.static(uploadsDir));
-app.use(cors());
+app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
@@ -35,6 +35,7 @@ app.use("/api/artworks", artworkRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/about", aboutRoutes);
 app.use("/api/agencies", agencyRoutes);
+app.use("/api/homepage", homepageRoutes);
 
 // ==============================
 // MONGODB CONNECTION (FIXED)

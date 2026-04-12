@@ -29,6 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
             avatar.innerText = user.name.charAt(0).toUpperCase();
         }
     }
+
+    loadHeroFromBackend();
 });
 function setupProfilePanel() {
     const profileIcon = document.getElementById("profileIcon");
@@ -63,9 +65,9 @@ function setupProfilePanel() {
                 // 🔥 FETCH ALL ORDERS & FILTER (Support Legacy Data)
                 const response = await fetch(`http://localhost:5000/api/orders`);
                 const allOrders = await response.json();
-                
-                const userOrders = allOrders.filter(o => 
-                    String(o.userId) === String(user._id) || 
+
+                const userOrders = allOrders.filter(o =>
+                    String(o.userId) === String(user._id) ||
                     o.userName === user.name
                 );
 
@@ -79,7 +81,7 @@ function setupProfilePanel() {
                         userOrders.forEach(order => {
                             const li = document.createElement("li");
                             const statusClass = order.status ? order.status.toLowerCase() : "paid";
-                            
+
                             li.innerHTML = `
                                 <strong>${order.artName}</strong><br>
                                 <small>${new Date(order.date).toLocaleDateString()}</small><br>
@@ -116,6 +118,16 @@ function setupProfilePanel() {
 const API = "http://localhost:5000/api/artworks";
 
 // ==============================
+// 🎨 IMAGE HELPER (NORMALIZATION)
+// ==============================
+function getImageSrc(img) {
+    if (!img) return "";
+    if (img.startsWith("http")) return img;
+    if (img.includes("Personal work")) return "../" + img;
+    return "http://localhost:5000/uploads/" + img;
+}
+
+// ==============================
 // 🎨 ART
 // ==============================
 async function loadGalleryFromDB() {
@@ -123,12 +135,15 @@ async function loadGalleryFromDB() {
         const res = await fetch(API + "?type=art");
         const arts = await res.json();
 
-        const html = arts.map(a => `
-            <div class="art-item">
-                <img src="${a.image}" onclick="openModal(this)">
-                <h3>${a.title}</h3>
-            </div>
-        `).join("");
+        const html = arts.map(a => {
+            console.log("IMAGE URL:", a.image);
+            return `
+                <div class="art-item">
+                    <img src="${getImageSrc(a.image)}" onclick="openModal(this)">
+                    <h3>${a.title}</h3>
+                </div>
+            `;
+        }).join("");
 
         document.querySelectorAll("#home-art-grid, #explore-art-grid")
             .forEach(c => c.innerHTML = html);
@@ -146,13 +161,16 @@ async function loadBooks() {
         const res = await fetch(API + "?type=book");
         const books = await res.json();
 
-        const html = books.map(b => `
-            <div class="art-item">
-                <img src="${b.image}" onclick="openModal(this)">
-                <h3>${b.title}</h3>
-                <p>${b.description || ""}</p>
-            </div>
-        `).join("");
+        const html = books.map(b => {
+            console.log("IMAGE URL:", b.image);
+            return `
+                <div class="art-item">
+                    <img src="${getImageSrc(b.image)}" onclick="openModal(this)">
+                    <h3>${b.title}</h3>
+                    <p>${b.description || ""}</p>
+                </div>
+            `;
+        }).join("");
 
         document.querySelectorAll("#home-book-grid, #explore-book-grid")
             .forEach(c => c.innerHTML = html);
@@ -190,14 +208,16 @@ function displayPrints() {
     const pageItems = allPrints.slice(start, start + itemsPerPage);
 
     const html = pageItems.map(p => {
+        console.log("IMAGE URL:", p.image);
         const price = p.description ? parseInt(p.description.replace('₹', '')) || 0 : 0;
+        const imgSrc = getImageSrc(p.image);
 
         return `
         <div class="shop-card">
-            <img src="${p.image}">
+            <img src="${imgSrc}">
             <h3>${p.title}</h3>
             <p>₹${price}</p>
-            <button onclick="buyPrint('${p.title}', ${price}, '${p.image}')">
+            <button onclick="buyPrint('${p.title}', ${price}, '${imgSrc}')">
                 Buy Print
             </button>
         </div>`;
@@ -545,3 +565,76 @@ window.logoutUser = logoutUser;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.downloadArt = downloadArt;
+// ==============================
+// 🎨 HOMEPAGE CMS (FINAL FIXED)
+// ==============================
+
+let heroSliderIntervalId = null;
+
+async function loadHeroFromBackend() {
+    const slider = document.getElementById("heroSlider");
+    const titleEl = document.getElementById("heroTitle");
+    const subEl = document.getElementById("heroSubtitle");
+
+    if (!slider) return;
+
+    try {
+        const res = await fetch("http://localhost:5000/api/homepage");
+        const data = await res.json();
+
+        console.log("HERO DATA:", data);
+
+        // ✅ TEXT
+        if (titleEl) titleEl.innerText = data.heroTitle || "";
+        if (subEl) subEl.innerText = data.heroSubtitle || "";
+
+        // ✅ RESET SLIDER
+        slider.innerHTML = "";
+
+        const BASE_URL = "http://localhost:5000/uploads/";
+        const images = data.heroImages || [];
+
+        console.log("IMAGES:", images);
+
+        if (images.length === 0) return;
+
+        // ✅ CREATE SLIDES
+        images.forEach((img, index) => {
+            const fullPath = BASE_URL + img;
+
+            console.log("IMAGE PATH:", fullPath);
+
+            slider.innerHTML += `
+                <div class="slide ${index === 0 ? "active" : ""}">
+                    <img src="${fullPath}" />
+                </div>
+            `;
+        });
+
+        initHeroSlider();
+
+    } catch (err) {
+        console.error("HERO ERROR:", err);
+    }
+}
+
+// ==============================
+// 🎞 SLIDER
+// ==============================
+function initHeroSlider() {
+    const slides = document.querySelectorAll("#heroSlider .slide");
+
+    if (slides.length === 0) return;
+
+    if (heroSliderIntervalId) {
+        clearInterval(heroSliderIntervalId);
+    }
+
+    let index = 0;
+
+    heroSliderIntervalId = setInterval(() => {
+        slides[index].classList.remove("active");
+        index = (index + 1) % slides.length;
+        slides[index].classList.add("active");
+    }, 3500);
+}

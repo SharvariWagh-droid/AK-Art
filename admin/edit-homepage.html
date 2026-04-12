@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Homepage — Admin Panel</title>
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="../frontend/style.css">
+</head>
+<body onload="checkAuth(); loadHomepageCMS();">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="adminSidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">A</div>
+        <div>
+          <h2>Abhilasha</h2>
+          <small>Admin Panel</small>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+        <a href="manage-art.html"><span class="nav-icon">🎨</span> Personal Art</a>
+        <a href="published-works.html"><span class="nav-icon">📚</span> Published Works</a>
+        <a href="digital-prints.html"><span class="nav-icon">🖼️</span> Digital Prints</a>
+        <a href="orders.html"><span class="nav-icon">📦</span> Orders</a>
+        <a href="testimonials.html"><span class="nav-icon">💬</span> Testimonials</a>
+        <a href="edit-homepage.html" class="active"><span class="nav-icon">🏠</span> Edit Homepage</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="#" onclick="logout()">🚪 Sign Out</a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header class="top-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+          <h1>Edit Homepage</h1>
+        </div>
+        <div class="header-right">
+          <div class="admin-profile">
+            <div class="admin-avatar">A</div>
+            <span class="admin-name">Abhilasha</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="section-header">
+          <h2>Hero Section Content</h2>
+        </div>
+
+        <div class="table-wrapper" style="padding: 30px;">
+          <form onsubmit="saveHomepageCMS(event)">
+            <div class="form-group">
+              <label>Hero Title</label>
+              <input type="text" id="hero-title" placeholder="Enter hero title" required>
+            </div>
+
+            <div class="form-group">
+              <label>Hero Subtitle</label>
+              <textarea id="hero-subtitle" placeholder="Enter hero subtitle" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Hero Slider Images (5 slots)</label>
+              <div id="heroUploadGrid" class="hero-upload-grid"></div>
+            </div>
+
+            <div class="modal-actions" style="justify-content: flex-start; margin-top: 40px;">
+              <button type="submit" class="btn btn-primary" style="padding: 12px 40px;">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

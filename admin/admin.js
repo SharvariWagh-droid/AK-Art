@@ -97,6 +97,7 @@ var container =
 if (!container) return;
 
   container.innerHTML = artworks.map(a => {
+    console.log("IMAGE URL:", a.image);
     const safeTitle = a.title ? a.title.replace(/'/g, "\\'") : "";
     const safeDesc = a.description ? a.description.replace(/'/g, "\\'") : "";
     return `
@@ -840,3 +841,153 @@ window.deleteAgency = deleteAgency;
 window.openAddTestimonialModal = openAddTestimonialModal;
 window.editTestimonial = editTestimonial;
 window.handleTestimonialSubmit = handleTestimonialSubmit;
+
+// ==============================
+// 🏠 HOMEPAGE CMS
+// ==============================
+// ==============================
+// 🏠 HOMEPAGE CMS (5-BOX GRID)
+// ==============================
+let selectedFiles = [null, null, null, null, null];
+
+function initHeroGrid() {
+  const grid = document.getElementById("heroUploadGrid");
+  if (!grid) return;
+
+  const UPLOAD_BASE = "http://localhost:5000/uploads/";
+
+  grid.innerHTML = "";
+  for (let i = 0; i < 5; i++) {
+    const box = document.createElement("div");
+    box.className = "upload-box";
+    box.dataset.index = i;
+
+    // Build box content
+    let previewHTML = `<div class="placeholder">📷</div>`;
+    
+    if (selectedFiles[i]) {
+      let src = "";
+      if (typeof selectedFiles[i] === "string") {
+        // Existing image from server
+        src = UPLOAD_BASE + selectedFiles[i];
+      } else {
+        // New file selected locally
+        src = URL.createObjectURL(selectedFiles[i]);
+      }
+      previewHTML = `<img src="${src}" />`;
+    }
+
+    box.innerHTML = `
+      ${selectedFiles[i] ? `<button type="button" class="remove-btn" onclick="removeHeroFile(${i})">×</button>` : ""}
+      <div class="box-preview">${previewHTML}</div>
+      <input type="file" accept="image/*" onchange="handleHeroFileChange(${i}, event)">
+    `;
+    grid.appendChild(box);
+  }
+}
+
+window.handleHeroFileChange = function(index, event) {
+  const file = event.target.files[0];
+  if (file) {
+    selectedFiles[index] = file;
+    initHeroGrid();
+  }
+};
+
+window.removeHeroFile = function(index) {
+  selectedFiles[index] = null;
+  initHeroGrid();
+};
+
+async function loadHomepageCMS() {
+  try {
+    const res = await fetch("http://localhost:5000/api/homepage");
+    if (!res.ok) throw new Error("Failed to fetch homepage data");
+    const data = await res.json();
+
+    if (data) {
+      document.getElementById("hero-title").value = data.heroTitle || "";
+      document.getElementById("hero-subtitle").value = data.heroSubtitle || "";
+      
+      // ✅ POPULATE EXISTING IMAGES
+      if (data.heroImages && Array.isArray(data.heroImages)) {
+        selectedFiles = [null, null, null, null, null]; // Reset
+        data.heroImages.forEach((img, i) => {
+          if (i < 5) selectedFiles[i] = img; // Store filename string
+        });
+      }
+    }
+    initHeroGrid();
+  } catch (err) {
+    console.error("Error loading homepage CMS:", err);
+  }
+}
+
+async function saveHomepageCMS(e) {
+  e.preventDefault();
+
+  try {
+    // 1. GATHER NEW FILES vs EXISTING FILENAMES
+    const newFiles = [];
+    const indexMapping = []; // track which new file belongs to which slot
+
+    selectedFiles.forEach((item, i) => {
+      if (item && typeof item !== "string") {
+        newFiles.push(item);
+        indexMapping.push(i);
+      }
+    });
+
+    let currentFilenames = [...selectedFiles];
+
+    // 2. UPLOAD NEW FILES (If any)
+    if (newFiles.length > 0) {
+      const formData = new FormData();
+      newFiles.forEach(file => formData.append("heroImages", file));
+
+      const uploadRes = await fetch("http://localhost:5000/api/homepage/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      if (!uploadRes.ok) {
+        const errData = await uploadRes.json().catch(() => ({}));
+        throw new Error(errData.error || "Image upload failed");
+      }
+
+      const uploadData = await uploadRes.json();
+      const newSavedNames = uploadData.files || [];
+
+      // Update the mapping with the real filenames from the server
+      newSavedNames.forEach((name, i) => {
+        const targetIndex = indexMapping[i];
+        currentFilenames[targetIndex] = name;
+      });
+    }
+
+    // 3. DO FINAL UPDATE (TEXT + ALL FILENAMES)
+    // Filter out nulls to get the clean array
+    const finalHeroImages = currentFilenames.filter(f => f !== null);
+
+    const updateRes = await fetch("http://localhost:5000/api/homepage", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        heroTitle: document.getElementById("hero-title").value,
+        heroSubtitle: document.getElementById("hero-subtitle").value,
+        heroImages: finalHeroImages
+      })
+    });
+
+    if (!updateRes.ok) throw new Error("Database update failed");
+
+    alert("Homepage changes saved successfully! 🚀");
+    loadHomepageCMS(); // Reload to refresh state
+  } catch (err) {
+    console.error("[Homepage CMS] Save error:", err);
+    alert(err.message || "Network error during save");
+  }
+}
+
+window.loadHomepageCMS = loadHomepageCMS;
+window.saveHomepageCMS = saveHomepageCMS;
