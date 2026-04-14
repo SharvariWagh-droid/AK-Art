@@ -7,7 +7,7 @@
     <title>Abhilasha Khatri | Portfolio </title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Roboto:wght@300;400;500;700&family=Montserrat:wght@300;400;500;700&family=Open+Sans:wght@300;400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 
 </head>
 
@@ -19,7 +19,7 @@
         <nav class="navbar">
             <ul>
                 <li><a href="index.html">Home</a></li>
-                <li><a href="explore.html">Explore</a></li>
+                <li><a href="explore.html">Explore Art</a></li>
                 <li><a href="shop.html">Buy Prints</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="login.html">Login</a></li>
@@ -38,6 +38,7 @@
                 <a href="shop.html" class="btn-secondary">Buy Digital Prints</a>
             </div>
         </div>
+
         <div class="hero-image">
             <div id="heroSlider" class="hero-slider"></div>
         </div>
@@ -66,7 +67,7 @@
         <div class="image-modal" id="imageModal">
             <span class="close" onclick="closeModal()">×</span>
             <button class="prev" onclick="changeImage(-1)">❮</button>
-            <img class="modal-content" id="modalImg">
+            <img class="modal-content" id="modalImage">
             <button class="next" onclick="changeImage(1)">❯</button>
         </div>
 
@@ -77,40 +78,7 @@
             <ul id="profilePrints"></ul>
             <button class="logout-btn" onclick="logoutUser()">Logout</button>
         </div>
-        <footer class="footer">
-            <div class="footer-container">
-
-                <div class="footer-about">
-                    <h3>Abhilasha Khatri</h3>
-                    <p>
-                        Creating magical worlds and unforgettable characters
-                        for the next generation of dreamers.
-                        Let’s work together on your next project.
-                    </p>
-
-                    <div class="social-icons">
-                        <a href="https://www.behance.net/abhilashakhatri0603" target="_blank">
-                            <i class="fab fa-behance"></i>
-                        </a>
-                        <a href="https://www.instagram.com/abhilashakhatri0603/" target="_blank">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="https://www.linkedin.com/in/abhilasha-khatri-73201b7" target="_blank">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="footer-bottom">
-                <p>&copy; 2026 Abhilasha Khatri. All Rights Reserved.</p>
-                <div>
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-            </div>
-        </footer>
+    <div id="footer"></div>
         <script src="script.js"></script>
 </body>
 

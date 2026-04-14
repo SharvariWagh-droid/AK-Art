@@ -97,7 +97,6 @@ var container =
 if (!container) return;
 
   container.innerHTML = artworks.map(a => {
-    console.log("IMAGE URL:", a.image);
     const safeTitle = a.title ? a.title.replace(/'/g, "\\'") : "";
     const safeDesc = a.description ? a.description.replace(/'/g, "\\'") : "";
     return `
@@ -909,6 +908,40 @@ async function loadHomepageCMS() {
       document.getElementById("hero-title").value = data.heroTitle || "";
       document.getElementById("hero-subtitle").value = data.heroSubtitle || "";
       
+      // ✅ POPULATE COLORS
+      const palette = data.heroColorPalette || "custom";
+      const radios = document.getElementsByName("palette");
+      radios.forEach(r => {
+        r.checked = (r.value === palette);
+      });
+
+      document.getElementById("heroTitleColor").value = data.heroTitleColor || "#1a1a1a";
+      document.getElementById("heroSubtitleColor").value = data.heroSubtitleColor || "#555555";
+      
+      // ✅ POPULATE TEXT STYLING
+      document.getElementById("heroTitleSize").value = data.heroTitleSize || "48px";
+      document.getElementById("heroSubtitleSize").value = data.heroSubtitleSize || "16px";
+      document.getElementById("heroTitleFont").value = data.heroTitleFont || "Poppins";
+      document.getElementById("heroSubtitleFont").value = data.heroSubtitleFont || "Poppins";
+      
+      // ✅ POPULATE FOOTER
+      document.getElementById("footerTitle").value = data.footerTitle != null ? data.footerTitle : "";
+      document.getElementById("footerDescription").value = data.footerDescription != null ? data.footerDescription : "";
+      document.getElementById("footerTextColor").value = data.footerTextColor != null ? data.footerTextColor : "#333333";
+      document.getElementById("footerFontSize").value = data.footerFontSize != null ? data.footerFontSize : "";
+      document.getElementById("footerFontFamily").value = data.footerFontFamily != null ? data.footerFontFamily : "Poppins";
+
+      // SHOW/HIDE CUSTOM PICKERS
+      const customSection = document.getElementById("customColorSelectors");
+      customSection.style.display = palette === "custom" ? "flex" : "none";
+
+      // ADD CHANGE LISTENERS
+      radios.forEach(r => {
+        r.onchange = (e) => {
+          customSection.style.display = e.target.value === "custom" ? "flex" : "none";
+        };
+      });
+      
       // ✅ POPULATE EXISTING IMAGES
       if (data.heroImages && Array.isArray(data.heroImages)) {
         selectedFiles = [null, null, null, null, null]; // Reset
@@ -969,14 +1002,28 @@ async function saveHomepageCMS(e) {
     // Filter out nulls to get the clean array
     const finalHeroImages = currentFilenames.filter(f => f !== null);
 
+    const updateData = {
+        heroTitle: document.getElementById("hero-title").value,
+        heroSubtitle: document.getElementById("hero-subtitle").value,
+        heroImages: finalHeroImages,
+        heroColorPalette: document.querySelector('input[name="palette"]:checked')?.value || "custom",
+        heroTitleColor: document.getElementById("heroTitleColor").value,
+        heroSubtitleColor: document.getElementById("heroSubtitleColor").value,
+        heroTitleSize: document.getElementById("heroTitleSize").value,
+        heroSubtitleSize: document.getElementById("heroSubtitleSize").value,
+        heroTitleFont: document.getElementById("heroTitleFont").value,
+        heroSubtitleFont: document.getElementById("heroSubtitleFont").value,
+        footerTitle: document.getElementById("footerTitle").value,
+        footerDescription: document.getElementById("footerDescription").value,
+        footerTextColor: document.getElementById("footerTextColor").value,
+        footerFontSize: document.getElementById("footerFontSize").value,
+        footerFontFamily: document.getElementById("footerFontFamily").value
+    };
+
     const updateRes = await fetch("http://localhost:5000/api/homepage", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        heroTitle: document.getElementById("hero-title").value,
-        heroSubtitle: document.getElementById("hero-subtitle").value,
-        heroImages: finalHeroImages
-      })
+      body: JSON.stringify(updateData)
     });
 
     if (!updateRes.ok) throw new Error("Database update failed");

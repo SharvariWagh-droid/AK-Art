@@ -1,6 +1,7 @@
 // ==============================
 // 🚀 INIT
 // ==============================
+const HOMEPAGE_API = "http://localhost:5000/api/homepage";
 document.addEventListener("DOMContentLoaded", () => {
     setupAuth();
     loadGalleryFromDB();
@@ -30,9 +31,67 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    loadHeroFromBackend();
-});
-function setupProfilePanel() {
+    loadHomepageData(); // 🔥 GLOBAL FOOTER & HERO
+ });
+ 
+ async function loadHomepageData() {
+    try {
+        const res = await fetch(HOMEPAGE_API);
+        const data = await res.json();
+ 
+        renderFooter(data);
+ 
+        // Only call hero if elements exist
+        if (document.getElementById("heroSlider")) {
+            loadHeroContent(data);
+        }
+    } catch (err) {
+        console.error("Homepage load error:", err);
+        // Render footer anyway with default data if API fails
+        renderFooter({});
+    }
+ }
+ 
+ function renderFooter(data) {
+    console.log("FOOTER DATA:", data);
+    const footer = document.getElementById("footer");
+    if (!footer) return;
+ 
+    footer.innerHTML = `
+        <div class="global-footer" id="globalFooterContainer">
+            <h2 id="footerTitle">${data.footerTitle != null ? data.footerTitle : "Abhilasha Khatri"}</h2>
+            <p id="footerDesc">${data.footerDescription != null ? data.footerDescription : "Creating magical worlds and unforgettable characters for the next generation of dreamers. Let’s work together on your next project."}</p>
+            
+            <div class="social-icons">
+                <a href="https://www.behance.net/abhilashakhatri0603" target="_blank"><i class="fab fa-behance"></i></a>
+                <a href="https://www.instagram.com/abhilashakhatri0603/" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.linkedin.com/in/abhilasha-khatri-73201b7" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+
+            <p class="copyright">
+                © 2026 Abhilasha Khatri. All Rights Reserved.
+            </p>
+        </div>
+    `;
+ 
+    const container = document.getElementById("globalFooterContainer");
+    if (container) {
+        // ✅ CONDITIONAL STYLE APPLICATION
+        if (data.footerTextColor) container.style.color = data.footerTextColor;
+        if (data.footerFontSize) container.style.fontSize = data.footerFontSize;
+        if (data.footerFontFamily) container.style.fontFamily = data.footerFontFamily;
+        
+        // Force inheritance for specific elements if browser defaults interfere
+        const textElements = container.querySelectorAll("h2, p, a");
+        textElements.forEach(el => {
+            if (!el.classList.contains("fab")) { // Don't override icon fonts
+                el.style.fontFamily = "inherit";
+            }
+        });
+    }
+ }
+ 
+ function setupProfilePanel() {
     const profileIcon = document.getElementById("profileIcon");
     const profilePanel = document.getElementById("profilePanel");
 
@@ -116,6 +175,7 @@ function setupProfilePanel() {
 // 🔥 BASE API
 // ==============================
 const API = "http://localhost:5000/api/artworks";
+const BASE_URL = "http://localhost:5000/uploads/";
 
 // ==============================
 // 🎨 IMAGE HELPER (NORMALIZATION)
@@ -139,7 +199,7 @@ async function loadGalleryFromDB() {
             console.log("IMAGE URL:", a.image);
             return `
                 <div class="art-item">
-                    <img src="${getImageSrc(a.image)}" onclick="openModal(this)">
+                    <img src="${getImageSrc(a.image)}" onclick="openModal(this.src)">
                     <h3>${a.title}</h3>
                 </div>
             `;
@@ -165,7 +225,7 @@ async function loadBooks() {
             console.log("IMAGE URL:", b.image);
             return `
                 <div class="art-item">
-                    <img src="${getImageSrc(b.image)}" onclick="openModal(this)">
+                    <img src="${getImageSrc(b.image)}" onclick="openModal(this.src)">
                     <h3>${b.title}</h3>
                     <p>${b.description || ""}</p>
                 </div>
@@ -526,12 +586,22 @@ document.querySelectorAll(".format-btn").forEach(btn => {
 // ==============================
 // 🖼 MODAL FIX (IMPORTANT)
 // ==============================
-function openModal(img) {
+function openModal(image) {
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("modalImage");
 
+    console.log("OPENING MODAL WITH:", image);
+
+    // FIX: ensure correct full URL
+    if (image.startsWith("http")) {
+        modalImg.src = image;
+    } else {
+        modalImg.src = BASE_URL + image;
+    }
+
     if (modal) modal.style.display = "flex";
-    if (modalImg) modalImg.src = img.src;
+    console.log("MODAL IMAGE:", modalImg.src);
+
 }
 // close modal
 document.querySelector(".close")?.addEventListener("click", closeModal);
@@ -571,7 +641,7 @@ window.downloadArt = downloadArt;
 
 let heroSliderIntervalId = null;
 
-async function loadHeroFromBackend() {
+async function loadHeroContent(data) {
     const slider = document.getElementById("heroSlider");
     const titleEl = document.getElementById("heroTitle");
     const subEl = document.getElementById("heroSubtitle");
@@ -579,14 +649,41 @@ async function loadHeroFromBackend() {
     if (!slider) return;
 
     try {
-        const res = await fetch("http://localhost:5000/api/homepage");
-        const data = await res.json();
-
         console.log("HERO DATA:", data);
 
         // ✅ TEXT
+        // ✅ COLORS & PALETTES
+        const palettes = {
+            pastel: { title: "#2d2d2d", subtitle: "#777777" },
+            earth: { title: "#3e2f1c", subtitle: "#7a5c3e" },
+            dark: { title: "#ffffff", subtitle: "#cccccc" },
+            playful: { title: "#ff4d6d", subtitle: "#6a4c93" }
+        };
+
+        console.log("COLOR DATA:", data);
+
+        if (data.heroColorPalette && data.heroColorPalette !== "custom") {
+            const p = palettes[data.heroColorPalette];
+            if (titleEl && p) titleEl.style.color = p.title;
+            if (subEl && p) subEl.style.color = p.subtitle;
+        } else {
+            if (titleEl) titleEl.style.color = data.heroTitleColor || "#1a1a1a";
+            if (subEl) subEl.style.color = data.heroSubtitleColor || "#555555";
+        }
+
+        // ✅ TEXT CONTENT
         if (titleEl) titleEl.innerText = data.heroTitle || "";
         if (subEl) subEl.innerText = data.heroSubtitle || "";
+
+        // ✅ APPLY TEXT STYLING (NEW)
+        if (titleEl) {
+            titleEl.style.fontSize = data.heroTitleSize || "48px";
+            titleEl.style.fontFamily = data.heroTitleFont || "Poppins";
+        }
+        if (subEl) {
+            subEl.style.fontSize = data.heroSubtitleSize || "16px";
+            subEl.style.fontFamily = data.heroSubtitleFont || "Poppins";
+        }
 
         // ✅ RESET SLIDER
         slider.innerHTML = "";

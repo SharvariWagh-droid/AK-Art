@@ -69,6 +69,110 @@
               <div id="heroUploadGrid" class="hero-upload-grid"></div>
             </div>
 
+            <div class="form-group" style="margin-top: 30px;">
+              <label>Color Settings</label>
+              <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                  <input type="radio" name="palette" value="pastel"> Soft Pastel
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                  <input type="radio" name="palette" value="earth"> Warm Earth
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                  <input type="radio" name="palette" value="dark"> Elegant Dark
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                  <input type="radio" name="palette" value="playful"> Playful Kids
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                  <input type="radio" name="palette" value="custom" checked> Custom
+                </label>
+              </div>
+
+              <!-- Custom Colors (Visible only when 'custom' is selected) -->
+              <div id="customColorSelectors" style="display: flex; gap: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <label style="font-size: 13px;">Title Color</label>
+                  <input type="color" id="heroTitleColor" value="#1a1a1a">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <label style="font-size: 13px;">Subtitle Color</label>
+                  <input type="color" id="heroSubtitleColor" value="#555555">
+                </div>
+              </div>
+
+              <!-- Text Styling -->
+              <div id="customTextStyling" style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <label style="font-size: 13px;">Title Font Size</label>
+                  <input type="text" id="heroTitleSize" placeholder="e.g. 48px">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <label style="font-size: 13px;">Subtitle Font Size</label>
+                  <input type="text" id="heroSubtitleSize" placeholder="e.g. 16px">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <label style="font-size: 13px;">Title Font Family</label>
+                  <select id="heroTitleFont">
+                    <option value="Poppins">Poppins</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Playfair Display">Playfair Display</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Open Sans">Open Sans</option>
+                  </select>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <label style="font-size: 13px;">Subtitle Font Family</label>
+                  <select id="heroSubtitleFont">
+                    <option value="Poppins">Poppins</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Playfair Display">Playfair Display</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Open Sans">Open Sans</option>
+                  </select>
+                </div>
+                   </div>
+            </div>
+ 
+            <!-- Footer Section -->
+            <div class="form-group" style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 30px;">
+              <label style="font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; display: block;">🦶 Footer Section Content</label>
+              
+              <div class="form-group">
+                <label>Footer Title</label>
+                <input type="text" id="footerTitle" placeholder="Enter footer title">
+              </div>
+ 
+              <div class="form-group">
+                <label>Footer Description</label>
+                <textarea id="footerDescription" placeholder="Enter footer description"></textarea>
+              </div>
+ 
+              <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <label style="font-size: 13px;">Footer Text Color</label>
+                  <input type="color" id="footerTextColor" value="#333333">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <label style="font-size: 13px;">Footer Font Size</label>
+                  <input type="text" id="footerFontSize" placeholder="e.g. 16px">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <label style="font-size: 13px;">Footer Font Family</label>
+                  <select id="footerFontFamily">
+                    <option value="Poppins">Poppins</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Roboto">Roboto</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             <div class="modal-actions" style="justify-content: flex-start; margin-top: 40px;">
               <button type="submit" class="btn btn-primary" style="padding: 12px 40px;">Save Changes</button>
             </div>

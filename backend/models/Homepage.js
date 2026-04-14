@@ -11,12 +11,59 @@ const homepageSchema = new mongoose.Schema({
   },
   heroImages: {
     type: [String],
-    default: [
-      "Personal work/hero1.png",
-      "Personal work/hero2.png",
-      "Personal work/hero3.png"
-    ]
-  }
+    default: []
+  },
+  heroColorPalette: {
+    type: String,
+    default: "custom"
+  },
+  heroTitleColor: {
+    type: String,
+    default: "#1a1a1a"
+  },
+  heroSubtitleColor: {
+    type: String,
+    default: "#555555"
+  },
+  heroTitleSize: {
+    type: String,
+    default: "48px"
+  },
+  heroSubtitleSize: {
+    type: String,
+    default: "16px"
+  },
+  heroTitleFont: {
+    type: String,
+    default: "Poppins"
+  },
+  heroSubtitleFont: {
+    type: String,
+    default: "Poppins"
+  },
+  globalFont: {
+    type: String,
+    default: "Poppins"
+  },
+  theme: {
+    primaryColor: { type: String, default: "#2563eb" },
+    secondaryColor: { type: String, default: "#64748b" },
+    backgroundColor: { type: String, default: "#ffffff" },
+    textColor: { type: String, default: "#111827" },
+    headingColor: { type: String, default: "#111827" },
+    hoverColor: { type: String, default: "#1d4ed8" }
+  },
+  footerTitle: { 
+    type: String, 
+    default: "Abhilasha Khatri" 
+  },
+  footerDescription: { 
+    type: String, 
+    default: "Creating magical worlds and unforgettable characters for the next generation of dreamers. Let’s work together on your next project." 
+  },
+  footerTextColor: { type: String, default: "#333333" },
+  footerFontSize: { type: String, default: "16px" },
+  footerFontFamily: { type: String, default: "Poppins" }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Homepage", homepageSchema);
