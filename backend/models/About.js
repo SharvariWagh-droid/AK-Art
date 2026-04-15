@@ -12,10 +12,13 @@ const aboutSchema = new mongoose.Schema({
   image: {
     type: String
   },
-  publishedWorks: {
-    type: [String],
-    default: []
-  },
+  publishedWorks: [
+    {
+      title: { type: String, default: "" },
+      details: { type: String, default: "" },
+      link: { type: String, default: "" }
+    }
+  ],
   updatedAt: {
     type: Date,
     default: Date.now

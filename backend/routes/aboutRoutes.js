@@ -1,6 +1,41 @@
 const express = require("express");
 const router = express.Router();
 const About = require("../models/About");
+const AboutStyle = require("../models/AboutStyle");
+
+// --- STYLE SETTINGS (Static routes first!) ---
+
+// Get style settings
+router.get("/style", async (req, res) => {
+  try {
+    const style = await AboutStyle.findOne();
+    res.json(style || {});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Save style settings
+router.post("/style", async (req, res) => {
+  try {
+    const data = {
+      nameSize: req.body.aboutNameSize || req.body.nameSize,
+      bioSize: req.body.aboutBioSize || req.body.bioSize,
+      worksSize: req.body.aboutWorksSize || req.body.worksSize,
+      textColor: req.body.aboutTextColor || req.body.textColor,
+      palette: req.body.aboutPalette || req.body.palette
+    };
+
+    const style = await AboutStyle.findOneAndUpdate(
+      {},
+      data,
+      { new: true, upsert: true }
+    );
+    res.json(style);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Get about info
 router.get("/", async (req, res) => {

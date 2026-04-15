@@ -1,6 +1,41 @@
 const express = require("express");
 const router = express.Router();
 const Testimonial = require("../models/Testimonial");
+const TestimonialStyle = require("../models/TestimonialStyle");
+
+// --- GET STYLE SETTINGS ---
+router.get("/style", async (req, res) => {
+  try {
+    const style = await TestimonialStyle.findOne();
+    res.json(style || {});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- SAVE STYLE SETTINGS ---
+router.post("/style", async (req, res) => {
+  try {
+    const data = {
+      textSize: req.body.testimonialTextSize,
+      nameSize: req.body.testimonialNameSize,
+      textColor: req.body.testimonialTextColor,
+      palette: req.body.testimonialColorPalette
+    };
+
+    const style = await TestimonialStyle.findOneAndUpdate(
+      {},
+      data,
+      { new: true, upsert: true }
+    );
+
+    res.json(style);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- EXISTING CRUD ROUTES (DO NOT CHANGE LOGIC) ---
 
 // Fetch all testimonials
 router.get("/", async (req, res) => {

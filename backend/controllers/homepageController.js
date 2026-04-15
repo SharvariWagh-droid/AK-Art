@@ -24,6 +24,11 @@ exports.getHomepage = async (req, res) => {
     if (!data.footerTextColor) data.footerTextColor = "#333333";
     if (!data.footerFontSize) data.footerFontSize = "16px";
     if (!data.footerFontFamily) data.footerFontFamily = "Poppins";
+    if (!data.digitalPrintTitle) data.digitalPrintTitle = "Digital Prints";
+    if (!data.digitalPrintDescription) data.digitalPrintDescription = "A curated collection of premium illustrations...";
+    if (!data.digitalPrintTitleSize) data.digitalPrintTitleSize = "32px";
+    if (!data.digitalPrintDescSize) data.digitalPrintDescSize = "16px";
+    if (!data.digitalPrintTextColor) data.digitalPrintTextColor = "#000000";
 
     res.json(data);
   } catch (err) {
@@ -53,7 +58,12 @@ exports.updateHomepage = async (req, res) => {
       footerDescription,
       footerTextColor,
       footerFontSize,
-      footerFontFamily
+      footerFontFamily,
+      digitalPrintTitle,
+      digitalPrintDescription,
+      digitalPrintTitleSize,
+      digitalPrintDescSize,
+      digitalPrintTextColor
     } = req.body;
 
     const update = {};
@@ -73,6 +83,11 @@ exports.updateHomepage = async (req, res) => {
     if (footerTextColor !== undefined) update.footerTextColor = footerTextColor;
     if (footerFontSize !== undefined) update.footerFontSize = footerFontSize;
     if (footerFontFamily !== undefined) update.footerFontFamily = footerFontFamily;
+    if (digitalPrintTitle !== undefined) update.digitalPrintTitle = digitalPrintTitle;
+    if (digitalPrintDescription !== undefined) update.digitalPrintDescription = digitalPrintDescription;
+    if (digitalPrintTitleSize !== undefined) update.digitalPrintTitleSize = digitalPrintTitleSize;
+    if (digitalPrintDescSize !== undefined) update.digitalPrintDescSize = digitalPrintDescSize;
+    if (digitalPrintTextColor !== undefined) update.digitalPrintTextColor = digitalPrintTextColor;
 
     if (heroImages !== undefined) {
       const arr = Array.isArray(heroImages) ? heroImages : [heroImages];

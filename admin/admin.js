@@ -85,16 +85,16 @@ async function loadArtworks() {
 
   const res = await fetch(`http://localhost:5000/api/artworks?type=${type}`);
   let artworks = await res.json();
-  
+
   // Apply filtering on the frontend
   artworks = artworks.filter(item => item.type === type);
 
-var container =
-  document.getElementById('artworks-grid') ||
-  document.getElementById('prints-grid') ||
-  document.getElementById('published-grid');
+  var container =
+    document.getElementById('artworks-grid') ||
+    document.getElementById('prints-grid') ||
+    document.getElementById('published-grid');
 
-if (!container) return;
+  if (!container) return;
 
   container.innerHTML = artworks.map(a => {
     const safeTitle = a.title ? a.title.replace(/'/g, "\\'") : "";
@@ -191,6 +191,16 @@ async function addPrint(e) {
     return;
   }
 
+  // ✅ COLLECT ATTRIBUTES
+  const attrRows = document.querySelectorAll("#attributes-container .attr-row");
+  const attributes = Array.from(attrRows).map(row => {
+    const inputs = row.querySelectorAll("input");
+    return {
+      key: inputs[0].value,
+      value: inputs[1].value
+    };
+  }).filter(a => a.key.trim() !== "" && a.value.trim() !== "");
+
   const reader = new FileReader();
 
   reader.onload = async function (ev) {
@@ -202,6 +212,7 @@ async function addPrint(e) {
     }
 
     console.log("ADDING TYPE: print");
+    console.log("SENDING ATTRIBUTES:", attributes);
 
     try {
       const res = await fetch("http://localhost:5000/api/artworks/add", {
@@ -213,7 +224,8 @@ async function addPrint(e) {
           title: title,
           description: "₹" + price,
           image: base64Image,
-          type: "print"
+          type: "print",
+          attributes: attributes
         })
       });
 
@@ -225,6 +237,8 @@ async function addPrint(e) {
         alert("Print added 🔥");
         closeModal('add-print-modal');
         e.target.reset();
+        const container = document.getElementById("attributes-container");
+        if (container) container.innerHTML = ""; // Clear attributes
         loadArtworks();
       }
     } catch (error) {
@@ -313,7 +327,7 @@ function previewPubImage(event) {
 
   const reader = new FileReader();
 
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     preview.src = e.target.result;
     preview.style.display = "block";
   };
@@ -329,8 +343,10 @@ window.previewPubImage = previewPubImage;
 
 function initTestimonialsPage() {
   loadAbout();
+  loadAboutStyle();
   loadAgencies();
   loadTestimonials();
+  loadTestimonialStyles();
 }
 
 // --- ABOUT ---
@@ -350,26 +366,64 @@ async function loadAbout() {
         document.getElementById("about-img-preview").style.display = "none";
       }
 
-      
+
       const worksList = document.getElementById("about-works-display");
-      worksList.innerHTML = (data.publishedWorks || []).map(w => {
-        const parts = w.split("(");
-        const title = parts[0];
-        const rest = parts[1] ? "(" + parts[1] : "";
-        return `
-          <li>
-            <a href="#" class="work-link">${title.trim()}</a><br>
-            <span class="work-meta">${rest}</span>
-          </li>
-        `;
-      }).join("");
-      
+      if (worksList) {
+        worksList.innerHTML = "";
+        (data.publishedWorks || []).forEach(w => {
+          if (!w) return;
+          const li = document.createElement("li");
+          if (typeof w === "object") {
+            li.innerHTML = `
+              <a href="${w.link || '#'}" class="work-link" target="_blank">${(w.title || "").trim()}</a><br>
+              <span class="work-meta">${(w.details || "").trim()}</span>
+            `;
+          } else {
+            const parts = w.split("(");
+            const title = parts[0];
+            const rest = parts[1] ? "(" + parts[1] : "";
+            li.innerHTML = `
+              <a href="#" class="work-link">${title.trim()}</a><br>
+              <span class="work-meta">${rest}</span>
+            `;
+          }
+          worksList.appendChild(li);
+        });
+      }
+
       // Hidden data for modal
       document.getElementById("about-name").value = data.name;
       document.getElementById("about-bio").value = data.bio;
       document.getElementById("about-image-data").value = data.image || "";
-      document.getElementById("about-works").value = (data.publishedWorks || []).join(", ");
-      if(data.image) {
+      
+      // Structured Works Handling
+      const worksContainer = document.getElementById("worksContainer");
+      if (worksContainer) {
+        worksContainer.innerHTML = "";
+        (data.publishedWorks || []).forEach(w => {
+          if (!w) return;
+
+          // NEW FORMAT (OBJECT)
+          if (typeof w === "object") {
+            addWork({
+              title: w.title || "",
+              details: w.details || "",
+              link: w.link || ""
+            });
+
+          } else if (typeof w === "string") {
+            // OLD FORMAT (STRING)
+            const parts = w.split("|");
+            addWork({
+              title: parts[0]?.trim() || "",
+              details: "",
+              link: parts[1]?.trim() || ""
+            });
+          }
+        });
+      }
+
+      if (data.image) {
         document.getElementById("about-modal-preview").src = data.image;
         document.getElementById("about-modal-preview").style.display = "block";
       }
@@ -387,7 +441,7 @@ function previewAboutImage(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(ev) {
+  reader.onload = function (ev) {
     const base64 = ev.target.result;
     document.getElementById("about-image-data").value = base64;
     const preview = document.getElementById("about-modal-preview");
@@ -397,14 +451,44 @@ function previewAboutImage(e) {
   reader.readAsDataURL(file);
 }
 
+function addWork(work = {}) {
+  const container = document.getElementById("worksContainer");
+  if (!container) return;
+
+  const div = document.createElement("div");
+  div.classList.add("work-item");
+
+  div.innerHTML = `
+    <input type="text" class="work-title-input" placeholder="Title" value="${work.title ?? ''}">
+    <input type="text" class="work-details-input" placeholder="Details" value="${work.details ?? ''}">
+    <input type="text" class="work-link-input" placeholder="Link" value="${work.link ?? ''}">
+    <button type="button" class="delete-work-btn" onclick="this.parentElement.remove()">Delete</button>
+    <hr/>
+  `;
+
+  container.appendChild(div);
+}
+
 async function handleAboutSubmit(e) {
   e.preventDefault();
   const submitBtn = e.target.querySelector('button[type="submit"]');
-  
+
   const name = document.getElementById("about-name").value;
   const bio = document.getElementById("about-bio").value;
   const image = document.getElementById("about-image-data").value;
-  const publishedWorks = document.getElementById("about-works").value.split(",").map(w => w.trim()).filter(w => w !== "");
+  
+  // Collect structured works
+  const publishedWorks = [];
+  document.querySelectorAll(".work-item").forEach(item => {
+    const title = item.querySelector(".work-title-input").value.trim();
+    const details = item.querySelector(".work-details-input").value.trim();
+    const link = item.querySelector(".work-link-input").value.trim();
+    
+    // Only push if title exists
+    if (title) {
+      publishedWorks.push({ title, details, link });
+    }
+  });
 
   if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = "Saving..."; }
 
@@ -430,6 +514,49 @@ async function handleAboutSubmit(e) {
   }
 }
 
+async function loadAboutStyle() {
+  try {
+    const res = await fetch("http://localhost:5000/api/about/style");
+    const style = await res.json();
+
+    if (style) {
+      document.getElementById("aboutNameSize").value = style.nameSize || "28px";
+      document.getElementById("aboutBioSize").value = style.bioSize || "16px";
+      document.getElementById("aboutWorksSize").value = style.worksSize || "14px";
+      document.getElementById("aboutTextColor").value = style.textColor || "#333333";
+      document.getElementById("aboutPalette").value = style.palette || "custom";
+    }
+  } catch (err) {
+    console.error("Error loading about styles:", err);
+  }
+}
+
+async function saveAboutStyle() {
+  const data = {
+    nameSize: document.getElementById("aboutNameSize").value,
+    bioSize: document.getElementById("aboutBioSize").value,
+    worksSize: document.getElementById("aboutWorksSize").value,
+    textColor: document.getElementById("aboutTextColor").value,
+    palette: document.getElementById("aboutPalette").value
+  };
+
+  try {
+    const res = await fetch("http://localhost:5000/api/about/style", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+      alert("About style saved ✨");
+    } else {
+      alert("Failed to save about style");
+    }
+  } catch (err) {
+    alert("Network error");
+  }
+}
+
 // --- AGENCIES ---
 
 async function loadAgencies() {
@@ -437,7 +564,7 @@ async function loadAgencies() {
     const res = await fetch("http://localhost:5000/api/agencies");
     const data = await res.json();
     const list = document.getElementById("agencies-list");
-    if(!list) return;
+    if (!list) return;
 
     list.innerHTML = data.map(a => `
       <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
@@ -517,7 +644,7 @@ async function loadTestimonials() {
     container.innerHTML = data.map(t => {
       const safeName = t.name ? t.name.replace(/'/g, "\\'") : "";
       const safeMsg = t.message ? t.message.replace(/'/g, "\\'").replace(/\n/g, "\\n") : "";
-      
+
       return `
       <div class="testimonial-card">
         <p>"${t.message}"</p>
@@ -589,8 +716,51 @@ async function handleTestimonialSubmit(e) {
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerText = "Save Testimonial";
+      submitBtn.innerText = id ? "Update Testimonial" : "Add Testimonial";
     }
+  }
+}
+
+// --- TESTIMONIAL STYLE ---
+
+async function loadTestimonialStyles() {
+  try {
+    const res = await fetch("http://localhost:5000/api/testimonials/style");
+    const style = await res.json();
+
+    if (style) {
+      document.getElementById("testTextSize").value = style.textSize || "16px";
+      document.getElementById("testNameSize").value = style.nameSize || "14px";
+      document.getElementById("testTextColor").value = style.textColor || "#333333";
+      document.getElementById("testPalette").value = style.palette || "custom";
+    }
+  } catch (err) {
+    console.error("Error loading testimonial styles:", err);
+  }
+}
+
+async function saveTestimonialStyles() {
+  const data = {
+    testimonialTextSize: document.getElementById("testTextSize").value,
+    testimonialNameSize: document.getElementById("testNameSize").value,
+    testimonialTextColor: document.getElementById("testTextColor").value,
+    testimonialColorPalette: document.getElementById("testPalette").value
+  };
+
+  try {
+    const res = await fetch("http://localhost:5000/api/testimonials/style", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+      alert("Testimonial styles saved 🎨");
+    } else {
+      alert("Failed to save styles");
+    }
+  } catch (err) {
+    alert("Network error");
   }
 }
 
@@ -642,7 +812,7 @@ async function loadOrders() {
 async function editArtwork(id, currentTitle, currentDesc) {
   const newTitle = prompt("Enter new title:", currentTitle);
   if (newTitle === null) return; // User cancelled
-  
+
   const newDesc = prompt("Enter new description/price:", currentDesc);
   if (newDesc === null) return;
 
@@ -652,7 +822,7 @@ async function editArtwork(id, currentTitle, currentDesc) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: newTitle, description: newDesc })
     });
-    
+
     if (res.ok) {
       loadArtworks();
     } else {
@@ -671,7 +841,7 @@ async function deleteArtwork(id) {
     const res = await fetch(`http://localhost:5000/api/artworks/${id}`, {
       method: "DELETE"
     });
-    
+
     if (res.ok) {
       loadArtworks();
     } else {
@@ -690,7 +860,7 @@ async function deleteTestimonial(id) {
     const res = await fetch(`http://localhost:5000/api/testimonials/${id}`, {
       method: "DELETE"
     });
-    
+
     if (res.ok) {
       loadTestimonials();
     } else {
@@ -710,29 +880,29 @@ async function deleteTestimonial(id) {
    DYNAMIC DASHBOARD
    ======================== */
 async function loadDashboardStats() {
-    try {
-        const [artRes, ordersRes] = await Promise.all([
-            fetch('http://localhost:5000/api/artworks'),
-            fetch('http://localhost:5000/api/orders')
-        ]);
-        const artworks = await artRes.json();
-        const orders = await ordersRes.json();
+  try {
+    const [artRes, ordersRes] = await Promise.all([
+      fetch('http://localhost:5000/api/artworks'),
+      fetch('http://localhost:5000/api/orders')
+    ]);
+    const artworks = await artRes.json();
+    const orders = await ordersRes.json();
 
-        const prints = artworks.filter(a => a.type === 'print');
-        
-        const elArt = document.getElementById('dash-total-art');
-        const elPrint = document.getElementById('dash-total-prints');
-        const elOrd = document.getElementById('dash-total-orders');
-        
-        if(elArt) elArt.textContent = artworks.length;
-        if(elPrint) elPrint.textContent = prints.length;
-        if(elOrd) elOrd.textContent = orders.length;
+    const prints = artworks.filter(a => a.type === 'print');
 
-        // Recent artworks
-        const dashArtGrid = document.getElementById('dash-recent-art');
-        if (dashArtGrid) {
-            const recentArt = artworks.slice(-3).reverse(); // get last 3
-            dashArtGrid.innerHTML = recentArt.map(a => `
+    const elArt = document.getElementById('dash-total-art');
+    const elPrint = document.getElementById('dash-total-prints');
+    const elOrd = document.getElementById('dash-total-orders');
+
+    if (elArt) elArt.textContent = artworks.length;
+    if (elPrint) elPrint.textContent = prints.length;
+    if (elOrd) elOrd.textContent = orders.length;
+
+    // Recent artworks
+    const dashArtGrid = document.getElementById('dash-recent-art');
+    if (dashArtGrid) {
+      const recentArt = artworks.slice(-3).reverse(); // get last 3
+      dashArtGrid.innerHTML = recentArt.map(a => `
               <div class="art-card">
                 <div class="art-card-img" style="background:#f4f6ff; padding:10px; display:flex; justify-content:center; align-items:center;">
                   <img src="${a.image || ''}" style="max-height:150px; border-radius:8px; object-fit:contain;">
@@ -740,17 +910,17 @@ async function loadDashboardStats() {
                 <div class="art-card-body"><h3>${a.title || 'Untitled'}</h3></div>
               </div>
             `).join('');
-        }
+    }
 
-        // Recent orders
-        const dashOrdGrid = document.getElementById('dash-recent-orders');
-        if (dashOrdGrid) {
-            const recentOrd = orders.slice(-3).reverse();
-            dashOrdGrid.innerHTML = recentOrd.map(order => {
-                const statusClass = order.status === "Completed" ? "badge-success" : "badge-warning";
-                const dateStr = order.date ? new Date(order.date).toLocaleDateString() : "N/A";
-                const statusStr = order.status || "Processing";
-                return `
+    // Recent orders
+    const dashOrdGrid = document.getElementById('dash-recent-orders');
+    if (dashOrdGrid) {
+      const recentOrd = orders.slice(-3).reverse();
+      dashOrdGrid.innerHTML = recentOrd.map(order => {
+        const statusClass = order.status === "Completed" ? "badge-success" : "badge-warning";
+        const dateStr = order.date ? new Date(order.date).toLocaleDateString() : "N/A";
+        const statusStr = order.status || "Processing";
+        return `
                   <tr>
                     <td>#${order._id ? order._id.slice(-6).toUpperCase() : 'ORD'}</td>
                     <td>${order.userName}</td>
@@ -759,11 +929,11 @@ async function loadDashboardStats() {
                     <td><span class="badge ${statusClass}">${statusStr}</span></td>
                   </tr>
                 `;
-            }).join('');
-        }
-    } catch(err) {
-        console.error("Error loading dashboard", err);
+      }).join('');
     }
+  } catch (err) {
+    console.error("Error loading dashboard", err);
+  }
 }
 window.loadDashboardStats = loadDashboardStats;
 
@@ -774,7 +944,7 @@ function updateProfileImage(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(ev) {
+  reader.onload = function (ev) {
     const base64 = ev.target.result;
     localStorage.setItem('adminProfileImage', base64);
     loadProfileImage();
@@ -794,28 +964,28 @@ function loadProfileImage() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadProfileImage();
-    const headers = document.querySelectorAll('.admin-profile');
-    headers.forEach(h => {
-       const avatar = h.querySelector('.admin-avatar');
-       if(avatar) {
-           avatar.style.cursor = 'pointer';
-           avatar.title = 'Change Profile Picture';
-           avatar.onclick = () => {
-              let fileInput = document.getElementById('profile-upload-global');
-              if(!fileInput) {
-                 fileInput = document.createElement('input');
-                 fileInput.type = 'file';
-                 fileInput.id = 'profile-upload-global';
-                 fileInput.accept = 'image/*';
-                 fileInput.style.display = 'none';
-                 fileInput.onchange = updateProfileImage;
-                 document.body.appendChild(fileInput);
-              }
-              fileInput.click();
-           };
-       }
-    });
+  loadProfileImage();
+  const headers = document.querySelectorAll('.admin-profile');
+  headers.forEach(h => {
+    const avatar = h.querySelector('.admin-avatar');
+    if (avatar) {
+      avatar.style.cursor = 'pointer';
+      avatar.title = 'Change Profile Picture';
+      avatar.onclick = () => {
+        let fileInput = document.getElementById('profile-upload-global');
+        if (!fileInput) {
+          fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.id = 'profile-upload-global';
+          fileInput.accept = 'image/*';
+          fileInput.style.display = 'none';
+          fileInput.onchange = updateProfileImage;
+          document.body.appendChild(fileInput);
+        }
+        fileInput.click();
+      };
+    }
+  });
 });
 
 window.loadArtworks = loadArtworks;
@@ -829,6 +999,27 @@ window.editArtwork = editArtwork;
 window.deleteArtwork = deleteArtwork;
 window.deleteTestimonial = deleteTestimonial;
 window.togglePasswordVisibility = togglePasswordVisibility;
+window.addAttributeField = addAttributeField;
+
+function addAttributeField(key = "", value = "") {
+  const container = document.getElementById("attributes-container");
+
+  if (container.children.length >= 15) {
+    alert("Max 15 attributes allowed");
+    return;
+  }
+
+  const div = document.createElement("div");
+  div.className = "attr-row";
+
+  div.innerHTML = `
+    <input type="text" placeholder="Key" value="${key}">
+    <input type="text" placeholder="Value" value="${value}">
+    <button type="button" onclick="this.parentElement.remove()">❌</button>
+  `;
+
+  container.appendChild(div);
+}
 // New Exports
 window.initTestimonialsPage = initTestimonialsPage;
 window.openAboutModal = openAboutModal;
@@ -863,7 +1054,7 @@ function initHeroGrid() {
 
     // Build box content
     let previewHTML = `<div class="placeholder">📷</div>`;
-    
+
     if (selectedFiles[i]) {
       let src = "";
       if (typeof selectedFiles[i] === "string") {
@@ -885,7 +1076,7 @@ function initHeroGrid() {
   }
 }
 
-window.handleHeroFileChange = function(index, event) {
+window.handleHeroFileChange = function (index, event) {
   const file = event.target.files[0];
   if (file) {
     selectedFiles[index] = file;
@@ -893,7 +1084,7 @@ window.handleHeroFileChange = function(index, event) {
   }
 };
 
-window.removeHeroFile = function(index) {
+window.removeHeroFile = function (index) {
   selectedFiles[index] = null;
   initHeroGrid();
 };
@@ -907,7 +1098,7 @@ async function loadHomepageCMS() {
     if (data) {
       document.getElementById("hero-title").value = data.heroTitle || "";
       document.getElementById("hero-subtitle").value = data.heroSubtitle || "";
-      
+
       // ✅ POPULATE COLORS
       const palette = data.heroColorPalette || "custom";
       const radios = document.getElementsByName("palette");
@@ -917,19 +1108,26 @@ async function loadHomepageCMS() {
 
       document.getElementById("heroTitleColor").value = data.heroTitleColor || "#1a1a1a";
       document.getElementById("heroSubtitleColor").value = data.heroSubtitleColor || "#555555";
-      
+
       // ✅ POPULATE TEXT STYLING
       document.getElementById("heroTitleSize").value = data.heroTitleSize || "48px";
       document.getElementById("heroSubtitleSize").value = data.heroSubtitleSize || "16px";
       document.getElementById("heroTitleFont").value = data.heroTitleFont || "Poppins";
       document.getElementById("heroSubtitleFont").value = data.heroSubtitleFont || "Poppins";
-      
+
       // ✅ POPULATE FOOTER
       document.getElementById("footerTitle").value = data.footerTitle != null ? data.footerTitle : "";
       document.getElementById("footerDescription").value = data.footerDescription != null ? data.footerDescription : "";
       document.getElementById("footerTextColor").value = data.footerTextColor != null ? data.footerTextColor : "#333333";
       document.getElementById("footerFontSize").value = data.footerFontSize != null ? data.footerFontSize : "";
       document.getElementById("footerFontFamily").value = data.footerFontFamily != null ? data.footerFontFamily : "Poppins";
+
+      // ✅ POPULATE DIGITAL PRINTS
+      document.getElementById("digitalPrintTitle").value = data.digitalPrintTitle || "";
+      document.getElementById("digitalPrintDescription").value = data.digitalPrintDescription || "";
+      document.getElementById("digitalPrintTitleSize").value = data.digitalPrintTitleSize || "";
+      document.getElementById("digitalPrintDescSize").value = data.digitalPrintDescSize || "";
+      document.getElementById("digitalPrintTextColor").value = data.digitalPrintTextColor || "#000000";
 
       // SHOW/HIDE CUSTOM PICKERS
       const customSection = document.getElementById("customColorSelectors");
@@ -941,7 +1139,7 @@ async function loadHomepageCMS() {
           customSection.style.display = e.target.value === "custom" ? "flex" : "none";
         };
       });
-      
+
       // ✅ POPULATE EXISTING IMAGES
       if (data.heroImages && Array.isArray(data.heroImages)) {
         selectedFiles = [null, null, null, null, null]; // Reset
@@ -1003,21 +1201,26 @@ async function saveHomepageCMS(e) {
     const finalHeroImages = currentFilenames.filter(f => f !== null);
 
     const updateData = {
-        heroTitle: document.getElementById("hero-title").value,
-        heroSubtitle: document.getElementById("hero-subtitle").value,
-        heroImages: finalHeroImages,
-        heroColorPalette: document.querySelector('input[name="palette"]:checked')?.value || "custom",
-        heroTitleColor: document.getElementById("heroTitleColor").value,
-        heroSubtitleColor: document.getElementById("heroSubtitleColor").value,
-        heroTitleSize: document.getElementById("heroTitleSize").value,
-        heroSubtitleSize: document.getElementById("heroSubtitleSize").value,
-        heroTitleFont: document.getElementById("heroTitleFont").value,
-        heroSubtitleFont: document.getElementById("heroSubtitleFont").value,
-        footerTitle: document.getElementById("footerTitle").value,
-        footerDescription: document.getElementById("footerDescription").value,
-        footerTextColor: document.getElementById("footerTextColor").value,
-        footerFontSize: document.getElementById("footerFontSize").value,
-        footerFontFamily: document.getElementById("footerFontFamily").value
+      heroTitle: document.getElementById("hero-title").value,
+      heroSubtitle: document.getElementById("hero-subtitle").value,
+      heroImages: finalHeroImages,
+      heroColorPalette: document.querySelector('input[name="palette"]:checked')?.value || "custom",
+      heroTitleColor: document.getElementById("heroTitleColor").value,
+      heroSubtitleColor: document.getElementById("heroSubtitleColor").value,
+      heroTitleSize: document.getElementById("heroTitleSize").value,
+      heroSubtitleSize: document.getElementById("heroSubtitleSize").value,
+      heroTitleFont: document.getElementById("heroTitleFont").value,
+      heroSubtitleFont: document.getElementById("heroSubtitleFont").value,
+      footerTitle: document.getElementById("footerTitle").value,
+      footerDescription: document.getElementById("footerDescription").value,
+      footerTextColor: document.getElementById("footerTextColor").value,
+      footerFontSize: document.getElementById("footerFontSize").value,
+      footerFontFamily: document.getElementById("footerFontFamily").value,
+      digitalPrintTitle: document.getElementById("digitalPrintTitle").value,
+      digitalPrintDescription: document.getElementById("digitalPrintDescription").value,
+      digitalPrintTitleSize: document.getElementById("digitalPrintTitleSize").value,
+      digitalPrintDescSize: document.getElementById("digitalPrintDescSize").value,
+      digitalPrintTextColor: document.getElementById("digitalPrintTextColor").value
     };
 
     const updateRes = await fetch("http://localhost:5000/api/homepage", {

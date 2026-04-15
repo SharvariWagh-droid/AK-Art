@@ -104,6 +104,14 @@
                     <input type="number" id="print-price" placeholder="Enter price" required>
                 </div>
 
+                <div class="form-group">
+                    <label>Attributes (Max 15)</label>
+                    <div id="attributes-container"></div>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addAttributeField()" style="margin-top: 10px;">
+                        + Add Attribute
+                    </button>
+                </div>
+
                 <div class="modal-actions">
                     <button type="button" class="btn btn-danger" onclick="closeModal('add-print-modal')">
                         Cancel

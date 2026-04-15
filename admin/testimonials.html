@@ -86,6 +86,49 @@
           </div>
         </div>
 
+        <!-- ABOUT STYLE SETTINGS -->
+        <div class="card" style="margin-bottom:40px; padding: 25px;">
+          <h3>About Style Settings</h3>
+          <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Control the look of your biography, name, and works.</p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div class="form-group">
+              <label>Name Font Size</label>
+              <input type="text" id="aboutNameSize" placeholder="28px">
+            </div>
+
+            <div class="form-group">
+              <label>Bio Font Size</label>
+              <input type="text" id="aboutBioSize" placeholder="16px">
+            </div>
+
+            <div class="form-group">
+              <label>Works Font Size</label>
+              <input type="text" id="aboutWorksSize" placeholder="14px">
+            </div>
+
+            <div class="form-group">
+              <label>Text Color</label>
+              <input type="color" id="aboutTextColor" style="height: 45px; padding: 5px;">
+            </div>
+
+            <div class="form-group">
+              <label>Color Palette</label>
+              <select id="aboutPalette">
+                <option value="custom">Custom (Use Picker)</option>
+                <option value="pastel">Pastel</option>
+                <option value="earth">Earth</option>
+                <option value="dark">Dark</option>
+                <option value="playful">Playful</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="saveAboutStyle()" style="margin-top: 10px;">
+            Save About Style
+          </button>
+        </div>
+
         <!-- AGENCIES SECTION -->
         <div class="section-header">
           <h2>Manage Agencies</h2>
@@ -96,6 +139,44 @@
         
         <div class="card" style="margin-bottom: 40px; padding: 20px; background: white; border-radius: 12px;">
           <ul id="agencies-list" style="list-style: none; padding: 0;"></ul>
+        </div>
+
+        <!-- TESTIMONIAL STYLE SETTINGS -->
+        <div class="card" style="margin-bottom:40px; padding: 25px;">
+          <h3>Testimonial Style Settings</h3>
+          <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Control how testimonials appear on the live site.</p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div class="form-group">
+              <label>Message Font Size</label>
+              <input type="text" id="testTextSize" placeholder="16px">
+            </div>
+
+            <div class="form-group">
+              <label>Name Font Size</label>
+              <input type="text" id="testNameSize" placeholder="14px">
+            </div>
+
+            <div class="form-group">
+              <label>Text Color</label>
+              <input type="color" id="testTextColor" style="height: 45px; padding: 5px;">
+            </div>
+
+            <div class="form-group">
+              <label>Color Palette</label>
+              <select id="testPalette">
+                <option value="custom">Custom (Use Picker)</option>
+                <option value="pastel">Pastel</option>
+                <option value="earth">Earth</option>
+                <option value="dark">Dark</option>
+                <option value="playful">Playful</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="saveTestimonialStyles()" style="margin-top: 10px;">
+            Save Style Settings
+          </button>
         </div>
 
         <div class="section-header">
@@ -179,9 +260,35 @@
         </div>
 
         <div class="form-group">
-          <label for="about-works">Published Works (comma separated)</label>
-          <textarea id="about-works" rows="5" placeholder="Work Title (Year) by Author..."></textarea>
+          <label>Published Works</label>
+          <div id="worksContainer" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;"></div>
+          <button type="button" class="btn btn-secondary" onclick="addWork()" style="margin-top: 10px; width: auto;">+ Add Work</button>
         </div>
+
+        <style>
+          .work-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            position: relative;
+          }
+          .work-item input {
+            margin-bottom: 8px;
+            width: 100%;
+          }
+          .delete-work-btn {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+          }
+          .delete-work-btn:hover { background: #cc0000; }
+        </style>
 
         <div class="modal-actions">
           <button type="button" class="btn btn-danger" onclick="closeModal('about-modal')">Cancel</button>

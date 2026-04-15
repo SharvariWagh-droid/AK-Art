@@ -63,7 +63,12 @@ const homepageSchema = new mongoose.Schema({
   },
   footerTextColor: { type: String, default: "#333333" },
   footerFontSize: { type: String, default: "16px" },
-  footerFontFamily: { type: String, default: "Poppins" }
+  footerFontFamily: { type: String, default: "Poppins" },
+  digitalPrintTitle: { type: String, default: "Digital Prints" },
+  digitalPrintDescription: { type: String, default: "A curated collection of premium illustrations..." },
+  digitalPrintTitleSize: { type: String, default: "32px" },
+  digitalPrintDescSize: { type: String, default: "16px" },
+  digitalPrintTextColor: { type: String, default: "#000000" }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Homepage", homepageSchema);

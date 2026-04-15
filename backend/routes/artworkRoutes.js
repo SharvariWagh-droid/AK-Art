@@ -25,6 +25,7 @@ router.get("/", async (req, res) => {
 
 router.post("/add", async (req, res) => {
   try {
+    console.log("REQ BODY:", req.body);
     const { title, type, image } = req.body;
 
     if (!type || !image) {
@@ -54,7 +55,33 @@ router.post("/add", async (req, res) => {
       return res.status(400).json({ error: "Artwork already exists" });
     }
 
-    const art = new Artwork({ ...req.body, title: finalTitle, image: finalImageUrl });
+    let attributes = req.body.attributes;
+
+    // SAFETY PARSE
+    if (typeof attributes === "string") {
+      try {
+        attributes = JSON.parse(attributes);
+      } catch {
+        attributes = [];
+      }
+    }
+
+    // ENSURE ARRAY
+    if (!Array.isArray(attributes)) {
+      attributes = [];
+    }
+
+    console.log("FINAL ATTRIBUTES BEING SAVED:", attributes);
+
+    const art = new Artwork({
+      title: finalTitle,
+      description: req.body.description,
+      image: finalImageUrl,
+      type: req.body.type,
+      price: req.body.price || 0,
+      attributes: attributes
+    });
+    
     await art.save();
     res.json({ message: "Added" });
   } catch (err) {

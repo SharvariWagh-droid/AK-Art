@@ -6,6 +6,15 @@ const artworkSchema = new mongoose.Schema({
   image: String,
   type: String,
   price: Number,
+  attributes: {
+    type: [
+      {
+        key: String,
+        value: String
+      }
+    ],
+    default: []
+  },
   createdAt: {
     type: Date,
     default: Date.now
