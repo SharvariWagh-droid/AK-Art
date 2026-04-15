@@ -10,9 +10,13 @@ const razorpay = new Razorpay({
 router.post("/create-order", async (req, res) => {
     try {
         const { amount } = req.body;
+        if (!amount || isNaN(amount) || amount <= 0) {
+            console.log("INVALID AMOUNT RECEIVED:", amount);
+            return res.status(400).send("Invalid amount");
+        }
 
         const options = {
-            amount: amount * 100, // ✅ IMPORTANT (₹ → paise)
+            amount: Math.round(amount * 100), // ✅ Ensure integer paise
             currency: "INR",
             receipt: "receipt_" + Date.now(),
         };
@@ -21,8 +25,8 @@ router.post("/create-order", async (req, res) => {
         res.json(order);
 
     } catch (err) {
-        console.log(err);
-        res.status(500).send("Error creating order");
+        console.error("RAZORPAY ORDER ERROR:", err.message);
+        res.status(500).send("Error creating order: " + err.message);
     }
 });
 

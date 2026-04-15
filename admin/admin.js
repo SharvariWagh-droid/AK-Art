@@ -69,6 +69,19 @@ document.addEventListener('click', function (e) {
 // 🚀 ARTWORKS (DB BASED - ALL TYPES)
 // ======================================================
 
+// Global arrays to store artwork data
+var allArts = [];
+var allBooks = [];
+var allPrints = [];
+
+function openModalByIndex(index, type) {
+    let list = [];
+    if (type === "art") list = allArts;
+    else if (type === "book") list = allBooks;
+    else if (type === "print") list = allPrints;
+    openModal(list[index], index, list);
+}
+
 function getType() {
   const page = window.location.pathname.toLowerCase();
 
@@ -89,6 +102,11 @@ async function loadArtworks() {
   // Apply filtering on the frontend
   artworks = artworks.filter(item => item.type === type);
 
+  // Store in global arrays
+  if (type === "art") allArts = artworks;
+  else if (type === "book") allBooks = artworks;
+  else if (type === "print") allPrints = artworks;
+
   var container =
     document.getElementById('artworks-grid') ||
     document.getElementById('prints-grid') ||
@@ -96,18 +114,19 @@ async function loadArtworks() {
 
   if (!container) return;
 
-  container.innerHTML = artworks.map(a => {
+  container.innerHTML = artworks.map((a, index) => {
     const safeTitle = a.title ? a.title.replace(/'/g, "\\'") : "";
     const safeDesc = a.description ? a.description.replace(/'/g, "\\'") : "";
     return `
     <div class="art-card">
       <div class="art-card-img">
-        <img src="${a.image || ''}">
+        <img src="${getImageSrc(a.image)}">
       </div>
       <div class="art-card-body">
         <h3>${a.title}</h3>
         <p>${a.description || ""}</p>
         <div style="margin-top: 10px; display: flex; gap: 10px;">
+          <button class="btn btn-primary btn-sm" onclick="openModalByIndex(${index}, '${type}')">View</button>
           <button class="btn btn-primary btn-sm" onclick="editArtwork('${a._id}', '${safeTitle}', '${safeDesc}')">Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deleteArtwork('${a._id}')">Delete</button>
         </div>
@@ -360,7 +379,7 @@ async function loadAbout() {
       document.getElementById("about-name-display").innerText = data.name;
       document.getElementById("about-bio-display").innerText = data.bio;
       if (data.image) {
-        document.getElementById("about-img-preview").src = data.image;
+        document.getElementById("about-img-preview").src = getImageSrc(data.image);
         document.getElementById("about-img-preview").style.display = "block";
       } else {
         document.getElementById("about-img-preview").style.display = "none";
@@ -415,16 +434,16 @@ async function loadAbout() {
             // OLD FORMAT (STRING)
             const parts = w.split("|");
             addWork({
-              title: parts[0]?.trim() || "",
+              title: parts[0] ? parts[0].trim() : "",
               details: "",
-              link: parts[1]?.trim() || ""
+              link: parts[1] ? parts[1].trim() : ""
             });
           }
         });
       }
 
       if (data.image) {
-        document.getElementById("about-modal-preview").src = data.image;
+        document.getElementById("about-modal-preview").src = getImageSrc(data.image);
         document.getElementById("about-modal-preview").style.display = "block";
       }
     }
@@ -905,7 +924,7 @@ async function loadDashboardStats() {
       dashArtGrid.innerHTML = recentArt.map(a => `
               <div class="art-card">
                 <div class="art-card-img" style="background:#f4f6ff; padding:10px; display:flex; justify-content:center; align-items:center;">
-                  <img src="${a.image || ''}" style="max-height:150px; border-radius:8px; object-fit:contain;">
+                  <img src="${getImageSrc(a.image)}" style="max-height:150px; border-radius:8px; object-fit:contain;">
                 </div>
                 <div class="art-card-body"><h3>${a.title || 'Untitled'}</h3></div>
               </div>
@@ -999,6 +1018,7 @@ window.editArtwork = editArtwork;
 window.deleteArtwork = deleteArtwork;
 window.deleteTestimonial = deleteTestimonial;
 window.togglePasswordVisibility = togglePasswordVisibility;
+window.openModalByIndex = openModalByIndex;
 window.addAttributeField = addAttributeField;
 
 function addAttributeField(key = "", value = "") {
@@ -1204,7 +1224,7 @@ async function saveHomepageCMS(e) {
       heroTitle: document.getElementById("hero-title").value,
       heroSubtitle: document.getElementById("hero-subtitle").value,
       heroImages: finalHeroImages,
-      heroColorPalette: document.querySelector('input[name="palette"]:checked')?.value || "custom",
+      heroColorPalette: (document.querySelector('input[name="palette"]:checked') ? document.querySelector('input[name="palette"]:checked').value : "custom"),
       heroTitleColor: document.getElementById("heroTitleColor").value,
       heroSubtitleColor: document.getElementById("heroSubtitleColor").value,
       heroTitleSize: document.getElementById("heroTitleSize").value,

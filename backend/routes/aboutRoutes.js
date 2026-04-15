@@ -52,16 +52,18 @@ router.post("/", async (req, res) => {
   try {
     const { name, bio, image, publishedWorks } = req.body;
     
+    const cleanImage = (image && image.startsWith('http')) ? image.split('/').pop() : image;
+    
     let about = await About.findOne();
     if (about) {
       about.name = name;
       about.bio = bio;
-      about.image = image;
+      about.image = cleanImage;
       about.publishedWorks = publishedWorks;
       about.updatedAt = Date.now();
       await about.save();
     } else {
-      about = new About({ name, bio, image, publishedWorks });
+      about = new About({ name, bio, image: cleanImage, publishedWorks });
       await about.save();
     }
     

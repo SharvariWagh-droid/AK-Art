@@ -15,7 +15,7 @@ exports.createOrder = async (req, res) => {
       email,
       artName: artworkName || artName, // Support both names
       price,
-      image,
+      image: (image && image.startsWith('http')) ? image.split('/').pop() : image,
       paymentId,
       status: "Paid" // Default to Paid
     });

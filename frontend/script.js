@@ -5,14 +5,52 @@ const HOMEPAGE_API = "http://localhost:5000/api/homepage";
 let currentIndex = 0;
 let currentList = [];
 let currentModalType = 'print';
+var allArts = [];
+var allBooks = [];
+var allPrints = [];
+let currentPage = 1;
+const itemsPerPage = 6;
+let heroSliderIntervalId = null;
+
+// Clear any bad localStorage values on page load
+function cleanupLocalStorage() {
+    const artImage = localStorage.getItem("artImage");
+    if (artImage && (artImage.includes("localhost:7070") || artImage.includes("localhost:37857") || (!artImage.includes("localhost:5000/uploads") && !artImage.includes("via.placeholder.com")))) {
+        console.log("Cleaning up bad localStorage image values");
+        localStorage.removeItem("artImage");
+        localStorage.removeItem("artName");
+        localStorage.removeItem("artPrice");
+    }
+}
+
+// Load success page functionality
+function loadSuccessPage() {
+    // Display order details from localStorage or URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentId = urlParams.get('payment_id');
+    
+    if (paymentId) {
+        // Display payment success message
+        const successMessage = document.querySelector('.success-message');
+        if (successMessage) {
+            successMessage.innerHTML = `Payment successful! Payment ID: ${paymentId}`;
+        }
+    }
+    
+    // Clear purchase-related localStorage after successful payment
+    localStorage.removeItem("artName");
+    localStorage.removeItem("artPrice");
+    localStorage.removeItem("artImage");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+    cleanupLocalStorage();
     setupAuth();
 
-    // 🔥 SAFE EXECUTION (ONLY RUN IF GRIDS EXIST)
     if (document.getElementById("gallery-grid") || document.getElementById("home-art-grid") || document.getElementById("explore-art-grid")) {
         loadGalleryFromDB();
     }
-    
+
     if (document.getElementById("published-grid") || document.getElementById("home-book-grid") || document.getElementById("explore-book-grid")) {
         loadBooks();
     }
@@ -28,14 +66,12 @@ document.addEventListener("DOMContentLoaded", () => {
         loadSuccessPage();
     }
 
-    // 👤 Profile Icon Visibility Fix
     const isShopPage = window.location.pathname.includes("shop.html");
     const profileIcon = document.getElementById("profileIcon");
     if (profileIcon) {
         profileIcon.style.display = isShopPage ? "flex" : "none";
     }
 
-    // 👤 Initialize Avatar on Load
     const user = JSON.parse(localStorage.getItem("user"));
     if (user && user.name) {
         const avatar = document.getElementById("profileAvatar");
@@ -44,22 +80,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    loadHomepageData(); // 🔥 GLOBAL FOOTER & HERO
- });
- 
- async function loadHomepageData() {
+    loadHomepageData();
+});
+
+async function loadHomepageData() {
     try {
         const res = await fetch(HOMEPAGE_API);
         const data = await res.json();
- 
+
         renderFooter(data);
- 
-        // Only call hero if elements exist
+
         if (document.getElementById("heroSlider")) {
             loadHeroContent(data);
         }
 
-        // Only call shop header if elements exist
         const dpTitle = document.getElementById("dpTitle");
         const dpDesc = document.getElementById("dpDesc");
         if (dpTitle && dpDesc) {
@@ -74,16 +108,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     } catch (err) {
         console.error("Homepage load error:", err);
-        // Render footer anyway with default data if API fails
         renderFooter({});
     }
- }
- 
- function renderFooter(data) {
+}
+
+function renderFooter(data) {
     console.log("FOOTER DATA:", data);
     const footer = document.getElementById("footer");
     if (!footer) return;
- 
+
     footer.innerHTML = `
         <div class="global-footer" id="globalFooterContainer">
             <h2 id="footerTitle">${data.footerTitle != null ? data.footerTitle : "Abhilasha Khatri"}</h2>
@@ -100,25 +133,23 @@ document.addEventListener("DOMContentLoaded", () => {
             </p>
         </div>
     `;
- 
+
     const container = document.getElementById("globalFooterContainer");
     if (container) {
-        // ✅ CONDITIONAL STYLE APPLICATION
         if (data.footerTextColor) container.style.color = data.footerTextColor;
         if (data.footerFontSize) container.style.fontSize = data.footerFontSize;
         if (data.footerFontFamily) container.style.fontFamily = data.footerFontFamily;
-        
-        // Force inheritance for specific elements if browser defaults interfere
+
         const textElements = container.querySelectorAll("h2, p, a");
         textElements.forEach(el => {
-            if (!el.classList.contains("fab")) { // Don't override icon fonts
+            if (!el.classList.contains("fab")) {
                 el.style.fontFamily = "inherit";
             }
         });
     }
- }
- 
- function setupProfilePanel() {
+}
+
+function setupProfilePanel() {
     const profileIcon = document.getElementById("profileIcon");
     const profilePanel = document.getElementById("profilePanel");
 
@@ -134,11 +165,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Toggle panel
         profilePanel.classList.toggle("active");
 
         if (profilePanel.classList.contains("active")) {
-            // 👤 Dynamic User Data
             const greeting = document.getElementById("profileGreeting");
             const total = document.getElementById("totalPrints");
             const list = document.getElementById("profilePrints");
@@ -148,7 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (avatar) avatar.innerText = user.name.charAt(0).toUpperCase();
 
             try {
-                // 🔥 FETCH ALL ORDERS & FILTER (Support Legacy Data)
                 const response = await fetch(`http://localhost:5000/api/orders`);
                 const allOrders = await response.json();
 
@@ -197,38 +225,35 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 }
 
-
-// ==============================
-// 🔥 BASE API
-// ==============================
 const API = "http://localhost:5000/api/artworks";
-const BASE_URL = "http://localhost:5000/uploads/";
+const BACKEND_ORIGIN = "http://localhost:5000";
 
-// ==============================
-// 🎨 IMAGE HELPER (NORMALIZATION)
-// ==============================
 function getImageSrc(img) {
-    if (!img) return "";
-    if (img.startsWith("http")) return img;
+    if (!img || typeof img !== 'string') return "";
+    if (img.startsWith('data:image')) return img;
+    if (img.startsWith('https://via.placeholder.com')) return img;
 
-    // ✅ FORCE BACKEND URL ONLY (fixes Razorpay crash)
-    return "http://localhost:5000/uploads/" + img;
+    // Extract only the filename from ANY string containing a slash
+    const filename = img.split('/').pop();
+    return BACKEND_ORIGIN + "/uploads/" + filename;
 }
 
+function getRazorpayImageSrc(img) {
+    // ALWAYS return HTTPS placeholder for Razorpay to prevent mixed content errors
+    // Razorpay checkout is HTTPS and cannot load HTTP images
+    return "https://via.placeholder.com/150";
+}
 
-// ==============================
-// 🎨 ART
-// ==============================
 async function loadGalleryFromDB() {
     try {
         const res = await fetch(API + "?type=art");
         allArts = await res.json();
 
         const targets = ["home-art-grid", "explore-art-grid", "gallery-grid"];
-        
+
         targets.forEach(id => {
             const container = document.getElementById(id);
-            if (!container) return; // Safety check
+            if (!container) return;
 
             if (!allArts.length) {
                 container.innerHTML = "<p class='no-data'>No items available</p>";
@@ -237,7 +262,7 @@ async function loadGalleryFromDB() {
 
             const isPreview = id.includes("explore") || id.includes("home");
             const limit = isPreview ? 3 : allArts.length;
-            
+
             container.innerHTML = allArts.slice(0, limit).map((a, i) => {
                 const imgSrc = getImageSrc(a.image);
                 const list = allArts.slice(0, limit);
@@ -254,6 +279,7 @@ async function loadGalleryFromDB() {
         console.log("ART ERROR:", err);
     }
 }
+
 async function loadBooks() {
     try {
         const res = await fetch(API + "?type=book");
@@ -263,7 +289,7 @@ async function loadBooks() {
 
         targets.forEach(id => {
             const container = document.getElementById(id);
-            if (!container) return; // Safety check
+            if (!container) return;
 
             if (!allBooks.length) {
                 container.innerHTML = "<p class='no-data'>No items available</p>";
@@ -291,21 +317,12 @@ async function loadBooks() {
     }
 }
 
-// ==============================
-// 🖼 PRINTS
-// ==============================
-// (Arrays moved to top)
-let currentPage = 1;
-const itemsPerPage = 6;
-
 async function loadPrints() {
     try {
         const res = await fetch(API + "?type=print");
         allPrints = await res.json();
-
         displayPrints();
         setupPagination();
-
     } catch (err) {
         console.log("PRINT ERROR:", err);
     }
@@ -325,27 +342,26 @@ function displayPrints() {
             c.innerHTML = "<p class='no-data'>No items available</p>";
             return;
         }
-        
+
         c.innerHTML = items.map((p, i) => {
             const price = p.description ? parseInt(p.description.replace('₹', '')) || 0 : 0;
             const imgSrc = getImageSrc(p.image);
 
             return `
-            <div class="shop-card">
-                <img src="${imgSrc}" onclick='openModal(${JSON.stringify(p)}, ${i}, ${JSON.stringify(items)})'>
-                <h3>${p.title}</h3>
-                <p>₹${price}</p>
-                <button onclick="buyPrint('${p.title}', ${price}, '${imgSrc}')">
-                    Buy Print
-                </button>
-            </div>`;
+                <div class="shop-card">
+                    <img src="${imgSrc}" onclick='openModal(${JSON.stringify(p)}, ${i}, ${JSON.stringify(items)})'>
+                    <h3>${p.title}</h3>
+                    <p>₹${price}</p>
+                    <button onclick="buyPrint('${p.title}', ${price}, '${getImageSrc(p.image)}')">
+                         Buy Print
+                      </button>
+                    
+                </div>
+            `;
         }).join("");
     });
 }
 
-// ==============================
-// 🔢 PAGINATION
-// ==============================
 function setupPagination() {
     const pagination = document.querySelector(".pagination");
     if (!pagination) return;
@@ -363,11 +379,7 @@ function changePage(page) {
     displayPrints();
 }
 
-// ==============================
-// 💳 PAYMENT
-// ==============================
 function buyPrint(name, price, image) {
-
     if (localStorage.getItem("loggedIn") !== "true") {
         alert("Please login first!");
         window.location.href = "login.html";
@@ -376,97 +388,86 @@ function buyPrint(name, price, image) {
 
     const user = JSON.parse(localStorage.getItem("user"));
 
-    // ✅ SAVE DATA (for success page)
+    if (!name || !price) {
+        alert("Invalid product data");
+        return;
+    }
+
+    // Clear any existing bad localStorage values
+    const existingImage = localStorage.getItem("artImage");
+    if (existingImage && (existingImage.includes("localhost:7070") || existingImage.includes("localhost:37857") || !existingImage.includes("localhost:5000/uploads"))) {
+        localStorage.removeItem("artImage");
+        localStorage.removeItem("artName");
+        localStorage.removeItem("artPrice");
+    }
+
+    const cleanImage = getRazorpayImageSrc(image);
+
     localStorage.setItem("artName", name);
     localStorage.setItem("artPrice", price);
-    localStorage.setItem("artImage", image);
+   localStorage.setItem("artImage", cleanImage);
 
     fetch("http://localhost:5000/api/payment/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: price })
     })
-    .then(res => res.json())
-    .then(order => {
-
-        const options = {
-            key: "rzp_test_SWwx1VajdB2nHb",
-            amount: order.amount,
-            currency: "INR",
-            name: "AK Art",
-            description: name,
-            order_id: order.id,
-
-            // ✅ IMPORTANT: DO NOT ADD image/config blocks (they broke UI earlier)
-
-            prefill: {
-                name: user?.name || "User",
-                email: user?.email || "user@email.com",
-                contact: "9999999999"
-            },
-
-            handler: async function (response) {
-
-                try {
-                    // ✅ Save locally
-                    const existingOrders = JSON.parse(localStorage.getItem("orders")) || [];
-
-                    existingOrders.push({
-                        userId: user._id,
-                        artName: name,
-                        price: price,
-                        paymentId: response.razorpay_payment_id
-                    });
-
-                    localStorage.setItem("orders", JSON.stringify(existingOrders));
-
-                    // ✅ Save to backend
-                    await fetch("http://localhost:5000/api/orders/create", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            userId: user._id,
-                            userName: user.name,
-                            email: user.email,
-                            artName: name,
-                            price: price,
-                            image: image,
-                            paymentId: response.razorpay_payment_id,
-                            status: "Paid"
-                        })
-                    });
-
-                    window.location.href = "success.html";
-
-                } catch (err) {
-                    console.error("Order Save Error:", err);
-                    alert("Payment done but saving failed");
-                }
-            },
-
-            modal: {
-                ondismiss: function () {
-                    console.log("Payment popup closed");
-                }
-            },
-
-            theme: {
-                color: "#3b5bdb"
+        .then(async res => {
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText);
             }
-        };
-
-        const rzp = new Razorpay(options);
-        rzp.open();
-    })
-    .catch(err => {
-        console.error("Payment Error:", err);
-        alert("Payment failed. Try again.");
-    });
+            return res.json();
+        })
+        .then(order => {
+            const options = {
+                key: "rzp_test_SWwx1VajdB2nHb",
+                amount: order.amount,
+                currency: "INR",
+                name: "AK Art",
+                description: "Art Purchase",
+                order_id: order.id,
+                callback_url: "https://your-domain.com/payment-callback",
+                redirect: false,
+                prefill: {
+                    name: user?.name || "User",
+                    email: user?.email || "user@email.com",
+                    contact: "9999999999"
+                },
+                handler: async function (response) {
+                    try {
+                        await fetch("http://localhost:5000/api/orders/create", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                userId: user._id,
+                                userName: user.name,
+                                email: user.email,
+                                artName: name,
+                                price: price,
+                                image: image, // Send only filename to backend
+                                paymentId: response.razorpay_payment_id,
+                                status: "Paid"
+                            })
+                        });
+                        window.location.href = "success.html";
+                    } catch (err) {
+                        alert("Payment done but saving failed");
+                    }
+                }
+            };
+            new Razorpay(options).open();
+        })
+        .catch(err => {
+            console.error("Payment setup failed:", err);
+            alert("Payment setup failed: " + err.message);
+        });
 }
 
-// ==============================
-// 💬 TESTIMONIALS (FRONTEND)
-// ==============================
+function payNow() {
+    window.location.href = "shop.html";
+}
+
 async function loadTestimonials() {
     try {
         const res = await fetch("http://localhost:5000/api/testimonials");
@@ -475,7 +476,6 @@ async function loadTestimonials() {
         const container = document.getElementById("testimonial-grid");
         if (!container) return;
 
-        // 1. RENDER HTML FIRST
         container.innerHTML = data.map(t => `
             <div class="testimonial-card">
                 <p>"${t.message}"</p>
@@ -483,7 +483,6 @@ async function loadTestimonials() {
             </div>
         `).join("");
 
-        // 2. FETCH STYLES (SAFE FETCH)
         let style = {};
         try {
             const styleRes = await fetch("http://localhost:5000/api/testimonials/style");
@@ -493,7 +492,6 @@ async function loadTestimonials() {
             style = {};
         }
 
-        // 3. APPLY STYLES
         const palettes = {
             pastel: { text: "#444" },
             earth: { text: "#3e2f1c" },
@@ -521,7 +519,6 @@ async function loadTestimonials() {
             }
         });
 
-        // 4. APPLY TO ABOUT SECTION (FRONTEND ONLY)
         const aboutName = document.querySelector(".about-name");
         const aboutBio = document.querySelector(".about-bio");
 
@@ -547,9 +544,7 @@ async function loadTestimonials() {
         console.log("TESTIMONIAL ERROR:", err);
     }
 }
-// ==============================
-// 💬 ABOUT PAGE DYNAMIC (NEW)
-// ==============================
+
 async function loadAboutData() {
     if (!window.location.pathname.includes("about.html")) return;
 
@@ -557,7 +552,6 @@ async function loadAboutData() {
         const aboutRes = await fetch("http://localhost:5000/api/about");
         const about = await aboutRes.json();
 
-        // ✅ NEW CORRECT IDs
         const nameEl = document.getElementById("aboutName");
         const imgEl = document.getElementById("aboutImage");
         const bioEl = document.getElementById("aboutBio");
@@ -567,7 +561,7 @@ async function loadAboutData() {
 
         if (imgEl) {
             if (about.image) {
-                imgEl.src = about.image; // ✅ BASE64 DIRECT
+                imgEl.src = getImageSrc(about.image);
             } else {
                 imgEl.style.display = "none";
             }
@@ -581,15 +575,14 @@ async function loadAboutData() {
         }
 
         if (worksList && about.publishedWorks) {
-            worksList.innerHTML = ""; // Clear existing
-            
+            worksList.innerHTML = "";
+
             if (about.publishedWorks.length === 0) {
                 worksList.innerHTML = "<li>No published works yet.</li>";
             } else {
                 about.publishedWorks.forEach(work => {
                     const li = document.createElement("li");
 
-                    // HANDLE OLD STRING DATA
                     if (typeof work === "string") {
                         const parts = work.split("|");
                         const text = parts[0]?.trim() || "";
@@ -599,7 +592,6 @@ async function loadAboutData() {
                             ? `<span class="work-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${text}</a></span>`
                             : `<span class="work-title">${text}</span>`;
                     } else if (work && typeof work === "object") {
-                        // NEW STRUCTURED DATA
                         const { title, details, link } = work;
 
                         if (link) {
@@ -615,8 +607,6 @@ async function loadAboutData() {
                                 <span class="work-rest">${details || ""}</span>
                             `;
                         }
-                    } else {
-                        return; // Skip invalid
                     }
 
                     worksList.appendChild(li);
@@ -624,7 +614,6 @@ async function loadAboutData() {
             }
         }
 
-        // ✅ AGENCIES FIX
         const agencyRes = await fetch("http://localhost:5000/api/agencies");
         const agencies = await agencyRes.json();
 
@@ -636,7 +625,6 @@ async function loadAboutData() {
                 : "<li>Independent Artist</li>";
         }
 
-        // --- APPLY ABOUT STYLES (FRONTEND ONLY) ---
         try {
             const styleRes = await fetch("http://localhost:5000/api/about/style");
             const style = await styleRes.json();
@@ -652,25 +640,24 @@ async function loadAboutData() {
 
             if (nameEl) {
                 nameEl.style.fontSize = style.nameSize || "28px";
-                nameEl.style.color = (palette !== "custom") 
-                    ? palettes[palette]?.text 
+                nameEl.style.color = (palette !== "custom")
+                    ? palettes[palette]?.text
                     : (style.textColor || "#000");
             }
 
             if (bioEl) {
                 bioEl.style.fontSize = style.bioSize || "16px";
-                bioEl.style.color = (palette !== "custom") 
-                    ? palettes[palette]?.text 
+                bioEl.style.color = (palette !== "custom")
+                    ? palettes[palette]?.text
                     : (style.textColor || "#333");
             }
 
             if (worksList) {
                 worksList.style.fontSize = style.worksSize || "14px";
-                worksList.style.color = (palette !== "custom") 
-                    ? palettes[palette]?.text 
+                worksList.style.color = (palette !== "custom")
+                    ? palettes[palette]?.text
                     : (style.textColor || "#333");
-                
-                // Ensure list items inherit color
+
                 worksList.querySelectorAll("a, span, li").forEach(el => {
                     el.style.color = "inherit";
                     el.style.fontSize = "inherit";
@@ -686,11 +673,7 @@ async function loadAboutData() {
     }
 }
 
-// ==============================
-// 🔐 AUTH
-// ==============================
 function setupAuth() {
-
     const loginForm = document.getElementById("loginForm");
     const registerForm = document.getElementById("registerForm");
 
@@ -748,22 +731,33 @@ function setupAuth() {
         });
     }
 }
-// ==============================
-// 🎉 SUCCESS PAGE
-// ==============================
-function loadSuccessPage() {
-    const img = document.querySelector("#artPreview");
+
+function displayArtDetails() {
+    const img = document.querySelector("#artImage");
     const name = document.querySelector("#artName");
     const price = document.querySelector("#artPrice");
 
     const artName = localStorage.getItem("artName");
     const artPrice = localStorage.getItem("artPrice");
-    const artImage = localStorage.getItem("artImage");
+    const imageUrl = localStorage.getItem("artImage");
 
-    if (img) img.src = artImage;
+    // Defensive filter - only allow valid backend URLs or placeholder
+    if (imageUrl && (imageUrl.includes("localhost:7070") || imageUrl.includes("localhost:37857") || (!imageUrl.includes("localhost:5000/uploads") && !imageUrl.includes("via.placeholder.com")))) {
+        // Clear bad localStorage values
+        localStorage.removeItem("artImage");
+        localStorage.removeItem("artName");
+        localStorage.removeItem("artPrice");
+        if (img) img.src = "";
+        if (name) name.innerText = "";
+        if (price) price.innerText = "";
+        return;
+    }
+
+    if (img) img.src = imageUrl;
     if (name) name.innerText = artName;
     if (price) price.innerText = "₹" + artPrice;
 }
+
 function downloadArt() {
     const image = localStorage.getItem("artImage");
 
@@ -772,18 +766,23 @@ function downloadArt() {
         return;
     }
 
+    // Defensive filter - only allow valid backend URLs or placeholder
+    if (image.includes("localhost:7070") || image.includes("localhost:37857") || (!image.includes("localhost:5000/uploads") && !image.includes("via.placeholder.com"))) {
+        alert("Invalid image URL found! Clearing cache...");
+        localStorage.removeItem("artImage");
+        localStorage.removeItem("artName");
+        localStorage.removeItem("artPrice");
+        return;
+    }
+
     const filename = image.split("/").pop();
 
-    const size =
-        document.querySelector(".size-btn.active")?.dataset.size || "6x7";
-
-    const format =
-        document.querySelector(".format-btn.active")?.dataset.format || "jpg";
-
+    const size = document.querySelector(".size-btn.active")?.dataset.size || "6x7";
+    const format = document.querySelector(".format-btn.active")?.dataset.format || "jpg";
     const title = localStorage.getItem("artName") || "artwork";
 
     window.location.href =
-        `http://localhost:5000/api/orders/download/${filename}/${size}/${format}?title=${encodeURIComponent(title)}`;
+        `/api/orders/download/${filename}/${size}/${format}?title=${encodeURIComponent(title)}`;
 }
 
 function closeModal() {
@@ -798,7 +797,6 @@ function injectModalExtras() {
     const container = document.getElementById("modalContainer");
     if (!modal || !container) return;
 
-    // 1. Title Div
     if (!document.getElementById("modalTitle")) {
         const titleDiv = document.createElement("div");
         titleDiv.id = "modalTitle";
@@ -815,7 +813,6 @@ function injectModalExtras() {
         modal.appendChild(titleDiv);
     }
 
-    // 2. Navigation Buttons
     if (!document.querySelector(".modal-nav")) {
         const prevBtn = document.createElement("button");
         prevBtn.className = "modal-nav prev";
@@ -848,7 +845,7 @@ function openModal(item, index = 0, list = []) {
 
 function showImage(index) {
     if (index < 0 || index >= currentList.length) return;
-    
+
     const item = currentList[index];
     const modalImg = document.getElementById("modalImage");
     const modalDetails = document.getElementById("modalDetails");
@@ -861,12 +858,10 @@ function showImage(index) {
     modalImg.src = imgSrc;
     currentIndex = index;
 
-    // Update Title Overlay
     if (modalTitle) {
         modalTitle.innerText = (typeof item === 'object' && item.title) ? item.title : "";
     }
 
-    // Handle Shop Mode (Digital Prints)
     const isShopPage = window.location.pathname.includes("shop.html");
     const isPrint = typeof item === 'object' && item.type === 'print';
 
@@ -885,8 +880,8 @@ function showImage(index) {
             modalDetails.style.flexDirection = "column";
             modalDetails.style.width = "60%";
             modalDetails.style.padding = "30px";
-            
-            const price = item.description ? parseInt(item.description.replace('₹','')) || 0 : 0;
+
+            const price = item.description ? parseInt(item.description.replace('₹', '')) || 0 : 0;
 
             modalDetails.innerHTML = `
                 <h2 style="font-size:28px; font-weight:700; margin-bottom:12px;">${item.title || ""}</h2>
@@ -894,13 +889,13 @@ function showImage(index) {
                 <div style="font-size:16px; line-height:1.8; color:#444; margin-bottom:25px;">
                     ${Array.isArray(item.attributes) ? item.attributes.map(attr => `<p><strong>${attr.key}:</strong> ${attr.value}</p>`).join("") : ""}
                 </div>
-                <button onclick="buyPrint('${item.title}', ${price}, '${imgSrc}')" style="padding:12px 25px; background:#3b5bdb; color:white; border:none; border-radius:8px; cursor:pointer;">
+
+               <button onclick="buyPrint('${item.title}', ${price}, '${getImageSrc(item.image)}')" style="padding:12px 25px; background:#3b5bdb; color:white; border:none; border-radius:8px; cursor:pointer;">
                     Buy Print
                 </button>
             `;
         }
     } else {
-        // Standard View (Art/Books)
         if (modalContainer) {
             modalContainer.style.display = "block";
             modalContainer.style.background = "transparent";
@@ -913,7 +908,6 @@ function showImage(index) {
         if (modalDetails) modalDetails.style.display = "none";
     }
 
-    // Toggle Nav Button Visibility
     const prevBtn = document.querySelector(".modal-nav.prev");
     const nextBtn = document.querySelector(".modal-nav.next");
     if (prevBtn) prevBtn.style.display = index > 0 ? "block" : "none";
@@ -931,43 +925,36 @@ function prevImage() {
         showImage(currentIndex - 1);
     }
 }
-// close modal
-document.querySelector(".close")?.addEventListener("click", closeModal);
 
-// close on outside click
-document.getElementById("imageModal")?.addEventListener("click", (e) => {
-    if (e.target.id === "imageModal") {
-        e.target.style.display = "none";
-    }
-});
+const closeBtn = document.querySelector(".close");
+if (closeBtn) {
+    closeBtn.addEventListener("click", closeModal);
+}
+
+const modalEl = document.getElementById("imageModal");
+if (modalEl) {
+    modalEl.addEventListener("click", (e) => {
+        if (e.target.id === "imageModal") {
+            e.target.style.display = "none";
+        }
+    });
+}
 
 function logoutUser() {
-    // clear user session
     localStorage.removeItem("user");
     localStorage.removeItem("loggedIn");
-
-    // optional cleanup
     localStorage.removeItem("artName");
     localStorage.removeItem("artPrice");
     localStorage.removeItem("artImage");
-
-    // redirect
     window.location.href = "index.html";
 }
-// ==============================
-// 🌍 GLOBAL
-// ==============================
+
 window.changePage = changePage;
 window.buyPrint = buyPrint;
 window.logoutUser = logoutUser;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.downloadArt = downloadArt;
-// ==============================
-// 🎨 HOMEPAGE CMS (FINAL FIXED)
-// ==============================
-
-let heroSliderIntervalId = null;
 
 async function loadHeroContent(data) {
     const slider = document.getElementById("heroSlider");
@@ -977,18 +964,12 @@ async function loadHeroContent(data) {
     if (!slider) return;
 
     try {
-        console.log("HERO DATA:", data);
-
-        // ✅ TEXT
-        // ✅ COLORS & PALETTES
         const palettes = {
             pastel: { title: "#2d2d2d", subtitle: "#777777" },
             earth: { title: "#3e2f1c", subtitle: "#7a5c3e" },
             dark: { title: "#ffffff", subtitle: "#cccccc" },
             playful: { title: "#ff4d6d", subtitle: "#6a4c93" }
         };
-
-        console.log("COLOR DATA:", data);
 
         if (data.heroColorPalette && data.heroColorPalette !== "custom") {
             const p = palettes[data.heroColorPalette];
@@ -999,11 +980,9 @@ async function loadHeroContent(data) {
             if (subEl) subEl.style.color = data.heroSubtitleColor || "#555555";
         }
 
-        // ✅ TEXT CONTENT
         if (titleEl) titleEl.innerText = data.heroTitle || "";
         if (subEl) subEl.innerText = data.heroSubtitle || "";
 
-        // ✅ APPLY TEXT STYLING (NEW)
         if (titleEl) {
             titleEl.style.fontSize = data.heroTitleSize || "48px";
             titleEl.style.fontFamily = data.heroTitleFont || "Poppins";
@@ -1013,21 +992,14 @@ async function loadHeroContent(data) {
             subEl.style.fontFamily = data.heroSubtitleFont || "Poppins";
         }
 
-        // ✅ RESET SLIDER
         slider.innerHTML = "";
 
-        const BASE_URL = "http://localhost:5000/uploads/";
         const images = data.heroImages || [];
-
-        console.log("IMAGES:", images);
 
         if (images.length === 0) return;
 
-        // ✅ CREATE SLIDES
         images.forEach((img, index) => {
-            const fullPath = BASE_URL + img;
-
-            console.log("IMAGE PATH:", fullPath);
+            const fullPath = getImageSrc(img);
 
             slider.innerHTML += `
                 <div class="slide ${index === 0 ? "active" : ""}">
@@ -1043,9 +1015,6 @@ async function loadHeroContent(data) {
     }
 }
 
-// ==============================
-// 🎞 SLIDER
-// ==============================
 function initHeroSlider() {
     const slides = document.querySelectorAll("#heroSlider .slide");
 

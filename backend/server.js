@@ -24,6 +24,14 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+// NEW: Serve admin static files
+app.use("/admin", express.static(path.join(__dirname, "../admin")));
+
+// NEW: Explicit /frontend route to support relative paths from admin (../frontend/script.js)
+app.use("/frontend", express.static(path.join(__dirname, "../frontend")));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 

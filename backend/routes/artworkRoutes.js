@@ -32,7 +32,7 @@ router.post("/add", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields: type, image" });
     }
 
-    let finalImageUrl = image;
+    let finalImageUrl = image.startsWith('http') ? image.split('/').pop() : image;
     let finalTitle = title ? title : `Artwork ${Math.floor(Math.random() * 10000)}`;
     
     // Check if frontend sent a base64 data string
@@ -46,7 +46,7 @@ router.post("/add", async (req, res) => {
         const filePath = path.join(__dirname, "../uploads", filename);
         
         fs.writeFileSync(filePath, buffer);
-        finalImageUrl = `http://localhost:5000/uploads/${filename}`;
+        finalImageUrl = filename;
       }
     }
 
