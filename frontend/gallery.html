@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Artwork</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body onload="loadGalleryFromDB()">
     <section class="gallery-page">
         <h2>All Personal Artwork</h2>
@@ -26,7 +28,7 @@
         align-items:center;
         z-index:9999;
     ">
-    
+
         <div id="modalContainer" style="
             display:flex;
             background:#fff;
@@ -36,18 +38,18 @@
             overflow:hidden;
             position: relative;
         ">
-    
+
             <img id="modalImage" style="
                 width:100%;
                 max-height:80vh;
                 object-fit:contain;
             " />
-    
+
             <div id="modalDetails" style="
                 padding:20px;
                 width:50%;
             "></div>
-    
+
             <!-- CLOSE BUTTON -->
             <span onclick="closeModal()" style="
                 position: absolute;
@@ -59,9 +61,9 @@
                 cursor: pointer;
                 z-index: 10;
             ">&times;</span>
-    
+
         </div>
-    
+
         <button id="modalBuyBtn" style="
             display:none;
             position:absolute;
@@ -76,10 +78,11 @@
         ">
             Buy Print
         </button>
-    
+
     </div>
 
     <div id="footer"></div>
     <script src="./script.js"></script>
 </body>
+
 </html>

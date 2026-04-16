@@ -46,15 +46,19 @@
             <h2>Create Account</h2>
             <p>Join to explore and collect artwork.</p>
             <form id="registerForm">
-                <input type="text"  id="registerName" placeholder="Full Name" required>
-                <input type="email"  id="registerEmail" placeholder="Email Address" required>
+                <input type="text" id="registerName" placeholder="Full Name" required>
+                <input type="email" id="registerEmail" placeholder="Email Address" required>
                 <div style="position: relative; margin-bottom: 15px; display: flex; align-items: center;">
-                    <input type="password" id="password" placeholder="Password" required style="width: 100%; padding-right: 40px; box-sizing: border-box; margin: 0;">
-                    <i class="far fa-eye" onclick="togglePasswordVisibility('password', this)" style="position: absolute; right: 15px; font-size: 18px; color: #666; cursor: pointer; user-select: none;"></i>
+                    <input type="password" id="password" placeholder="Password" required
+                        style="width: 100%; padding-right: 40px; box-sizing: border-box; margin: 0;">
+                    <i class="far fa-eye" onclick="togglePasswordVisibility('password', this)"
+                        style="position: absolute; right: 15px; font-size: 18px; color: #666; cursor: pointer; user-select: none;"></i>
                 </div>
                 <div style="position: relative; margin-bottom: 15px; display: flex; align-items: center;">
-                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required style="width: 100%; padding-right: 40px; box-sizing: border-box; margin: 0;">
-                    <i class="far fa-eye" onclick="togglePasswordVisibility('confirmPassword', this)" style="position: absolute; right: 15px; font-size: 18px; color: #666; cursor: pointer; user-select: none;"></i>
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required
+                        style="width: 100%; padding-right: 40px; box-sizing: border-box; margin: 0;">
+                    <i class="far fa-eye" onclick="togglePasswordVisibility('confirmPassword', this)"
+                        style="position: absolute; right: 15px; font-size: 18px; color: #666; cursor: pointer; user-select: none;"></i>
                 </div>
                 <script>
                     function togglePasswordVisibility(inputId, iconElement) {
