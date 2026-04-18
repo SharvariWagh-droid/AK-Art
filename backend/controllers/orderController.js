@@ -9,6 +9,11 @@ exports.createOrder = async (req, res) => {
 
     const { userId, userName, email, artName, artworkName, price, image, paymentId, status } = req.body;
 
+    // Enhanced validation
+    if (!userId || !paymentId || (!artName && !artworkName)) {
+      return res.status(400).json({ message: "Invalid order data: Missing required fields" });
+    }
+
     const order = new Order({
       userId: userId, // Link to user
       userName,
@@ -52,6 +57,20 @@ exports.getUserOrders = async (req, res) => {
   }
 };
 
+
+// GET ORDER BY PAYMENT ID (FOR SUCCESS PAGE)
+exports.getOrderByPaymentId = async (req, res) => {
+  try {
+    const order = await Order.findOne({ paymentId: req.params.paymentId });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    res.json(order);
+  } catch (err) {
+    console.error("Fetch order error:", err);
+    res.status(500).json({ message: "Error fetching order details" });
+  }
+};
 
 // DOWNLOAD ARTWORK
 exports.downloadArtwork = async (req, res) => {

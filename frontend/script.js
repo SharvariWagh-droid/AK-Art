@@ -17,9 +17,6 @@ function cleanupLocalStorage() {
     const artImage = localStorage.getItem("artImage");
     if (artImage && (artImage.includes("localhost:7070") || artImage.includes("localhost:37857") || (!artImage.includes("localhost:5000/uploads") && !artImage.includes("via.placeholder.com")))) {
         console.log("Cleaning up bad localStorage image values");
-        localStorage.removeItem("artImage");
-        localStorage.removeItem("artName");
-        localStorage.removeItem("artPrice");
     }
 }
 
@@ -28,7 +25,6 @@ function loadSuccessPage() {
     // Display order details from localStorage or URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const paymentId = urlParams.get('payment_id');
-    
     if (paymentId) {
         // Display payment success message
         const successMessage = document.querySelector('.success-message');
@@ -36,7 +32,7 @@ function loadSuccessPage() {
             successMessage.innerHTML = `Payment successful! Payment ID: ${paymentId}`;
         }
     }
-    
+
     // Clear purchase-related localStorage after successful payment
     localStorage.removeItem("artName");
     localStorage.removeItem("artPrice");
@@ -45,6 +41,7 @@ function loadSuccessPage() {
 
 document.addEventListener("DOMContentLoaded", () => {
     cleanupLocalStorage();
+    renderHeader();
     setupAuth();
 
     if (document.getElementById("gallery-grid") || document.getElementById("home-art-grid") || document.getElementById("explore-art-grid")) {
@@ -110,6 +107,33 @@ async function loadHomepageData() {
         console.error("Homepage load error:", err);
         renderFooter({});
     }
+}
+
+function renderHeader() {
+    const headerPlaceholder = document.getElementById("header");
+    if (!headerPlaceholder) return;
+
+    headerPlaceholder.innerHTML = `
+        <header class="header">
+            <div class="logo-container">
+                <a href="index.html">
+                    <img src="Personal work/logo.gif" alt="Abhilasha Khatri Logo" class="logo">
+                </a>
+            </div>
+            <nav class="navbar">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="explore.html">Explore Art</a></li>
+                    <li><a href="shop.html">Buy Prints</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="login.html">Login</a></li>
+                </ul>
+                <div class="user-profile">
+                    <i class="fas fa-user-circle" id="profileIcon"></i>
+                </div>
+            </nav>
+        </header>
+    `;
 }
 
 function renderFooter(data) {
@@ -233,14 +257,12 @@ function getImageSrc(img) {
     if (img.startsWith('data:image')) return img;
     if (img.startsWith('https://via.placeholder.com')) return img;
 
-    // Extract only the filename from ANY string containing a slash
+
     const filename = img.split('/').pop();
     return BACKEND_ORIGIN + "/uploads/" + filename;
 }
 
 function getRazorpayImageSrc(img) {
-    // ALWAYS return HTTPS placeholder for Razorpay to prevent mixed content errors
-    // Razorpay checkout is HTTPS and cannot load HTTP images
     return "https://via.placeholder.com/150";
 }
 
@@ -401,11 +423,9 @@ function buyPrint(name, price, image) {
         localStorage.removeItem("artPrice");
     }
 
-    const cleanImage = getRazorpayImageSrc(image);
-
     localStorage.setItem("artName", name);
     localStorage.setItem("artPrice", price);
-   localStorage.setItem("artImage", cleanImage);
+    localStorage.setItem("artImage", image);
 
     fetch("http://localhost:5000/api/payment/create-order", {
         method: "POST",
@@ -421,14 +441,12 @@ function buyPrint(name, price, image) {
         })
         .then(order => {
             const options = {
-                key: "rzp_test_SWwx1VajdB2nHb",
+                key: "rzp_test_ScwfKDA2qTOJyf",
                 amount: order.amount,
                 currency: "INR",
                 name: "AK Art",
                 description: "Art Purchase",
                 order_id: order.id,
-                callback_url: "https://your-domain.com/payment-callback",
-                redirect: false,
                 prefill: {
                     name: user?.name || "User",
                     email: user?.email || "user@email.com",
@@ -450,7 +468,8 @@ function buyPrint(name, price, image) {
                                 status: "Paid"
                             })
                         });
-                        window.location.href = "success.html";
+                        
+                        window.location.href = `success.html?razorpay_payment_id=${response.razorpay_payment_id}&razorpay_order_id=${response.razorpay_order_id}&razorpay_signature=${response.razorpay_signature}`;
                     } catch (err) {
                         alert("Payment done but saving failed");
                     }
@@ -775,14 +794,14 @@ function downloadArt() {
         return;
     }
 
-    const filename = image.split("/").pop();
+    const filename = image.split("/uploads/").pop().split("?")[0];
 
     const size = document.querySelector(".size-btn.active")?.dataset.size || "6x7";
     const format = document.querySelector(".format-btn.active")?.dataset.format || "jpg";
     const title = localStorage.getItem("artName") || "artwork";
 
-    window.location.href =
-        `/api/orders/download/${filename}/${size}/${format}?title=${encodeURIComponent(title)}`;
+   window.location.href =
+       `http://localhost:5000/api/orders/download/${filename}/${size}/${format}?title=${encodeURIComponent(title)}`;
 }
 
 function closeModal() {
@@ -1032,3 +1051,33 @@ function initHeroSlider() {
         slides[index].classList.add("active");
     }, 3500);
 }
+
+function togglePasswordVisibility(inputId, iconElement) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        if (iconElement) {
+            iconElement.classList.replace("fa-eye", "fa-eye-slash");
+        }
+    } else {
+        input.type = "password";
+        if (iconElement) {
+            iconElement.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    }
+}
+// SIZE BUTTONS
+document.querySelectorAll(".size-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelectorAll(".size-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+    });
+});
+
+// FORMAT BUTTONS
+document.querySelectorAll(".format-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelectorAll(".format-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+    });
+});

@@ -10,28 +10,14 @@
 
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="icon" href="/frontend/Personal%20work/logo.gif">
+    <link rel="icon" href="./Personal work/logo.gif">
 </head>
 
 <body>
 
     <!-- HEADER -->
 
-    <header class="header">
-
-        <div class="logo-container">
-            <img src="Personal%20work/logo.gif" alt="AK Art Logo" class="logo">
-        </div>
-
-        <nav class="navbar">
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="explore.html">Explore</a></li>
-                <li><a href="shop.html">Digital Prints</a></li>
-            </ul>
-        </nav>
-
-    </header>
+    <div id="header"></div>
 
 
     <!-- SUCCESS SECTION -->
@@ -44,9 +30,10 @@
 
             <h1>Payment Successful</h1>
 
-            <p class="success-message">
+            <p class="success-message" id="paymentStatus">
                 Thank you for purchasing from AK Art. Your digital artwork is ready to download.
             </p>
+            <p id="verificationStatus" style="font-weight: 600; margin-top: 10px;"></p>
 
 
             <div class="order-details">
@@ -98,6 +85,95 @@
 
     <div id="footer"></div>
     <script src="./script.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+
+            const params = new URLSearchParams(window.location.search);
+
+            const paymentId = params.get("razorpay_payment_id");
+            const orderId = params.get("razorpay_order_id");
+            const signature = params.get("razorpay_signature");
+
+            console.log("Payment ID:", paymentId);
+            console.log("Order ID:", orderId);
+            console.log("Signature:", signature);
+
+            const statusEl = document.getElementById("verificationStatus");
+
+            // ❌ Invalid session
+            if (!paymentId || !orderId || !signature) {
+                if (statusEl) {
+                    statusEl.innerHTML = "<span style='color:#e74c3c;'>Invalid payment session!</span>";
+                }
+                return;
+            }
+
+            try {
+                // ✅ VERIFY PAYMENT 
+                const response = await fetch("http://localhost:5000/api/payment/verify", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        razorpay_order_id: orderId,
+                        razorpay_payment_id: paymentId,
+                        razorpay_signature: signature
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+
+                    if (statusEl) {
+                        statusEl.innerHTML = "<span style='color:#27ae60;'>✔ Payment Verified</span>";
+                    }
+
+                    // ✅ FETCH ORDER DETAILS (FIXED)
+                    try {
+                        const orderRes = await fetch("http://localhost:5000/api/orders/payment/" + paymentId);
+                        const result = await orderRes.json();
+
+                        if (result) {
+
+                            const order = result;
+
+                            const artPreview = document.getElementById("artPreview");
+                            const artName = document.getElementById("artName");
+                            const artPrice = document.getElementById("artPrice");
+
+                            const fullImageUrl = "http://localhost:5000/uploads/" + order.image;
+
+                            if (artPreview) artPreview.src = fullImageUrl;
+                            if (artName) artName.innerText = order.artName;
+                            if (artPrice) artPrice.innerText = "₹" + order.price;
+
+                            localStorage.setItem("artImage", fullImageUrl);
+                            localStorage.setItem("artName", order.artName);
+                            localStorage.setItem("artPrice", order.price);
+
+                        } else {
+                            alert("No artwork found!");
+                        }
+                    } catch (orderErr) {
+                        console.error("Error loading order details:", orderErr);
+                    }
+
+                } else {
+                    if (statusEl) {
+                        statusEl.innerHTML = "<span style='color:#e74c3c;'>✖ Verification Failed</span>";
+                    }
+                    alert("Payment verification failed!");
+                }
+
+            } catch (err) {
+                console.error("Verification error:", err);
+                if (statusEl) {
+                    statusEl.innerHTML = "<span style='color:#e74c3c;'>Error verifying payment.</span>";
+                }
+            }
+
+        });
+    </script>
 </body>
 
 </html>
