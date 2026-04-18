@@ -77,10 +77,10 @@ exports.forgotPassword = async (req, res) => {
 
     console.log("-----------------------");
     console.log("PASSWORD RESET LINK:");
-    console.log(`http://localhost:5000/reset-password.html?token=${token}`);
+    console.log(`http://127.0.0.1:3000/frontend/reset-password.html?token=${token}`);
     console.log("-----------------------");
 
-    res.json({ success: true, message: "Reset link sent" });
+    res.json({ success: true, message: "Reset link sent", token: token });
 
   } catch (error) {
     res.json({ message: "Server error" });

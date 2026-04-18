@@ -59,9 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadTestimonials();
     loadAboutData();
 
-    if (window.location.pathname.includes("success.html")) {
-        loadSuccessPage();
-    }
+
 
     const isShopPage = window.location.pathname.includes("shop.html");
     const profileIcon = document.getElementById("profileIcon");
@@ -78,6 +76,47 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     loadHomepageData();
+
+    // Page-specific handlers
+    const forgotPasswordForm = document.getElementById("forgotPasswordForm");
+    if (forgotPasswordForm) {
+        setupForgotPassword(forgotPasswordForm);
+    }
+
+    const resetPasswordForm = document.getElementById("resetPasswordForm");
+    if (resetPasswordForm) {
+        setupResetPassword(resetPasswordForm);
+    }
+
+    if (window.location.pathname.includes("success.html")) {
+        loadSuccessPage();
+        verifyPayment();
+    }
+
+    // Global listeners
+    document.addEventListener("click", (e) => {
+        if (e.target.classList.contains("logout-btn")) {
+            logoutUser();
+        }
+        if (e.target.classList.contains("modal-close-btn")) {
+            closeModal();
+        }
+        if (e.target.classList.contains("pay-btn")) {
+            payNow();
+        }
+        if (e.target.classList.contains("close-error-btn")) {
+            closeErrorModal();
+        }
+        if (e.target.classList.contains("download-btn")) {
+            downloadArt();
+        }
+        if (e.target.classList.contains("password-toggle-icon")) {
+            const input = e.target.parentElement.querySelector("input");
+            if (input) {
+                togglePasswordVisibility(input.id, e.target);
+            }
+        }
+    });
 });
 
 async function loadHomepageData() {
@@ -441,7 +480,7 @@ function buyPrint(name, price, image) {
         })
         .then(order => {
             const options = {
-                key: "rzp_test_ScwfKDA2qTOJyf",
+               key: "rzp_test_ScwfKDA2qTOJyf".trim(),
                 amount: order.amount,
                 currency: "INR",
                 name: "AK Art",
@@ -1081,3 +1120,192 @@ document.querySelectorAll(".format-btn").forEach(btn => {
         btn.classList.add("active");
     });
 });
+
+// ==============================
+// 🔐 AUTH (FORGOT/RESET)
+// ==============================
+function setupForgotPassword(form) {
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("forgotEmail").value;
+        const btn = e.target.querySelector("button");
+        
+        btn.innerText = "Sending...";
+        btn.disabled = true;
+
+        try {
+            const response = await fetch("http://localhost:5000/api/auth/forgot-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Server Error:", errorText);
+                alert("Error: " + response.status + " " + response.statusText);
+                return;
+            }
+
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const data = await response.json();
+                alert(data.message);
+                if (data.success && data.token) {
+                    window.location.href = `reset-password.html?token=${data.token}`;
+                }
+            } else {
+                const text = await response.text();
+                console.error("Non-JSON response:", text);
+                alert("Email not sent. Please check if the backend is running on port 5000.");
+            }
+
+        } catch (err) {
+            console.error("Fetch error:", err);
+            alert("Could not connect to the server. Please ensure the backend is running on port 5000.");
+        } finally {
+            btn.innerText = "Send Reset Link";
+            btn.disabled = false;
+        }
+    });
+}
+
+function setupResetPassword(form) {
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const password = document.getElementById("newPassword").value;
+        const confirm = document.getElementById("confirmPassword").value;
+        
+        if (password !== confirm) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        if (!token) {
+            alert("Invalid or missing token.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:5000/api/auth/reset-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token, password })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Server Error:", errorText);
+                alert("Error: " + response.status + " " + response.statusText);
+                return;
+            }
+
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const data = await response.json();
+                alert(data.message);
+                if (data.message.toLowerCase().includes("successful")) {
+                    window.location.href = "login.html";
+                }
+            } else {
+                const text = await response.text();
+                console.error("Non-JSON response:", text);
+                alert("Password reset failed. Please check if the backend is running on port 5000.");
+            }
+
+        } catch (err) {
+            console.error("Fetch error:", err);
+            alert("Could not connect to the server. Please ensure the backend is running on port 5000.");
+        }
+    });
+}
+
+// ==============================
+// ✅ SUCCESS PAGE VERIFICATION
+// ==============================
+async function verifyPayment() {
+    const params = new URLSearchParams(window.location.search);
+    const paymentId = params.get("razorpay_payment_id");
+    const orderId = params.get("razorpay_order_id");
+    const signature = params.get("razorpay_signature");
+
+    const statusEl = document.getElementById("verificationStatus");
+
+    if (!paymentId || !orderId || !signature) {
+        if (statusEl) {
+            statusEl.innerHTML = "<span style='color:#e74c3c;'>Invalid payment session!</span>";
+        }
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:5000/api/payment/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                razorpay_order_id: orderId,
+                razorpay_payment_id: paymentId,
+                razorpay_signature: signature
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            if (statusEl) {
+                statusEl.innerHTML = "<span style='color:#27ae60;'>✔ Payment Verified</span>";
+            }
+            fetchOrderDetails(paymentId);
+        } else {
+            if (statusEl) {
+                statusEl.innerHTML = "<span style='color:#e74c3c;'>✖ Verification Failed</span>";
+            }
+            alert("Payment verification failed!");
+        }
+    } catch (err) {
+        console.error("Verification error:", err);
+        if (statusEl) {
+            statusEl.innerHTML = "<span style='color:#e74c3c;'>Error verifying payment.</span>";
+        }
+    }
+}
+
+async function fetchOrderDetails(paymentId) {
+    try {
+        const orderRes = await fetch("http://localhost:5000/api/orders/payment/" + paymentId);
+        const result = await orderRes.json();
+
+        if (result) {
+            const order = result;
+            const artPreview = document.getElementById("artPreview");
+            const artName = document.getElementById("artName");
+            const artPrice = document.getElementById("artPrice");
+
+            const fullImageUrl = "http://localhost:5000/uploads/" + order.image;
+
+            if (artPreview) artPreview.src = fullImageUrl;
+            if (artName) artName.innerText = order.artName;
+            if (artPrice) artPrice.innerText = "₹" + order.price;
+
+            localStorage.setItem("artImage", fullImageUrl);
+            localStorage.setItem("artName", order.artName);
+            localStorage.setItem("artPrice", order.price);
+        } else {
+            alert("No artwork found!");
+        }
+    } catch (orderErr) {
+        console.error("Error loading order details:", orderErr);
+    }
+}
+
+function closeErrorModal() {
+    const errorModal = document.getElementById("errorModal");
+    if (errorModal) {
+        errorModal.style.display = "none";
+    }
+}
+
+window.closeErrorModal = closeErrorModal;

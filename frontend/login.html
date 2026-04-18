@@ -27,14 +27,13 @@
             <form id="loginForm">
                 <input type="email" id="loginEmail" placeholder="Email Address" required>
 
-                <div style="position: relative; margin-bottom: 15px; display: flex; align-items: center;">
+                <div class="password-group">
                     <input type="password" id="loginPassword" placeholder="Password" required
-                        style="width: 100%; padding-right: 40px; box-sizing: border-box; margin: 0;">
-                    <i class="far fa-eye" onclick="togglePasswordVisibility('loginPassword', this)"
-                        style="position: absolute; right: 15px; font-size: 18px; color: #666; cursor: pointer; user-select: none;"></i>
+                        class="password-input-styled">
+                    <i class="far fa-eye password-toggle-icon"></i>
                 </div>
-                <div style="text-align: right; margin-bottom: 20px;">
-                    <a href="forgot-password.html" style="font-size: 14px; color: #2d5bff; text-decoration: none;">Forgot Password?</a>
+                <div class="forgot-password-link-container">
+                    <a href="forgot-password.html" class="forgot-password-link">Forgot Password?</a>
                 </div>
 
                 <button type="submit">Login</button>
