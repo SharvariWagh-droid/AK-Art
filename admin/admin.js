@@ -1086,40 +1086,63 @@ window.handleTestimonialSubmit = handleTestimonialSubmit;
 // ==============================
 // 🏠 HOMEPAGE CMS (5-BOX GRID)
 // ==============================
-let selectedFiles = [null, null, null, null, null];
+let selectedFiles = new Array(5).fill(null);
+let currentFilenames = new Array(5).fill(null);
 
 function initHeroGrid() {
   const grid = document.getElementById("heroUploadGrid");
   if (!grid) return;
 
   const UPLOAD_BASE = "http://localhost:5000/uploads/";
-
   grid.innerHTML = "";
+
   for (let i = 0; i < 5; i++) {
     const box = document.createElement("div");
     box.className = "upload-box";
-    box.dataset.index = i;
 
-    // Build box content
-    let previewHTML = `<div class="placeholder">📷</div>`;
+    const previewContainer = document.createElement("div");
+    previewContainer.className = "box-preview";
 
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "remove-btn";
+    removeBtn.innerText = "×";
+    removeBtn.onclick = () => removeHeroFile(i);
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => handleHeroFileChange(i, e);
+
+    let hasImage = false;
+
+    // Fix preview priority: new upload takes precedence
     if (selectedFiles[i]) {
-      let src = "";
-      if (typeof selectedFiles[i] === "string") {
-        // Existing image from server
-        src = UPLOAD_BASE + selectedFiles[i];
-      } else {
-        // New file selected locally
-        src = URL.createObjectURL(selectedFiles[i]);
-      }
-      previewHTML = `<img src="${src}" />`;
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(selectedFiles[i]);
+      previewContainer.appendChild(img);
+      hasImage = true;
+    } else if (currentFilenames[i]) {
+      const img = document.createElement("img");
+      img.src = UPLOAD_BASE + currentFilenames[i];
+      // Validate file existence
+      img.onerror = () => {
+        currentFilenames[i] = null; // Clear if missing on server
+        img.remove();
+        previewContainer.innerHTML = '<div class="placeholder">📷</div>';
+        removeBtn.style.display = "none";
+      };
+      previewContainer.appendChild(img);
+      hasImage = true;
+    } else {
+      previewContainer.innerHTML = '<div class="placeholder">📷</div>';
     }
 
-    box.innerHTML = `
-      ${selectedFiles[i] ? `<button type="button" class="remove-btn" onclick="removeHeroFile(${i})">×</button>` : ""}
-      <div class="box-preview">${previewHTML}</div>
-      <input type="file" accept="image/*" onchange="handleHeroFileChange(${i}, event)">
-    `;
+    if (!hasImage) removeBtn.style.display = "none";
+
+    box.appendChild(removeBtn);
+    box.appendChild(previewContainer);
+    box.appendChild(input);
     grid.appendChild(box);
   }
 }
@@ -1134,6 +1157,7 @@ window.handleHeroFileChange = function (index, event) {
 
 window.removeHeroFile = function (index) {
   selectedFiles[index] = null;
+  currentFilenames[index] = null;
   initHeroGrid();
 };
 
@@ -1216,9 +1240,10 @@ async function loadHomepageCMS() {
 
       // ✅ POPULATE EXISTING IMAGES
       if (data.heroImages && Array.isArray(data.heroImages)) {
-        selectedFiles = [null, null, null, null, null]; // Reset
+        currentFilenames = [null, null, null, null, null];
+        selectedFiles = [null, null, null, null, null];
         data.heroImages.forEach((img, i) => {
-          if (i < 5) selectedFiles[i] = img; // Store filename string
+          if (i < 5) currentFilenames[i] = img;
         });
       }
     }
@@ -1232,47 +1257,41 @@ async function saveHomepageCMS(e) {
   e.preventDefault();
 
   try {
-    // 1. GATHER NEW FILES vs EXISTING FILENAMES
-    const newFiles = [];
-    const indexMapping = []; // track which new file belongs to which slot
+    // 1. UPLOAD NEW FILES (If any)
+    const formData = new FormData();
+    let hasNewFiles = false;
 
-    selectedFiles.forEach((item, i) => {
-      if (item && typeof item !== "string") {
-        newFiles.push(item);
-        indexMapping.push(i);
+    selectedFiles.forEach(file => {
+      if (file) {
+        formData.append("heroImages", file);
+        hasNewFiles = true;
       }
     });
 
-    let currentFilenames = [...selectedFiles];
-
-    // 2. UPLOAD NEW FILES (If any)
-    if (newFiles.length > 0) {
-      const formData = new FormData();
-      newFiles.forEach(file => formData.append("heroImages", file));
-
+    if (hasNewFiles) {
       const uploadRes = await fetch("http://localhost:5000/api/homepage/upload", {
         method: "POST",
         body: formData
       });
 
-      if (!uploadRes.ok) {
-        const errData = await uploadRes.json().catch(() => ({}));
-        throw new Error(errData.error || "Image upload failed");
-      }
+      if (!uploadRes.ok) throw new Error("Image upload failed");
 
       const uploadData = await uploadRes.json();
-      const newSavedNames = uploadData.files || [];
+      const newFiles = uploadData.filenames || [];
+      let newIndex = 0;
 
-      // Update the mapping with the real filenames from the server
-      newSavedNames.forEach((name, i) => {
-        const targetIndex = indexMapping[i];
-        currentFilenames[targetIndex] = name;
+      // Map new filenames back to correct slots
+      currentFilenames = currentFilenames.map((oldFile, index) => {
+        if (selectedFiles[index]) {
+          const newName = newFiles[newIndex++] || null;
+          selectedFiles[index] = null; // Clear pending file
+          return newName;
+        }
+        return oldFile;
       });
     }
-
-    // 3. DO FINAL UPDATE (TEXT + ALL FILENAMES)
-    // Filter out nulls to get the clean array
-    const finalHeroImages = currentFilenames.filter(f => f !== null);
+    const finalHeroImages = currentFilenames.map(img => img || null);
+    console.log("SENDING HERO IMAGES:", finalHeroImages);
 
     const heroPaletteInp = document.querySelector('input[name="palette"]:checked');
     const heroPalette = heroPaletteInp ? heroPaletteInp.value : undefined;

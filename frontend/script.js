@@ -1109,7 +1109,7 @@ async function loadHeroContent(data) {
 
         slider.innerHTML = "";
 
-        const images = data.heroImages || [];
+        const images = (data.heroImages || []).filter(img => img);
 
         if (images.length === 0) return;
 

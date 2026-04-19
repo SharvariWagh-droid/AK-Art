@@ -141,10 +141,7 @@ exports.updateHomepage = async (req, res) => {
 
     // IMAGES
     if (heroImages !== undefined) {
-      const arr = Array.isArray(heroImages) ? heroImages : [heroImages];
-      update.heroImages = arr
-        .map(img => (img && img.startsWith("http") ? img.split("/").pop() : img))
-        .filter(Boolean);
+      update.heroImages = heroImages.filter(img => img !== null);
     }
 
     let existing = await Homepage.findOne();
