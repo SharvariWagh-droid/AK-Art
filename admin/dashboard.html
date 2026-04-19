@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — Admin Panel</title>
   <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body onload="checkAuth(); loadDashboardStats();">
   <div class="admin-layout">
@@ -89,10 +90,39 @@
             </tbody>
           </table>
         </div>
+
+        <div class="section-header">
+          <h2>Admin Settings</h2>
+        </div>
+
+        <div class="form-container" style="max-width:400px; padding: 20px; background: white; border-radius: 12px; margin-top: 20px;">
+          <form onsubmit="changeCredentials(event)">
+            
+            <div class="form-group" style="margin-bottom: 15px;">
+              <label>New Username</label>
+              <input type="text" id="new-username" placeholder="Enter new username" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+              <label>New Password</label>
+              <div class="password-field">
+                <input type="password" id="new-password" placeholder="Enter new password" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                <span class="toggle-password" onclick="toggleNewPassword()">
+                  <i class="fa fa-eye"></i>
+                </span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top:10px;">
+              Update Credentials
+            </button>
+
+          </form>
+        </div>
       </div>
     </div>
   </div>
   <script src="../frontend/script.js"></script>
   <script src="admin.js"></script>
-</body>
+<div id="toastContainer"></div></body>
 </html>

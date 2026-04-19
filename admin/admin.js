@@ -1,3 +1,19 @@
+// ===== TOAST NOTIFICATIONS =====
+function showToast(message, type = "success") {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = "toast " + type;
+  toast.innerText = message;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
 // ===== SIDEBAR =====
 function toggleSidebar() {
   var sidebar = document.querySelector('.sidebar');
@@ -14,12 +30,17 @@ document.addEventListener('click', function (e) {
 
 // ===== LOGIN =====
 function togglePasswordVisibility() {
-  var passwordInput = document.getElementById('password');
-  var icon = document.getElementById('togglePasswordIcon');
+  const passwordInput = document.getElementById('password');
+  const icon = document.querySelector('.toggle-eye i');
+
   if (passwordInput.type === 'password') {
     passwordInput.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
   } else {
     passwordInput.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
   }
 }
 
@@ -29,22 +50,25 @@ function handleLogin(e) {
   var username = document.getElementById('username').value;
   var password = document.getElementById('password').value;
 
-  if (username === 'abhilasha' && password === 'admin123') {
-    sessionStorage.setItem('adminLoggedIn', 'true');
+  const savedUser = localStorage.getItem('adminUser') || 'abhilasha';
+  const savedPass = localStorage.getItem('adminPass') || 'admin123';
+
+  if (username === savedUser && password === savedPass) {
+    localStorage.setItem('adminLoggedIn', 'true');
     window.location.href = 'dashboard.html';
   } else {
-    alert('Invalid credentials');
+    showToast('Invalid credentials ❌', 'error');
   }
 }
 
 function checkAuth() {
-  if (sessionStorage.getItem('adminLoggedIn') !== 'true') {
+  if (localStorage.getItem('adminLoggedIn') !== 'true') {
     window.location.href = 'admin-login.html';
   }
 }
 
 function logout() {
-  sessionStorage.removeItem('adminLoggedIn');
+  localStorage.removeItem('adminLoggedIn');
   window.location.href = 'admin-login.html';
 }
 
@@ -149,7 +173,7 @@ async function addArt(e) {
   const submitBtn = e.target.querySelector('button[type="submit"]');
 
   if (!fileInput.files[0]) {
-    alert("Upload image 😭");
+    showToast("Upload image 😭", "warning");
     return;
   }
 
@@ -177,15 +201,15 @@ async function addArt(e) {
       });
 
       const data = await res.json();
-      if (!res.ok) alert(data.error || "Failed to add art");
+      if (!res.ok) showToast(data.error || "Failed to add art ❌", "error");
       else {
-        alert("Artwork added 🎨");
+        showToast("Artwork added 🎨", "success");
         closeModal('add-art-modal');
         e.target.reset();
         loadArtworks();
       }
     } catch (error) {
-      alert("Network error. Please try again.");
+      showToast("Network error 🌐", "error");
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -206,7 +230,7 @@ async function addPrint(e) {
   const submitBtn = e.target.querySelector('button[type="submit"]');
 
   if (!fileInput.files[0]) {
-    alert("Upload image 😭");
+    showToast("Upload image 😭", "warning");
     return;
   }
 
@@ -251,9 +275,9 @@ async function addPrint(e) {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Failed to add print");
+        showToast(data.error || "Failed to add print ❌", "error");
       } else {
-        alert("Print added 🔥");
+        showToast("Print added 🔥", "success");
         closeModal('add-print-modal');
         e.target.reset();
         const container = document.getElementById("attributes-container");
@@ -261,7 +285,7 @@ async function addPrint(e) {
         loadArtworks();
       }
     } catch (error) {
-      alert("Network error. Please try again.");
+      showToast("Network error 🌐", "error");
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -283,7 +307,7 @@ async function addPublished(e) {
   const submitBtn = e.target.querySelector('button[type="submit"]');
 
   if (!fileInput.files[0]) {
-    alert("Upload image 😭");
+    showToast("Upload image 😭", "warning");
     return;
   }
 
@@ -316,15 +340,15 @@ async function addPublished(e) {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Failed to add book");
+        showToast(data.error || "Failed to add book ❌", "error");
       } else {
-        alert("Book added 📚✨");
+        showToast("Book added 📚✨", "success");
         closeModal('add-pub-modal');
         e.target.reset();
         loadArtworks();
       }
     } catch (error) {
-      alert("Network error. Please try again.");
+      showToast("Network error 🌐", "error");
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -392,20 +416,16 @@ async function loadAbout() {
         (data.publishedWorks || []).forEach(w => {
           if (!w) return;
           const li = document.createElement("li");
+
           if (typeof w === "object") {
             li.innerHTML = `
-              <a href="${w.link || '#'}" class="work-link" target="_blank">${(w.title || "").trim()}</a><br>
-              <span class="work-meta">${(w.details || "").trim()}</span>
+              <a href="${w.link || '#'}" target="_blank">${(w.title || "").trim()}</a><br>
+              <span>${(w.details || "").trim()}</span>
             `;
           } else {
-            const parts = w.split("(");
-            const title = parts[0];
-            const rest = parts[1] ? "(" + parts[1] : "";
-            li.innerHTML = `
-              <a href="#" class="work-link">${title.trim()}</a><br>
-              <span class="work-meta">${rest}</span>
-            `;
+            li.innerHTML = `<span>${w}</span>`;
           }
+
           worksList.appendChild(li);
         });
       }
@@ -446,6 +466,7 @@ async function loadAbout() {
         document.getElementById("about-modal-preview").src = getImageSrc(data.image);
         document.getElementById("about-modal-preview").style.display = "block";
       }
+
     }
   } catch (err) {
     console.error("Error loading about data:", err);
@@ -488,6 +509,7 @@ function addWork(work = {}) {
   container.appendChild(div);
 }
 
+
 async function handleAboutSubmit(e) {
   e.preventDefault();
   const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -509,6 +531,7 @@ async function handleAboutSubmit(e) {
     }
   });
 
+
   if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = "Saving..."; }
 
   try {
@@ -519,15 +542,15 @@ async function handleAboutSubmit(e) {
     });
 
     if (res.ok) {
-      alert("About section updated! ✨");
+      showToast("About section updated! ✨", "success");
       closeModal("about-modal");
       loadAbout();
     } else {
       const data = await res.json();
-      alert(data.error || "Update failed");
+      showToast(data.error || "Update failed ❌", "error");
     }
   } catch (err) {
-    alert("Network Error");
+    showToast("Network Error 🌐", "error");
   } finally {
     if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = "Save Changes"; }
   }
@@ -567,12 +590,12 @@ async function saveAboutStyle() {
     });
 
     if (res.ok) {
-      alert("About style saved ✨");
+      showToast("About style saved ✨", "success");
     } else {
-      alert("Failed to save about style");
+      showToast("Failed to save about style ❌", "error");
     }
   } catch (err) {
-    alert("Network error");
+    showToast("Network error 🌐", "error");
   }
 }
 
@@ -582,18 +605,19 @@ async function loadAgencies() {
   try {
     const res = await fetch("http://localhost:5000/api/agencies");
     const data = await res.json();
-    const list = document.getElementById("agencies-list");
-    if (!list) return;
 
-    list.innerHTML = data.map(a => `
-      <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
-        <span>${a.name}</span>
-        <div>
-          <button class="btn btn-primary btn-sm" onclick="editAgency('${a._id}', '${a.name}')">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteAgency('${a._id}')">Delete</button>
-        </div>
-      </li>
-    `).join("");
+    const list = document.getElementById("agencies-list");
+    if (list) {
+      list.innerHTML = data.map(a => `
+        <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+          <span>${a.name}</span>
+          <div>
+            <button class="btn btn-primary btn-sm" onclick="editAgency('${a._id}', '${a.name}')">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteAgency('${a._id}')">Delete</button>
+          </div>
+        </li>
+      `).join("");
+    }
   } catch (err) {
     console.error("Error loading agencies:", err);
   }
@@ -626,17 +650,17 @@ async function handleAgencySubmit(e) {
     });
 
     if (res.ok) {
-      alert(`Agency ${id ? 'updated' : 'added'}!`);
+      showToast(`Agency ${id ? 'updated' : 'added'}! ✨`, "success");
       closeModal("add-agency-modal");
       e.target.reset();
       document.getElementById("agency-id").value = "";
       loadAgencies();
     } else {
       const data = await res.json();
-      alert(data.error || "Operation failed");
+      showToast(data.error || "Operation failed ❌", "error");
     }
   } catch (err) {
-    alert("Network Error");
+    showToast("Network Error 🌐", "error");
   } finally {
     if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = "Save Agency"; }
   }
@@ -646,8 +670,11 @@ async function deleteAgency(id) {
   if (!confirm("Remove this agency?")) return;
   try {
     const res = await fetch(`http://localhost:5000/api/agencies/${id}`, { method: "DELETE" });
-    if (res.ok) loadAgencies();
-  } catch (err) { alert("Network Error"); }
+    if (res.ok) {
+      showToast("Agency removed! 🗑️", "success");
+      loadAgencies();
+    }
+  } catch (err) { showToast("Network Error 🌐", "error"); }
 }
 
 // --- TESTIMONIALS ---
@@ -723,15 +750,15 @@ async function handleTestimonialSubmit(e) {
     });
 
     if (res.ok) {
-      alert(`Testimonial ${id ? 'updated' : 'added'} 💬✨`);
+      showToast(`Testimonial ${id ? 'updated' : 'added'} 💬✨`, "success");
       closeModal("testimonial-modal");
       loadTestimonials();
     } else {
       const data = await res.json();
-      alert(data.error || "Operation failed");
+      showToast(data.error || "Operation failed ❌", "error");
     }
   } catch (error) {
-    alert("Network Error");
+    showToast("Network Error 🌐", "error");
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
@@ -774,12 +801,12 @@ async function saveTestimonialStyles() {
     });
 
     if (res.ok) {
-      alert("Testimonial styles saved 🎨");
+      showToast("Testimonial styles saved 🎨", "success");
     } else {
-      alert("Failed to save styles");
+      showToast("Failed to save styles ❌", "error");
     }
   } catch (err) {
-    alert("Network error");
+    showToast("Network error 🌐", "error");
   }
 }
 
@@ -843,13 +870,14 @@ async function editArtwork(id, currentTitle, currentDesc) {
     });
 
     if (res.ok) {
+      showToast("Artwork updated successfully! ✨", "success");
       loadArtworks();
     } else {
       const data = await res.json();
-      alert(data.error || "Failed to edit artwork");
+      showToast(data.error || "Failed to edit artwork ❌", "error");
     }
   } catch (err) {
-    alert("Network Error");
+    showToast("Network Error 🌐", "error");
   }
 }
 
@@ -865,10 +893,10 @@ async function deleteArtwork(id) {
       loadArtworks();
     } else {
       const data = await res.json();
-      alert(data.error || "Failed to delete artwork");
+      showToast(data.error || "Failed to delete artwork ❌", "error");
     }
   } catch (err) {
-    alert("Network Error");
+    showToast("Network Error 🌐", "error");
   }
 }
 
@@ -884,10 +912,10 @@ async function deleteTestimonial(id) {
       loadTestimonials();
     } else {
       const data = await res.json();
-      alert(data.error || "Failed to delete testimonial");
+      showToast(data.error || "Failed to delete testimonial ❌", "error");
     }
   } catch (err) {
-    alert("Network Error");
+    showToast("Network Error 🌐", "error");
   }
 }
 
@@ -1025,7 +1053,7 @@ function addAttributeField(key = "", value = "") {
   const container = document.getElementById("attributes-container");
 
   if (container.children.length >= 15) {
-    alert("Max 15 attributes allowed");
+    showToast("Max 15 attributes allowed", "warning");
     return;
   }
 
@@ -1132,22 +1160,48 @@ async function loadHomepageCMS() {
       // ✅ POPULATE TEXT STYLING
       document.getElementById("heroTitleSize").value = data.heroTitleSize || "48px";
       document.getElementById("heroSubtitleSize").value = data.heroSubtitleSize || "16px";
-      document.getElementById("heroTitleFont").value = data.heroTitleFont || "Poppins";
-      document.getElementById("heroSubtitleFont").value = data.heroSubtitleFont || "Poppins";
 
       // ✅ POPULATE FOOTER
       document.getElementById("footerTitle").value = data.footerTitle != null ? data.footerTitle : "";
       document.getElementById("footerDescription").value = data.footerDescription != null ? data.footerDescription : "";
+      document.getElementById("footerTitleColor").value = data.footerTitleColor || "#333333";
+      document.getElementById("footerDescColor").value = data.footerDescColor || "#555555";
       document.getElementById("footerTextColor").value = data.footerTextColor != null ? data.footerTextColor : "#333333";
       document.getElementById("footerFontSize").value = data.footerFontSize != null ? data.footerFontSize : "";
-      document.getElementById("footerFontFamily").value = data.footerFontFamily != null ? data.footerFontFamily : "Poppins";
+
+      const footerRadios = document.getElementsByName("footerPalette");
+      const footerValue = (data.footerPalette || "custom").toLowerCase().trim();
+      footerRadios.forEach(r => {
+        r.checked = r.value === footerValue;
+      });
 
       // ✅ POPULATE DIGITAL PRINTS
       document.getElementById("digitalPrintTitle").value = data.digitalPrintTitle || "";
       document.getElementById("digitalPrintDescription").value = data.digitalPrintDescription || "";
       document.getElementById("digitalPrintTitleSize").value = data.digitalPrintTitleSize || "";
       document.getElementById("digitalPrintDescSize").value = data.digitalPrintDescSize || "";
+      document.getElementById("digitalPrintTitleColor").value = data.digitalPrintTitleColor || "#000000";
+      document.getElementById("digitalPrintDescColor").value = data.digitalPrintDescColor || "#555555";
       document.getElementById("digitalPrintTextColor").value = data.digitalPrintTextColor || "#000000";
+
+      const dpRadios = document.getElementsByName("digitalPalette");
+      const dpValue = (data.digitalPrintPalette || "custom").toLowerCase().trim();
+      dpRadios.forEach(r => {
+        r.checked = r.value === dpValue;
+      });
+
+      // ✅ POPULATE PORTFOLIO (EXPLORE PAGE)
+      document.getElementById("portfolioTitle").value = data.portfolioTitle || "";
+      document.getElementById("portfolioSubtitle").value = data.portfolioSubtitle || "";
+      document.getElementById("portfolioTitleColor").value = data.portfolioTitleColor || "#000000";
+      document.getElementById("portfolioSubtitleColor").value = data.portfolioSubtitleColor || "#555555";
+      document.getElementById("portfolioTitleSize").value = data.portfolioTitleSize || "48px";
+      document.getElementById("portfolioSubtitleSize").value = data.portfolioSubtitleSize || "16px";
+      
+      const portfolioRadios = document.getElementsByName("portfolioPalette");
+      portfolioRadios.forEach(r => {
+        r.checked = (r.value === data.portfolioPalette);
+      });
 
       // SHOW/HIDE CUSTOM PICKERS
       const customSection = document.getElementById("customColorSelectors");
@@ -1220,28 +1274,57 @@ async function saveHomepageCMS(e) {
     // Filter out nulls to get the clean array
     const finalHeroImages = currentFilenames.filter(f => f !== null);
 
+    const heroPaletteInp = document.querySelector('input[name="palette"]:checked');
+    const heroPalette = heroPaletteInp ? heroPaletteInp.value : undefined;
+
+    const digitalPaletteInp = document.querySelector('input[name="digitalPalette"]:checked');
+    const digitalPalette = digitalPaletteInp ? digitalPaletteInp.value : undefined;
+
+    const footerPaletteInp = document.querySelector('input[name="footerPalette"]:checked');
+    const footerPalette = footerPaletteInp ? footerPaletteInp.value : undefined;
+
+    const portfolioPaletteInp = document.querySelector('input[name="portfolioPalette"]:checked');
+    const portfolioPalette = portfolioPaletteInp ? portfolioPaletteInp.value : undefined;
+
     const updateData = {
       heroTitle: document.getElementById("hero-title").value,
       heroSubtitle: document.getElementById("hero-subtitle").value,
       heroImages: finalHeroImages,
-      heroColorPalette: (document.querySelector('input[name="palette"]:checked') ? document.querySelector('input[name="palette"]:checked').value : "custom"),
+
       heroTitleColor: document.getElementById("heroTitleColor").value,
       heroSubtitleColor: document.getElementById("heroSubtitleColor").value,
       heroTitleSize: document.getElementById("heroTitleSize").value,
       heroSubtitleSize: document.getElementById("heroSubtitleSize").value,
-      heroTitleFont: document.getElementById("heroTitleFont").value,
-      heroSubtitleFont: document.getElementById("heroSubtitleFont").value,
-      footerTitle: document.getElementById("footerTitle").value,
-      footerDescription: document.getElementById("footerDescription").value,
-      footerTextColor: document.getElementById("footerTextColor").value,
-      footerFontSize: document.getElementById("footerFontSize").value,
-      footerFontFamily: document.getElementById("footerFontFamily").value,
+
       digitalPrintTitle: document.getElementById("digitalPrintTitle").value,
       digitalPrintDescription: document.getElementById("digitalPrintDescription").value,
       digitalPrintTitleSize: document.getElementById("digitalPrintTitleSize").value,
       digitalPrintDescSize: document.getElementById("digitalPrintDescSize").value,
-      digitalPrintTextColor: document.getElementById("digitalPrintTextColor").value
+      digitalPrintTitleColor: document.getElementById("digitalPrintTitleColor").value,
+      digitalPrintDescColor: document.getElementById("digitalPrintDescColor").value,
+      digitalPrintTextColor: document.getElementById("digitalPrintTextColor").value,
+
+      footerTitle: document.getElementById("footerTitle").value,
+      footerDescription: document.getElementById("footerDescription").value,
+      footerTitleColor: document.getElementById("footerTitleColor").value,
+      footerDescColor: document.getElementById("footerDescColor").value,
+      footerTextColor: document.getElementById("footerTextColor").value,
+      footerFontSize: document.getElementById("footerFontSize").value,
+
+      portfolioTitle: document.getElementById("portfolioTitle")?.value || "",
+      portfolioSubtitle: document.getElementById("portfolioSubtitle")?.value || "",
+      portfolioTitleColor: document.getElementById("portfolioTitleColor")?.value || "#000000",
+      portfolioSubtitleColor: document.getElementById("portfolioSubtitleColor")?.value || "#555555",
+      portfolioTitleSize: document.getElementById("portfolioTitleSize")?.value || "48px",
+      portfolioSubtitleSize: document.getElementById("portfolioSubtitleSize")?.value || "16px",
     };
+
+    if (heroPalette !== undefined) updateData.heroColorPalette = heroPalette;
+    if (digitalPalette !== undefined) updateData.digitalPrintPalette = digitalPalette;
+    if (footerPalette !== undefined) updateData.footerPalette = footerPalette;
+    if (portfolioPalette !== undefined) updateData.portfolioPalette = portfolioPalette;
+
+    console.log("Saving CMS payload:", updateData);
 
     const updateRes = await fetch("http://localhost:5000/api/homepage", {
       method: "PUT",
@@ -1251,13 +1334,51 @@ async function saveHomepageCMS(e) {
 
     if (!updateRes.ok) throw new Error("Database update failed");
 
-    alert("Homepage changes saved successfully! 🚀");
+    showToast("Homepage changes saved successfully! 🚀", "success");
     loadHomepageCMS(); // Reload to refresh state
   } catch (err) {
     console.error("[Homepage CMS] Save error:", err);
-    alert(err.message || "Network error during save");
+    showToast(err.message || "Network error during save ❌", "error");
   }
 }
 
 window.loadHomepageCMS = loadHomepageCMS;
 window.saveHomepageCMS = saveHomepageCMS;
+
+function changeCredentials(e) {
+  e.preventDefault();
+
+  const newUser = document.getElementById('new-username').value;
+  const newPass = document.getElementById('new-password').value;
+
+  if (!newUser || !newPass) {
+    showToast("Fill all fields 😭", "warning");
+    return;
+  }
+
+  localStorage.setItem('adminUser', newUser);
+  localStorage.setItem('adminPass', newPass);
+
+  showToast("Credentials updated 🔥", "success");
+
+  e.target.reset();
+}
+
+window.changeCredentials = changeCredentials;
+
+function toggleNewPassword() {
+  const input = document.getElementById("new-password");
+  const icon = document.querySelector(".toggle-password i");
+
+  if (input.type === "password") {
+    input.type = "text";
+    icon.classList.remove("fa-eye");
+    icon.classList.add("fa-eye-slash");
+  } else {
+    input.type = "password";
+    icon.classList.remove("fa-eye-slash");
+    icon.classList.add("fa-eye");
+  }
+}
+
+window.toggleNewPassword = toggleNewPassword;

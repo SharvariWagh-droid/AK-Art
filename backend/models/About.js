@@ -19,6 +19,9 @@ const aboutSchema = new mongoose.Schema({
       link: { type: String, default: "" }
     }
   ],
+  agencies: [
+    { type: String }
+  ],
   updatedAt: {
     type: Date,
     default: Date.now

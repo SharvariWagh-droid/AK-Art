@@ -111,33 +111,67 @@
                   <label style="font-size: 13px;">Subtitle Font Size</label>
                   <input type="text" id="heroSubtitleSize" placeholder="e.g. 16px">
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                  <label style="font-size: 13px;">Title Font Family</label>
-                  <select id="heroTitleFont">
-                    <option value="Poppins">Poppins</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Playfair Display">Playfair Display</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Open Sans">Open Sans</option>
-                  </select>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                  <label style="font-size: 13px;">Subtitle Font Family</label>
-                  <select id="heroSubtitleFont">
-                    <option value="Poppins">Poppins</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Playfair Display">Playfair Display</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Open Sans">Open Sans</option>
-                  </select>
-                </div>
                    </div>
             </div>
  
+            <!-- Portfolio (Explore Page) Section -->
+            <div class="form-group" style="margin-top:40px; border-top:1px solid #eee; padding-top:30px;">
+              <label style="font-size:1.1rem; font-weight:600; margin-bottom: 20px; display: block;">🎨 Portfolio (Explore Page)</label>
+
+              <div class="form-group">
+                <label>Portfolio Title</label>
+                <input type="text" id="portfolioTitle" placeholder="Enter portfolio title">
+              </div>
+
+              <div class="form-group">
+                <label>Portfolio Subtitle</label>
+                <textarea id="portfolioSubtitle" placeholder="Enter portfolio subtitle"></textarea>
+              </div>
+
+              <div class="form-group" style="margin-top:20px;">
+                <label>Color Settings</label>
+                <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom: 15px;">
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="portfolioPalette" value="pastel"> Soft Pastel
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="portfolioPalette" value="earth"> Warm Earth
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="portfolioPalette" value="dark"> Elegant Dark
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="portfolioPalette" value="playful"> Playful Kids
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="portfolioPalette" value="custom" checked> Custom
+                  </label>
+                </div>
+
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                  <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px;">Title Color</label>
+                    <input type="color" id="portfolioTitleColor">
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px;">Subtitle Color</label>
+                    <input type="color" id="portfolioSubtitleColor">
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:20px;">
+                  <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px;">Title Size</label>
+                    <input type="text" id="portfolioTitleSize" placeholder="e.g. 48px">
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px;">Subtitle Size</label>
+                    <input type="text" id="portfolioSubtitleSize" placeholder="e.g. 16px">
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Digital Prints Section -->
             <div class="form-group" style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 30px;">
               <label style="font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; display: block;">🖼️ Digital Prints Section</label>
@@ -166,11 +200,43 @@
                   <input type="color" id="digitalPrintTextColor" value="#000000">
                 </div>
               </div>
+
+              <div class="form-group" style="margin-top:20px;">
+                <label>Color Settings</label>
+                <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom: 15px;">
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="digitalPalette" value="pastel"> Soft Pastel
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="digitalPalette" value="earth"> Warm Earth
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="digitalPalette" value="dark"> Elegant Dark
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="digitalPalette" value="playful"> Playful Kids
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="digitalPalette" value="custom" checked> Custom
+                  </label>
+                </div>
+
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                  <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px;">Title Color</label>
+                    <input type="color" id="digitalPrintTitleColor" value="#000000">
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px;">Description Color</label>
+                    <input type="color" id="digitalPrintDescColor" value="#555555">
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Footer Section -->
             <div class="form-group" style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 30px;">
-              <label style="font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; display: block;">🦶 Footer Section Content</label>
+              <label style="font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; display: block;">✨ Footer Section Content</label>
               
               <div class="form-group">
                 <label>Footer Title</label>
@@ -191,14 +257,37 @@
                   <label style="font-size: 13px;">Footer Font Size</label>
                   <input type="text" id="footerFontSize" placeholder="e.g. 16px">
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                  <label style="font-size: 13px;">Footer Font Family</label>
-                  <select id="footerFontFamily">
-                    <option value="Poppins">Poppins</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Roboto">Roboto</option>
-                  </select>
+              </div>
+
+              <div class="form-group" style="margin-top:20px;">
+                <label>Color Settings</label>
+                <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom: 15px;">
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="footerPalette" value="pastel"> Soft Pastel
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="footerPalette" value="earth"> Warm Earth
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="footerPalette" value="dark"> Elegant Dark
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="footerPalette" value="playful"> Playful Kids
+                  </label>
+                  <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="radio" name="footerPalette" value="custom" checked> Custom
+                  </label>
+                </div>
+
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                  <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px;">Title Color</label>
+                    <input type="color" id="footerTitleColor" value="#333333">
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px;">Description Color</label>
+                    <input type="color" id="footerDescColor" value="#555555">
+                  </div>
                 </div>
               </div>
             </div>
@@ -214,5 +303,5 @@
 
   <script src="../frontend/script.js"></script>
   <script src="admin.js"></script>
-</body>
+<div id="toastContainer"></div></body>
 </html>

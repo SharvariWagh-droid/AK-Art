@@ -1,0 +1,1 @@
+heroSubtitle: document.getElementById("hero-subtitle").value,

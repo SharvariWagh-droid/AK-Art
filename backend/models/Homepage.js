@@ -68,7 +68,24 @@ const homepageSchema = new mongoose.Schema({
   digitalPrintDescription: { type: String, default: "A curated collection of premium illustrations..." },
   digitalPrintTitleSize: { type: String, default: "32px" },
   digitalPrintDescSize: { type: String, default: "16px" },
-  digitalPrintTextColor: { type: String, default: "#000000" }
+  digitalPrintTextColor: { type: String, default: "#000000" },
+  digitalPrintPalette: { type: String, default: "custom" },
+  digitalPrintTitleColor: { type: String, default: "#000000" },
+  digitalPrintDescColor: { type: String, default: "#555555" },
+
+  footerPalette: { type: String, default: "custom" },
+  footerTitleColor: { type: String, default: "#333333" },
+  footerDescColor: { type: String, default: "#555555" },
+
+  
+  // Portfolio (Explore Page)
+  portfolioTitle: { type: String, default: "Explore Art & Works" },
+  portfolioSubtitle: { type: String, default: "A curated portfolio of my creative journey." },
+  portfolioTitleColor: { type: String, default: "#1a1a1a" },
+  portfolioSubtitleColor: { type: String, default: "#555555" },
+  portfolioTitleSize: { type: String, default: "48px" },
+  portfolioSubtitleSize: { type: String, default: "16px" },
+  portfolioPalette: { type: String, default: "custom" }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Homepage", homepageSchema);

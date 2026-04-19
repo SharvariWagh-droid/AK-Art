@@ -12,6 +12,13 @@ let currentPage = 1;
 const itemsPerPage = 6;
 let heroSliderIntervalId = null;
 
+const palettes = {
+    pastel: { title: "#2d2d2d", subtitle: "#777777", text: "#444" },
+    earth: { title: "#3e2f1c", subtitle: "#7a5c3e", text: "#3e2f1c" },
+    dark: { title: "#ffffff", subtitle: "#cccccc", text: "#ffffff" },
+    playful: { title: "#ff4d6d", subtitle: "#6a4c93", text: "#6a4c93" }
+};
+
 // Clear any bad localStorage values on page load
 function cleanupLocalStorage() {
     const artImage = localStorage.getItem("artImage");
@@ -123,6 +130,7 @@ async function loadHomepageData() {
     try {
         const res = await fetch(HOMEPAGE_API);
         const data = await res.json();
+        console.log("Homepage Data:", data);
 
         renderFooter(data);
 
@@ -139,8 +147,40 @@ async function loadHomepageData() {
             dpTitle.style.fontSize = data.digitalPrintTitleSize || "32px";
             dpDesc.style.fontSize = data.digitalPrintDescSize || "16px";
 
-            dpTitle.style.color = data.digitalPrintTextColor || "#000000";
-            dpDesc.style.color = data.digitalPrintTextColor || "#000000";
+            if (data.digitalPrintPalette && data.digitalPrintPalette !== "custom") {
+                const p = palettes[data.digitalPrintPalette];
+                if (dpTitle && p) dpTitle.style.color = p.title;
+                if (dpDesc && p) dpDesc.style.color = p.subtitle;
+            } else {
+                if (dpTitle) dpTitle.style.color = data.digitalPrintTitleColor || "#000000";
+                if (dpDesc) dpDesc.style.color = data.digitalPrintDescColor || "#555555";
+            }
+        }
+
+        // --- PORTFOLIO (EXPLORE PAGE) ---
+        const pTitle = document.getElementById("portfolioTitle");
+        const pSub = document.getElementById("portfolioSubtitle");
+
+        if (pTitle) {
+            pTitle.innerText = data.portfolioTitle || "Explore Art & Works";
+            pTitle.style.fontSize = data.portfolioTitleSize || "48px";
+            
+            if (data.portfolioPalette && data.portfolioPalette !== "custom") {
+                pTitle.style.color = palettes[data.portfolioPalette]?.title || "#000";
+            } else {
+                pTitle.style.color = data.portfolioTitleColor || "#000";
+            }
+        }
+
+        if (pSub) {
+            pSub.innerText = data.portfolioSubtitle || "A curated portfolio of my creative journey.";
+            pSub.style.fontSize = data.portfolioSubtitleSize || "16px";
+
+            if (data.portfolioPalette && data.portfolioPalette !== "custom") {
+                pSub.style.color = palettes[data.portfolioPalette]?.subtitle || "#555";
+            } else {
+                pSub.style.color = data.portfolioSubtitleColor || "#555";
+            }
         }
     } catch (err) {
         console.error("Homepage load error:", err);
@@ -176,7 +216,8 @@ function renderHeader() {
 }
 
 function renderFooter(data) {
-    console.log("FOOTER DATA:", data);
+    if (!data) data = {};
+    console.log("Rendering Footer with data:", data);
     const footer = document.getElementById("footer");
     if (!footer) return;
 
@@ -199,9 +240,23 @@ function renderFooter(data) {
 
     const container = document.getElementById("globalFooterContainer");
     if (container) {
-        if (data.footerTextColor) container.style.color = data.footerTextColor;
+        const footerTitle = document.getElementById("footerTitle");
+        const footerDesc = document.getElementById("footerDesc");
+
+        if (data.footerPalette && data.footerPalette !== "custom") {
+            const p = palettes[data.footerPalette];
+            if (p) {
+                if (footerTitle) footerTitle.style.color = p.title;
+                if (footerDesc) footerDesc.style.color = p.subtitle;
+                container.style.color = p.text;
+            }
+        } else {
+            if (footerTitle) footerTitle.style.color = data.footerTitleColor || "#333333";
+            if (footerDesc) footerDesc.style.color = data.footerDescColor || "#555555";
+            if (data.footerTextColor) container.style.color = data.footerTextColor;
+        }
+
         if (data.footerFontSize) container.style.fontSize = data.footerFontSize;
-        if (data.footerFontFamily) container.style.fontFamily = data.footerFontFamily;
 
         const textElements = container.querySelectorAll("h2, p, a");
         textElements.forEach(el => {
@@ -550,13 +605,6 @@ async function loadTestimonials() {
             style = {};
         }
 
-        const palettes = {
-            pastel: { text: "#444" },
-            earth: { text: "#3e2f1c" },
-            dark: { text: "#ffffff" },
-            playful: { text: "#6a4c93" }
-        };
-
         const palette = style.palette || "custom";
 
         document.querySelectorAll(".testimonial-card p").forEach(el => {
@@ -607,8 +655,9 @@ async function loadAboutData() {
     if (!window.location.pathname.includes("about.html")) return;
 
     try {
-        const aboutRes = await fetch("http://localhost:5000/api/about");
-        const about = await aboutRes.json();
+        const aboutResponse = await fetch("http://localhost:5000/api/about");
+        const aboutData = await aboutResponse.json();
+        const about = aboutData.about || aboutData;
 
         const nameEl = document.getElementById("aboutName");
         const imgEl = document.getElementById("aboutImage");
@@ -672,27 +721,23 @@ async function loadAboutData() {
             }
         }
 
+        console.log("ABOUT DATA RESPONSE:", about);
+        const agenciesData = [];
+
         const agencyRes = await fetch("http://localhost:5000/api/agencies");
-        const agencies = await agencyRes.json();
+        const agencyData = await agencyRes.json();
 
-        const agencyList = document.getElementById("agenciesList");
+        const agenciesList = document.getElementById("agenciesList");
 
-        if (agencyList) {
-            agencyList.innerHTML = agencies.length
-                ? agencies.map(a => `<li>${a.name}</li>`).join("")
+        if (agenciesList) {
+            agenciesList.innerHTML = agencyData.length
+                ? agencyData.map(a => `<li>${a.name}</li>`).join("")
                 : "<li>Independent Artist</li>";
         }
 
         try {
             const styleRes = await fetch("http://localhost:5000/api/about/style");
             const style = await styleRes.json();
-
-            const palettes = {
-                pastel: { text: "#444" },
-                earth: { text: "#3e2f1c" },
-                dark: { text: "#ffffff" },
-                playful: { text: "#6a4c93" }
-            };
 
             const palette = style.palette || "custom";
 
@@ -717,6 +762,18 @@ async function loadAboutData() {
                     : (style.textColor || "#333");
 
                 worksList.querySelectorAll("a, span, li").forEach(el => {
+                    el.style.color = "inherit";
+                    el.style.fontSize = "inherit";
+                });
+            }
+
+            if (agenciesList) {
+                agenciesList.style.fontSize = style.worksSize || "14px";
+                agenciesList.style.color = (palette !== "custom")
+                    ? palettes[palette]?.text
+                    : (style.textColor || "#333");
+
+                agenciesList.querySelectorAll("li").forEach(el => {
                     el.style.color = "inherit";
                     el.style.fontSize = "inherit";
                 });

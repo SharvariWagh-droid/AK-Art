@@ -3,14 +3,27 @@ const router = express.Router();
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+let razorpay;
+try {
+  if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+  } else {
+    console.warn("Razorpay credentials missing. Payment features will be disabled.");
+  }
+} catch (err) {
+  console.error("Razorpay Init Error:", err.message);
+}
 
 
 router.post("/create-order", async (req, res) => {
     try {
+        if (!razorpay) {
+            console.error("RAZORPAY NOT INITIALIZED");
+            return res.status(500).json({ message: "Razorpay keys are missing. Payment cannot be processed." });
+        }
         const { amount } = req.body;
         if (!amount || isNaN(amount) || amount <= 0) {
             console.log("INVALID AMOUNT RECEIVED:", amount);

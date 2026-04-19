@@ -4,7 +4,6 @@ const About = require("../models/About");
 const AboutStyle = require("../models/AboutStyle");
 
 // --- STYLE SETTINGS (Static routes first!) ---
-
 // Get style settings
 router.get("/style", async (req, res) => {
   try {
@@ -41,7 +40,7 @@ router.post("/style", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const about = await About.findOne();
-    res.json(about || {});
+    res.json(about);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

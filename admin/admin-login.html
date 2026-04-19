@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Login — Abhilasha's Portfolio</title>
   <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
   <div class="login-wrapper">
@@ -19,9 +20,11 @@
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <div style="position: relative; display: flex; align-items: center;">
-            <input type="password" id="password" placeholder="Enter password" required style="width: 100%; padding-right: 40px; box-sizing: border-box;">
-            <i class="far fa-eye" onclick="togglePasswordVisibility()" id="togglePasswordIcon" style="position: absolute; right: 15px; font-size: 18px; color: #666; cursor: pointer; user-select: none;" title="Toggle Password Visibility"></i>
+          <div class="password-field">
+            <input type="password" id="password" placeholder="Enter password" required>
+            <span class="toggle-eye" onclick="togglePasswordVisibility()" title="Toggle Password Visibility">
+              <i class="fas fa-eye"></i>
+            </span>
           </div>
         </div>
         <button type="submit" class="btn btn-primary btn-login">Sign In</button>
@@ -30,5 +33,5 @@
   </div>
   <script src="../frontend/script.js"></script>
   <script src="admin.js"></script>
-</body>
+<div id="toastContainer"></div></body>
 </html>
