@@ -37,6 +37,7 @@ app.use("/admin", express.static(path.join(__dirname, "../admin")));
 // NEW: Explicit /frontend route to support relative paths from admin (../frontend/script.js)
 app.use("/frontend", express.static(path.join(__dirname, "../frontend")));
 
+
 // ROUTE MIDDLEWARE
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
