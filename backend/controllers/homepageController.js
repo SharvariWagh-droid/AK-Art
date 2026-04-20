@@ -8,15 +8,19 @@ exports.getHomepage = async (req, res) => {
   try {
     let data = await Homepage.findOne();
 
-    // Create default if not exists
-    if (!data) {
-      data = new Homepage({
-        heroTitle: "",
-        heroSubtitle: "",
-        heroImages: []
-      });
-      await data.save();
-    }
+if (!data) {
+  data = new Homepage({
+    heroTitle: "",
+    heroSubtitle: "",
+    heroImages: []
+  });
+  await data.save();
+}
+
+
+if (data.toObject) {
+  data = data.toObject();
+}
 
     // Ensure missing fields are added manually for legacy documents
     if (!data.footerTitle) data.footerTitle = "Abhilasha Khatri";
@@ -154,9 +158,9 @@ exports.updateHomepage = async (req, res) => {
 
     res.json({ message: "Homepage updated successfully", data: existing });
 
-  } catch (err) {
-    console.error("UPDATE ERROR:", err); // 👈 NOW YOU WILL SEE REAL ERROR
-    res.status(500).json({ message: err.message });
+  }catch (err) {
+     console.error("HOMEPAGE ERROR:", err);
+     res.status(500).json({ message: err.message });
   }
 };
 
