@@ -140,9 +140,16 @@ async function loadHomepageData() {
         const data = await res.json();
         console.log("Homepage Data:", data);
 
+        // ✅ TASK 1: FIX loadHomepageData()
+        if (!data || data.message || data.error) {
+            renderFooter({});
+            return;
+        }
+
         renderFooter(data);
 
-        if (document.getElementById("heroSlider")) {
+        const slider = document.getElementById("heroSlider");
+        if (slider) {
             loadHeroContent(data);
         }
 
@@ -231,8 +238,8 @@ function renderFooter(data) {
 
     footer.innerHTML = `
         <div class="global-footer" id="globalFooterContainer">
-            <h2 id="footerTitle">${data.footerTitle != null ? data.footerTitle : "Abhilasha Khatri"}</h2>
-            <p id="footerDesc">${data.footerDescription != null ? data.footerDescription : "Creating magical worlds and unforgettable characters for the next generation of dreamers. Let’s work together on your next project."}</p>
+            <h2 id="footerTitle">${data.footerTitle || "Abhilasha Khatri"}</h2>
+            <p id="footerDesc">${data.footerDescription || "Creating magical worlds and unforgettable characters for the next generation of dreamers. Let’s work together on your next project."}</p>
             
             <div class="social-icons">
                 <a href="https://www.behance.net/abhilashakhatri0603" target="_blank"><i class="fab fa-behance"></i></a>
@@ -462,11 +469,16 @@ function displayPrints() {
     const containers = document.querySelectorAll(".prints-grid, #explore-print-grid");
     if (!containers.length) return;
 
+    // ✅ TASK 3: FIX ARRAY CRASH
+    if (!Array.isArray(allPrints)) {
+        allPrints = [];
+    }
+
     const start = (currentPage - 1) * itemsPerPage;
     const pageItems = allPrints.slice(start, start + itemsPerPage);
 
     containers.forEach(c => {
-        const items = c.id.includes("explore") ? allPrints.slice(0, 3) : pageItems;
+        const items = c.id && c.id.includes("explore") ? allPrints.slice(0, 3) : pageItems;
 
         if (!items.length) {
             c.innerHTML = "<p class='no-data'>No items available</p>";
