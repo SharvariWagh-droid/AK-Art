@@ -22,16 +22,26 @@ const palettes = {
 // Clear any bad localStorage values on page load
 function cleanupLocalStorage() {
     const artImage = localStorage.getItem("artImage");
-    if (artImage && (artImage.includes("localhost:7070") || artImage.includes("localhost:37857") || (!artImage.includes("13.233.50.44:5000/uploads") && !artImage.includes("via.placeholder.com")))) {
-        console.log("Cleaning up bad localStorage image values");
+
+    if (!artImage) return;
+
+    // ONLY remove clearly wrong localhost ports
+    if (
+        artImage.includes("localhost:7070") ||
+        artImage.includes("localhost:37857")
+    ) {
+        console.log("Cleaning bad localhost image");
+
+        localStorage.removeItem("artImage");
+        localStorage.removeItem("artName");
+        localStorage.removeItem("artPrice");
     }
 }
-
 // Load success page functionality
 function loadSuccessPage() {
     // Display order details from localStorage or URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const paymentId = urlParams.get('payment_id');
+    const paymentId = urlParams.get('razorpay_payment_id');
     if (paymentId) {
         // Display payment success message
         const successMessage = document.querySelector('.success-message');
@@ -879,8 +889,10 @@ function downloadArt() {
         return;
     }
 
-    // Defensive filter - only allow valid backend URLs or placeholder
-    if (image.includes("localhost:7070") || image.includes("localhost:37857") || (!image.includes("13.233.50.44:5000/uploads") && !image.includes("via.placeholder.com"))) {
+    if (
+        image.includes("localhost:7070") ||
+        image.includes("localhost:37857")
+    ) {
         alert("Invalid image URL found! Clearing cache...");
         localStorage.removeItem("artImage");
         localStorage.removeItem("artName");
