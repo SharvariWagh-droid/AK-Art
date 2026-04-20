@@ -22,7 +22,7 @@ const palettes = {
 // Clear any bad localStorage values on page load
 function cleanupLocalStorage() {
     const artImage = localStorage.getItem("artImage");
-    if (artImage && (artImage.includes("localhost:7070") || artImage.includes("localhost:37857") || (!artImage.includes("localhost:5000/uploads") && !artImage.includes("via.placeholder.com")))) {
+    if (artImage && (artImage.includes("localhost:7070") || artImage.includes("localhost:37857") || (!artImage.includes("13.233.50.44:5000/uploads") && !artImage.includes("via.placeholder.com")))) {
         console.log("Cleaning up bad localStorage image values");
     }
 }
@@ -40,10 +40,8 @@ function loadSuccessPage() {
         }
     }
 
-    // Clear purchase-related localStorage after successful payment
-    localStorage.removeItem("artName");
-    localStorage.removeItem("artPrice");
-    localStorage.removeItem("artImage");
+    // Clear purchase-related localStorage after successful payment (handled in fetchOrderDetails fallback or verification)
+
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -511,7 +509,7 @@ function buyPrint(name, price, image) {
 
     // Clear any existing bad localStorage values
     const existingImage = localStorage.getItem("artImage");
-    if (existingImage && (existingImage.includes("localhost:7070") || existingImage.includes("localhost:37857") || !existingImage.includes("localhost:5000/uploads"))) {
+    if (existingImage && (existingImage.includes("localhost:7070") || existingImage.includes("localhost:37857") || !existingImage.includes("13.233.50.44:5000/uploads"))) {
         localStorage.removeItem("artImage");
         localStorage.removeItem("artName");
         localStorage.removeItem("artPrice");
@@ -857,7 +855,7 @@ function displayArtDetails() {
     const imageUrl = localStorage.getItem("artImage");
 
     // Defensive filter - only allow valid backend URLs or placeholder
-    if (imageUrl && (imageUrl.includes("localhost:7070") || imageUrl.includes("localhost:37857") || (!imageUrl.includes("localhost:5000/uploads") && !imageUrl.includes("via.placeholder.com")))) {
+    if (imageUrl && (imageUrl.includes("localhost:7070") || imageUrl.includes("localhost:37857") || (!imageUrl.includes("13.233.50.44:5000/uploads") && !imageUrl.includes("via.placeholder.com")))) {
         // Clear bad localStorage values
         localStorage.removeItem("artImage");
         localStorage.removeItem("artName");
@@ -882,7 +880,7 @@ function downloadArt() {
     }
 
     // Defensive filter - only allow valid backend URLs or placeholder
-    if (image.includes("localhost:7070") || image.includes("localhost:37857") || (!image.includes("localhost:5000/uploads") && !image.includes("via.placeholder.com"))) {
+    if (image.includes("localhost:7070") || image.includes("localhost:37857") || (!image.includes("13.233.50.44:5000/uploads") && !image.includes("via.placeholder.com"))) {
         alert("Invalid image URL found! Clearing cache...");
         localStorage.removeItem("artImage");
         localStorage.removeItem("artName");
@@ -1335,26 +1333,44 @@ async function fetchOrderDetails(paymentId) {
         const orderRes = await fetch("http://13.233.50.44:5000/api/orders/payment/" + paymentId);
         const result = await orderRes.json();
 
-        if (result) {
-            const order = result;
-            const artPreview = document.getElementById("artPreview");
-            const artName = document.getElementById("artName");
-            const artPrice = document.getElementById("artPrice");
+        const artPreview = document.getElementById("artPreview");
+        const artNameEl = document.getElementById("artName");
+        const artPriceEl = document.getElementById("artPrice");
 
+        if (result && result.image) {
+            const order = result;
             const fullImageUrl = "http://13.233.50.44:5000/uploads/" + order.image;
 
             if (artPreview) artPreview.src = fullImageUrl;
-            if (artName) artName.innerText = order.artName;
-            if (artPrice) artPrice.innerText = "₹" + order.price;
+            if (artNameEl) artNameEl.innerText = order.artName;
+            if (artPriceEl) artPriceEl.innerText = "₹" + order.price;
 
             localStorage.setItem("artImage", fullImageUrl);
             localStorage.setItem("artName", order.artName);
             localStorage.setItem("artPrice", order.price);
         } else {
-            alert("No artwork found!");
+            console.log("No artwork found in API, loading from localStorage...");
+            const localImage = localStorage.getItem("artImage");
+            const localName = localStorage.getItem("artName");
+            const localPrice = localStorage.getItem("artPrice");
+
+            if (localImage && artPreview) artPreview.src = localImage;
+            if (localName && artNameEl) artNameEl.innerText = localName;
+            if (localPrice && artPriceEl) artPriceEl.innerText = "₹" + localPrice;
         }
     } catch (orderErr) {
         console.error("Error loading order details:", orderErr);
+        const localImage = localStorage.getItem("artImage");
+        const localName = localStorage.getItem("artName");
+        const localPrice = localStorage.getItem("artPrice");
+
+        const artPreview = document.getElementById("artPreview");
+        const artNameEl = document.getElementById("artName");
+        const artPriceEl = document.getElementById("artPrice");
+
+        if (localImage && artPreview) artPreview.src = localImage;
+        if (localName && artNameEl) artNameEl.innerText = localName;
+        if (localPrice && artPriceEl) artPriceEl.innerText = "₹" + localPrice;
     }
 }
 
