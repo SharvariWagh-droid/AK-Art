@@ -56,27 +56,19 @@ app.use("/api/homepage", homepageRoutes);
 // ==============================
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGO_URI)
-.then(async () => {
-  console.log("MongoDB Connected ✅");
+const startServer = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB Connected ✅");
+    console.log("DB NAME:", mongoose.connection.name);
 
-  console.log("DB NAME:", mongoose.connection.name);
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://0.0.0.0:${PORT}`);
+    });
+  } catch (err) {
+    console.error("MongoDB Connection Error:", err);
+    process.exit(1);
+  }
+};
 
-  const collections = await mongoose.connection.db.listCollections().toArray();
-  console.log("COLLECTIONS:", collections.map(c => c.name));
-
-  const test = await mongoose.connection.db
-    .collection("artworks")
-    .find()
-    .toArray();
-
-  console.log("TEST DATA:", test.length);
-})
-.catch(err => {
-  console.error("MongoDB Connection Error:", err);
-});
-
-console.log("SERVER STARTED");
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
-});
+startServer();

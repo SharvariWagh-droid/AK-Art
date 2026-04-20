@@ -9,6 +9,7 @@ router.get("/style", async (req, res) => {
     const style = await TestimonialStyle.findOne();
     res.json(style || {});
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -31,6 +32,7 @@ router.post("/style", async (req, res) => {
 
     res.json(style);
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -43,7 +45,7 @@ router.get("/", async (req, res) => {
     const testimonials = await Testimonial.find().sort({ createdAt: -1 });
     res.json(testimonials);
   } catch (err) {
-    console.error(err);
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -60,6 +62,7 @@ router.post("/", async (req, res) => {
     await testimonial.save();
     res.status(201).json({ message: "Testimonial added successfully", testimonial });
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -78,6 +81,7 @@ router.put("/:id", async (req, res) => {
     }
     res.json({ message: "Testimonial updated successfully", testimonial: updatedTestimonial });
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -91,6 +95,7 @@ router.delete("/:id", async (req, res) => {
     }
     res.json({ message: "Testimonial deleted successfully" });
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });

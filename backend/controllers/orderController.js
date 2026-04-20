@@ -30,8 +30,8 @@ exports.createOrder = async (req, res) => {
     res.json({ message: "Order saved", orderId: order._id });
 
   } catch (err) {
-    console.error("Save error:", err);
-    res.status(500).json({ message: "Error saving order" });
+    console.error("ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -42,7 +42,8 @@ exports.getOrders = async (req, res) => {
     const orders = await Order.find();
     res.json(orders);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching orders" });
+    console.error("ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -52,8 +53,8 @@ exports.getUserOrders = async (req, res) => {
     const orders = await Order.find({ userId: req.params.userId });
     res.json(orders);
   } catch (err) {
-    console.error("User orders fetch error:", err);
-    res.status(500).json({ message: "Error fetching user orders" });
+    console.error("ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -67,8 +68,8 @@ exports.getOrderByPaymentId = async (req, res) => {
     }
     res.json(order);
   } catch (err) {
-    console.error("Fetch order error:", err);
-    res.status(500).json({ message: "Error fetching order details" });
+    console.error("ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -86,14 +87,16 @@ exports.downloadArtwork = async (req, res) => {
       if (err) {
         console.error("Download error:", err);
         if (!res.headersSent) {
-          res.status(500).json({ message: "Download failed" });
+          res.status(500).json({ error: "Download failed" });
         }
       }
     });
 
   } catch (err) {
-    console.error("Server error:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("ERROR:", err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: err.message });
+    }
   }
 };
 
@@ -142,7 +145,7 @@ exports.downloadArtworkResized = async (req, res) => {
     res.send(buffer);
 
   } catch (err) {
-    console.error("Processing error:", err);
-    res.status(500).json({ message: "Error processing image" });
+    console.error("ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 };

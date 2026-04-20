@@ -25,7 +25,8 @@ exports.registerUser = async (req, res) => {
     res.json({ message: "Registration successful" });
 
   } catch (error) {
-    res.json({ message: "Server error" });
+    console.error("ERROR:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -55,7 +56,8 @@ exports.loginUser = async (req, res) => {
     });
 
   } catch (error) {
-    res.json({ message: "Server error" });
+    console.error("ERROR:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -83,7 +85,8 @@ exports.forgotPassword = async (req, res) => {
     res.json({ success: true, message: "Reset link sent", token: token });
 
   } catch (error) {
-    res.json({ message: "Server error" });
+    console.error("ERROR:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -109,6 +112,7 @@ exports.resetPassword = async (req, res) => {
     res.json({ message: "Password reset successful" });
 
   } catch (error) {
-    res.json({ message: "Server error" });
+    console.error("ERROR:", error);
+    res.status(500).json({ error: error.message });
   }
 };

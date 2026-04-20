@@ -371,7 +371,9 @@ function getRazorpayImageSrc(img) {
 async function loadGalleryFromDB() {
     try {
         const res = await fetch(API + "?type=art");
-        allArts = await res.json();
+        const data = await res.json();
+        console.log("API RESPONSE:", data);
+        allArts = Array.isArray(data) ? data : [];
 
         const targets = ["home-art-grid", "explore-art-grid", "gallery-grid"];
 
@@ -407,7 +409,9 @@ async function loadGalleryFromDB() {
 async function loadBooks() {
     try {
         const res = await fetch(API + "?type=book");
-        allBooks = await res.json();
+        const data = await res.json();
+        console.log("API RESPONSE:", data);
+        allBooks = Array.isArray(data) ? data : [];
 
         const targets = ["home-book-grid", "explore-book-grid", "published-grid"];
 
@@ -444,7 +448,9 @@ async function loadBooks() {
 async function loadPrints() {
     try {
         const res = await fetch(API + "?type=print");
-        allPrints = await res.json();
+        const data = await res.json();
+        console.log("API RESPONSE:", data);
+        allPrints = Array.isArray(data) ? data : [];
         displayPrints();
         setupPagination();
     } catch (err) {
@@ -593,11 +599,13 @@ async function loadTestimonials() {
     try {
         const res = await fetch("http://13.233.50.44/api/testimonials");
         const data = await res.json();
+        console.log("API RESPONSE:", data);
+        const safeData = Array.isArray(data) ? data : [];
 
         const container = document.getElementById("testimonial-grid");
         if (!container) return;
 
-        container.innerHTML = data.map(t => `
+        container.innerHTML = safeData.map(t => `
             <div class="testimonial-card">
                 <p>"${t.message}"</p>
                 <h4>${t.name}</h4>
@@ -733,7 +741,9 @@ async function loadAboutData() {
         const agenciesData = [];
 
         const agencyRes = await fetch("http://13.233.50.44/api/agencies");
-        const agencyData = await agencyRes.json();
+        const data = await agencyRes.json();
+        console.log("API RESPONSE:", data);
+        const agencyData = Array.isArray(data) ? data : [];
 
         const agenciesList = document.getElementById("agenciesList");
 

@@ -8,41 +8,39 @@ exports.getHomepage = async (req, res) => {
   try {
     let data = await Homepage.findOne();
 
-if (!data) {
-  data = new Homepage({
-    heroTitle: "",
-    heroSubtitle: "",
-    heroImages: []
-  });
-  await data.save();
-}
+    if (!data) {
+      data = new Homepage({
+        heroTitle: "Default Title",
+        heroSubtitle: "Default Subtitle",
+        heroImages: []
+      });
+      await data.save();
+    }
 
-
-if (data.toObject) {
-  data = data.toObject();
-}
+    const finalData = data.toObject ? data.toObject() : data;
 
     // Ensure missing fields are added manually for legacy documents
-    if (!data.footerTitle) data.footerTitle = "Abhilasha Khatri";
-    if (!data.footerDescription) data.footerDescription = "Creating magical worlds and unforgettable characters for the next generation of dreamers. Let’s work together on your next project.";
-    if (!data.footerTextColor) data.footerTextColor = "#333333";
-    if (!data.footerFontSize) data.footerFontSize = "16px";
-    if (!data.footerFontFamily) data.footerFontFamily = "Poppins";
-    if (!data.digitalPrintTitle) data.digitalPrintTitle = "Digital Prints";
-    if (!data.digitalPrintDescription) data.digitalPrintDescription = "A curated collection of premium illustrations...";
-    if (!data.digitalPrintTitleSize) data.digitalPrintTitleSize = "32px";
-    if (!data.digitalPrintDescSize) data.digitalPrintDescSize = "16px";
-    if (!data.digitalPrintTextColor) data.digitalPrintTextColor = "#000000";
-    if (!data.portfolioTitle) data.portfolioTitle = "Explore Art & Works";
-    if (!data.portfolioSubtitle) data.portfolioSubtitle = "A curated portfolio of my creative journey.";
-    if (!data.portfolioTitleColor) data.portfolioTitleColor = "#1a1a1a";
-    if (!data.portfolioSubtitleColor) data.portfolioSubtitleColor = "#555555";
-    if (!data.portfolioTitleSize) data.portfolioTitleSize = "48px";
-    if (!data.portfolioSubtitleSize) data.portfolioSubtitleSize = "16px";
+    if (!finalData.footerTitle) finalData.footerTitle = "Abhilasha Khatri";
+    if (!finalData.footerDescription) finalData.footerDescription = "Creating magical worlds and unforgettable characters for the next generation of dreamers. Let’s work together on your next project.";
+    if (!finalData.footerTextColor) finalData.footerTextColor = "#333333";
+    if (!finalData.footerFontSize) finalData.footerFontSize = "16px";
+    if (!finalData.footerFontFamily) finalData.footerFontFamily = "Poppins";
+    if (!finalData.digitalPrintTitle) finalData.digitalPrintTitle = "Digital Prints";
+    if (!finalData.digitalPrintDescription) finalData.digitalPrintDescription = "A curated collection of premium illustrations...";
+    if (!finalData.digitalPrintTitleSize) finalData.digitalPrintTitleSize = "32px";
+    if (!finalData.digitalPrintDescSize) finalData.digitalPrintDescSize = "16px";
+    if (!finalData.digitalPrintTextColor) finalData.digitalPrintTextColor = "#000000";
+    if (!finalData.portfolioTitle) finalData.portfolioTitle = "Explore Art & Works";
+    if (!finalData.portfolioSubtitle) finalData.portfolioSubtitle = "A curated portfolio of my creative journey.";
+    if (!finalData.portfolioTitleColor) finalData.portfolioTitleColor = "#1a1a1a";
+    if (!finalData.portfolioSubtitleColor) finalData.portfolioSubtitleColor = "#555555";
+    if (!finalData.portfolioTitleSize) finalData.portfolioTitleSize = "48px";
+    if (!finalData.portfolioSubtitleSize) finalData.portfolioSubtitleSize = "16px";
 
-    res.json(data);
+    res.json(finalData);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching homepage data" });
+    console.error("ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -158,9 +156,9 @@ exports.updateHomepage = async (req, res) => {
 
     res.json({ message: "Homepage updated successfully", data: existing });
 
-  }catch (err) {
-     console.error("HOMEPAGE ERROR:", err);
-     res.status(500).json({ message: err.message });
+  } catch (err) {
+    console.error("ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -176,7 +174,7 @@ exports.uploadImages = async (req, res) => {
     const filenames = req.files.map(file => file.filename);
     res.json({ success: true, filenames });
   } catch (err) {
-    console.error("UPLOAD ERROR:", err);
-    res.status(500).json({ message: "Error uploading images" });
+    console.error("ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 };

@@ -10,6 +10,7 @@ router.get("/style", async (req, res) => {
     const style = await AboutStyle.findOne();
     res.json(style || {});
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -32,6 +33,7 @@ router.post("/style", async (req, res) => {
     );
     res.json(style);
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -42,6 +44,7 @@ router.get("/", async (req, res) => {
     const about = await About.findOne();
     res.json(about);
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -68,6 +71,7 @@ router.post("/", async (req, res) => {
     
     res.status(201).json({ message: "About info saved successfully", about });
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -81,6 +85,7 @@ router.put("/", async (req, res) => {
     const about = await About.findOneAndUpdate({}, updates, { new: true, upsert: true });
     res.json({ message: "About info updated successfully", about });
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });

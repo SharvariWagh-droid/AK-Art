@@ -8,6 +8,7 @@ router.get("/", async (req, res) => {
     const agencies = await Agency.find().sort({ createdAt: 1 });
     res.json(agencies);
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -22,6 +23,7 @@ router.post("/", async (req, res) => {
     await agency.save();
     res.status(201).json({ message: "Agency added successfully", agency });
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -38,6 +40,7 @@ router.put("/:id", async (req, res) => {
     if (!updatedAgency) return res.status(404).json({ error: "Agency not found" });
     res.json({ message: "Agency updated successfully", agency: updatedAgency });
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -49,6 +52,7 @@ router.delete("/:id", async (req, res) => {
     if (!deletedAgency) return res.status(404).json({ error: "Agency not found" });
     res.json({ message: "Agency deleted successfully" });
   } catch (err) {
+    console.error("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
