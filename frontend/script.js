@@ -1,7 +1,7 @@
 // ==============================
 // 🚀 INIT
 // ==============================
-const HOMEPAGE_API = "http://13.233.50.44:5000/api/homepage";
+const HOMEPAGE_API = "http://13.233.50.44/api/homepage";
 let currentIndex = 0;
 let currentList = [];
 let currentModalType = 'print';
@@ -303,7 +303,7 @@ function setupProfilePanel() {
             if (avatar) avatar.innerText = user.name.charAt(0).toUpperCase();
 
             try {
-                const response = await fetch(`http://13.233.50.44:5000/api/orders`);
+                const response = await fetch(`http://13.233.50.44/api/orders`);
                 const allOrders = await response.json();
 
                 const userOrders = allOrders.filter(o =>
@@ -351,8 +351,8 @@ function setupProfilePanel() {
     });
 }
 
-const API = "http://13.233.50.44:5000/api/artworks";
-const BACKEND_ORIGIN = "http://13.233.50.44:5000";
+const API = "http://13.233.50.44/api/artworks";
+const BACKEND_ORIGIN = "http://13.233.50.44";
 
 function getImageSrc(img) {
     if (!img || typeof img !== 'string') return "";
@@ -519,7 +519,7 @@ function buyPrint(name, price, image) {
 
     // Clear any existing bad localStorage values
     const existingImage = localStorage.getItem("artImage");
-    if (existingImage && (existingImage.includes("localhost:7070") || existingImage.includes("localhost:37857") || !existingImage.includes("13.233.50.44:5000/uploads"))) {
+    if (existingImage && (existingImage.includes("localhost:7070") || existingImage.includes("localhost:37857") || !existingImage.includes("13.233.50.44/uploads"))) {
         localStorage.removeItem("artImage");
         localStorage.removeItem("artName");
         localStorage.removeItem("artPrice");
@@ -529,7 +529,7 @@ function buyPrint(name, price, image) {
     localStorage.setItem("artPrice", price);
     localStorage.setItem("artImage", image);
 
-    fetch("http://13.233.50.44:5000/api/payment/create-order", {
+    fetch("http://13.233.50.44/api/payment/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: price })
@@ -556,7 +556,7 @@ function buyPrint(name, price, image) {
                 },
                 handler: async function (response) {
                     try {
-                        await fetch("http://13.233.50.44:5000/api/orders/create", {
+                        await fetch("http://13.233.50.44/api/orders/create", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
@@ -591,7 +591,7 @@ function payNow() {
 
 async function loadTestimonials() {
     try {
-        const res = await fetch("http://13.233.50.44:5000/api/testimonials");
+        const res = await fetch("http://13.233.50.44/api/testimonials");
         const data = await res.json();
 
         const container = document.getElementById("testimonial-grid");
@@ -606,7 +606,7 @@ async function loadTestimonials() {
 
         let style = {};
         try {
-            const styleRes = await fetch("http://13.233.50.44:5000/api/testimonials/style");
+            const styleRes = await fetch("http://13.233.50.44/api/testimonials/style");
             style = await styleRes.json();
         } catch (err) {
             console.log("TESTIMONIAL STYLE FETCH ERROR:", err);
@@ -663,7 +663,7 @@ async function loadAboutData() {
     if (!window.location.pathname.includes("about.html")) return;
 
     try {
-        const aboutResponse = await fetch("http://13.233.50.44:5000/api/about");
+        const aboutResponse = await fetch("http://13.233.50.44/api/about");
         const aboutData = await aboutResponse.json();
         const about = aboutData.about || aboutData;
 
@@ -732,7 +732,7 @@ async function loadAboutData() {
         console.log("ABOUT DATA RESPONSE:", about);
         const agenciesData = [];
 
-        const agencyRes = await fetch("http://13.233.50.44:5000/api/agencies");
+        const agencyRes = await fetch("http://13.233.50.44/api/agencies");
         const agencyData = await agencyRes.json();
 
         const agenciesList = document.getElementById("agenciesList");
@@ -744,7 +744,7 @@ async function loadAboutData() {
         }
 
         try {
-            const styleRes = await fetch("http://13.233.50.44:5000/api/about/style");
+            const styleRes = await fetch("http://13.233.50.44/api/about/style");
             const style = await styleRes.json();
 
             const palette = style.palette || "custom";
@@ -807,7 +807,7 @@ function setupAuth() {
             const email = document.getElementById("loginEmail").value;
             const password = document.getElementById("loginPassword").value;
 
-            const res = await fetch("http://13.233.50.44:5000/api/auth/login", {
+            const res = await fetch("http://13.233.50.44/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password })
@@ -839,7 +839,7 @@ function setupAuth() {
                 return;
             }
 
-            const res = await fetch("http://13.233.50.44:5000/api/auth/register", {
+            const res = await fetch("http://13.233.50.44/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, email, password })
@@ -865,7 +865,7 @@ function displayArtDetails() {
     const imageUrl = localStorage.getItem("artImage");
 
     // Defensive filter - only allow valid backend URLs or placeholder
-    if (imageUrl && (imageUrl.includes("localhost:7070") || imageUrl.includes("localhost:37857") || (!imageUrl.includes("13.233.50.44:5000/uploads") && !imageUrl.includes("via.placeholder.com")))) {
+    if (imageUrl && (imageUrl.includes("localhost:7070") || imageUrl.includes("localhost:37857") || (!imageUrl.includes("13.233.50.44/uploads") && !imageUrl.includes("via.placeholder.com")))) {
         // Clear bad localStorage values
         localStorage.removeItem("artImage");
         localStorage.removeItem("artName");
@@ -907,7 +907,7 @@ function downloadArt() {
     const title = localStorage.getItem("artName") || "artwork";
 
    window.location.href =
-       `http://13.233.50.44:5000/api/orders/download/${filename}/${size}/${format}?title=${encodeURIComponent(title)}`;
+       `http://13.233.50.44/api/orders/download/${filename}/${size}/${format}?title=${encodeURIComponent(title)}`;
 }
 
 function closeModal() {
@@ -1201,7 +1201,7 @@ function setupForgotPassword(form) {
         btn.disabled = true;
 
         try {
-            const response = await fetch("http://13.233.50.44:5000/api/auth/forgot-password", {
+            const response = await fetch("http://13.233.50.44/api/auth/forgot-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email })
@@ -1257,7 +1257,7 @@ function setupResetPassword(form) {
         }
 
         try {
-            const response = await fetch("http://13.233.50.44:5000/api/auth/reset-password", {
+            const response = await fetch("http://13.233.50.44/api/auth/reset-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ token, password })
@@ -1309,7 +1309,7 @@ async function verifyPayment() {
     }
 
     try {
-        const response = await fetch("http://13.233.50.44:5000/api/payment/verify", {
+        const response = await fetch("http://13.233.50.44/api/payment/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1342,7 +1342,7 @@ async function verifyPayment() {
 
 async function fetchOrderDetails(paymentId) {
     try {
-        const orderRes = await fetch("http://13.233.50.44:5000/api/orders/payment/" + paymentId);
+        const orderRes = await fetch("http://13.233.50.44/api/orders/payment/" + paymentId);
         const result = await orderRes.json();
 
         const artPreview = document.getElementById("artPreview");
@@ -1351,7 +1351,7 @@ async function fetchOrderDetails(paymentId) {
 
         if (result && result.image) {
             const order = result;
-            const fullImageUrl = "http://13.233.50.44:5000/uploads/" + order.image;
+            const fullImageUrl = "http://13.233.50.44/uploads/" + order.image;
 
             if (artPreview) artPreview.src = fullImageUrl;
             if (artNameEl) artNameEl.innerText = order.artName;

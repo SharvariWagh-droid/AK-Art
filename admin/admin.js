@@ -120,7 +120,7 @@ async function loadArtworks() {
 
   const type = getType();
 
-  const res = await fetch(`http://13.233.50.44:5000/api/artworks?type=${type}`);
+  const res = await fetch(`http://13.233.50.44/api/artworks?type=${type}`);
   let artworks = await res.json();
 
   // Apply filtering on the frontend
@@ -189,7 +189,7 @@ async function addArt(e) {
     console.log("ADDING TYPE: art");
 
     try {
-      const res = await fetch("http://13.233.50.44:5000/api/artworks/add", {
+      const res = await fetch("http://13.233.50.44/api/artworks/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -258,7 +258,7 @@ async function addPrint(e) {
     console.log("SENDING ATTRIBUTES:", attributes);
 
     try {
-      const res = await fetch("http://13.233.50.44:5000/api/artworks/add", {
+      const res = await fetch("http://13.233.50.44/api/artworks/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -324,7 +324,7 @@ async function addPublished(e) {
     console.log("ADDING TYPE: book");
 
     try {
-      const res = await fetch("http://13.233.50.44:5000/api/artworks/add", {
+      const res = await fetch("http://13.233.50.44/api/artworks/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -396,7 +396,7 @@ function initTestimonialsPage() {
 
 async function loadAbout() {
   try {
-    const res = await fetch("http://13.233.50.44:5000/api/about");
+    const res = await fetch("http://13.233.50.44/api/about");
     const data = await res.json();
 
     if (data && data.name) {
@@ -535,7 +535,7 @@ async function handleAboutSubmit(e) {
   if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = "Saving..."; }
 
   try {
-    const res = await fetch("http://13.233.50.44:5000/api/about", {
+    const res = await fetch("http://13.233.50.44/api/about", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, bio, image, publishedWorks })
@@ -558,7 +558,7 @@ async function handleAboutSubmit(e) {
 
 async function loadAboutStyle() {
   try {
-    const res = await fetch("http://13.233.50.44:5000/api/about/style");
+    const res = await fetch("http://13.233.50.44/api/about/style");
     const style = await res.json();
 
     if (style) {
@@ -583,7 +583,7 @@ async function saveAboutStyle() {
   };
 
   try {
-    const res = await fetch("http://13.233.50.44:5000/api/about/style", {
+    const res = await fetch("http://13.233.50.44/api/about/style", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
@@ -603,7 +603,7 @@ async function saveAboutStyle() {
 
 async function loadAgencies() {
   try {
-    const res = await fetch("http://13.233.50.44:5000/api/agencies");
+    const res = await fetch("http://13.233.50.44/api/agencies");
     const data = await res.json();
 
     const list = document.getElementById("agencies-list");
@@ -638,7 +638,7 @@ async function handleAgencySubmit(e) {
   const submitBtn = document.getElementById("agency-submit-btn");
 
   const method = id ? "PUT" : "POST";
-  const url = id ? `http://13.233.50.44:5000/api/agencies/${id}` : "http://13.233.50.44:5000/api/agencies";
+  const url = id ? `http://13.233.50.44/api/agencies/${id}` : "http://13.233.50.44/api/agencies";
 
   if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = "Processing..."; }
 
@@ -669,7 +669,7 @@ async function handleAgencySubmit(e) {
 async function deleteAgency(id) {
   if (!confirm("Remove this agency?")) return;
   try {
-    const res = await fetch(`http://13.233.50.44:5000/api/agencies/${id}`, { method: "DELETE" });
+    const res = await fetch(`http://13.233.50.44/api/agencies/${id}`, { method: "DELETE" });
     if (res.ok) {
       showToast("Agency removed! 🗑️", "success");
       loadAgencies();
@@ -681,7 +681,7 @@ async function deleteAgency(id) {
 
 async function loadTestimonials() {
   try {
-    const res = await fetch("http://13.233.50.44:5000/api/testimonials");
+    const res = await fetch("http://13.233.50.44/api/testimonials");
     const data = await res.json();
 
     const container = document.getElementById("testimonials-grid");
@@ -732,7 +732,7 @@ async function handleTestimonialSubmit(e) {
   const submitBtn = document.getElementById("test-submit-btn");
 
   const method = id ? "PUT" : "POST";
-  const url = id ? `http://13.233.50.44:5000/api/testimonials/${id}` : "http://13.233.50.44:5000/api/testimonials";
+  const url = id ? `http://13.233.50.44/api/testimonials/${id}` : "http://13.233.50.44/api/testimonials";
 
   if (submitBtn) {
     submitBtn.disabled = true;
@@ -771,7 +771,7 @@ async function handleTestimonialSubmit(e) {
 
 async function loadTestimonialStyles() {
   try {
-    const res = await fetch("http://13.233.50.44:5000/api/testimonials/style");
+    const res = await fetch("http://13.233.50.44/api/testimonials/style");
     const style = await res.json();
 
     if (style) {
@@ -794,7 +794,7 @@ async function saveTestimonialStyles() {
   };
 
   try {
-    const res = await fetch("http://13.233.50.44:5000/api/testimonials/style", {
+    const res = await fetch("http://13.233.50.44/api/testimonials/style", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
@@ -816,7 +816,7 @@ async function saveTestimonialStyles() {
 
 async function loadOrders() {
   try {
-    const res = await fetch("http://13.233.50.44:5000/api/orders");
+    const res = await fetch("http://13.233.50.44/api/orders");
     const orders = await res.json();
 
     const table = document.getElementById("ordersTableBody");
@@ -863,7 +863,7 @@ async function editArtwork(id, currentTitle, currentDesc) {
   if (newDesc === null) return;
 
   try {
-    const res = await fetch(`http://13.233.50.44:5000/api/artworks/${id}`, {
+    const res = await fetch(`http://13.233.50.44/api/artworks/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: newTitle, description: newDesc })
@@ -885,7 +885,7 @@ async function deleteArtwork(id) {
   if (!confirm("Are you sure you want to delete this artwork?")) return;
 
   try {
-    const res = await fetch(`http://13.233.50.44:5000/api/artworks/${id}`, {
+    const res = await fetch(`http://13.233.50.44/api/artworks/${id}`, {
       method: "DELETE"
     });
 
@@ -904,7 +904,7 @@ async function deleteTestimonial(id) {
   if (!confirm("Are you sure you want to delete this testimonial?")) return;
 
   try {
-    const res = await fetch(`http://13.233.50.44:5000/api/testimonials/${id}`, {
+    const res = await fetch(`http://13.233.50.44/api/testimonials/${id}`, {
       method: "DELETE"
     });
 
@@ -929,8 +929,8 @@ async function deleteTestimonial(id) {
 async function loadDashboardStats() {
   try {
     const [artRes, ordersRes] = await Promise.all([
-      fetch('http://13.233.50.44:5000/api/artworks'),
-      fetch('http://13.233.50.44:5000/api/orders')
+      fetch('http://13.233.50.44/api/artworks'),
+      fetch('http://13.233.50.44/api/orders')
     ]);
     const artworks = await artRes.json();
     const orders = await ordersRes.json();
@@ -1093,7 +1093,7 @@ function initHeroGrid() {
   const grid = document.getElementById("heroUploadGrid");
   if (!grid) return;
 
-  const UPLOAD_BASE = "http://13.233.50.44:5000/uploads/";
+  const UPLOAD_BASE = "http://13.233.50.44/uploads/";
   grid.innerHTML = "";
 
   for (let i = 0; i < 5; i++) {
@@ -1163,7 +1163,7 @@ window.removeHeroFile = function (index) {
 
 async function loadHomepageCMS() {
   try {
-    const res = await fetch("http://13.233.50.44:5000/api/homepage");
+    const res = await fetch("http://13.233.50.44/api/homepage");
     if (!res.ok) throw new Error("Failed to fetch homepage data");
     const data = await res.json();
 
@@ -1269,7 +1269,7 @@ async function saveHomepageCMS(e) {
     });
 
     if (hasNewFiles) {
-      const uploadRes = await fetch("http://13.233.50.44:5000/api/homepage/upload", {
+      const uploadRes = await fetch("http://13.233.50.44/api/homepage/upload", {
         method: "POST",
         body: formData
       });
@@ -1345,7 +1345,7 @@ async function saveHomepageCMS(e) {
 
     console.log("Saving CMS payload:", updateData);
 
-    const updateRes = await fetch("http://13.233.50.44:5000/api/homepage", {
+    const updateRes = await fetch("http://13.233.50.44/api/homepage", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updateData)
