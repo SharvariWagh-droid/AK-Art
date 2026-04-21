@@ -1,74 +1,67 @@
-require("dotenv").config({ path: __dirname + "/.env" });
-
+require("dotenv").config(); // ← MUST be line 1, before any other require
 
 const express = require("express");
-const app = express();
 const mongoose = require("mongoose");
+const path = require("path");
 const cors = require("cors");
 
+// ── Route imports ────────────────────────────────────────────
+const authRoutes        = require("./routes/auth");
+const artworkRoutes     = require("./routes/artwork");
+const homepageRoutes    = require("./routes/homepage");
+const orderRoutes       = require("./routes/order");
+const paymentRoutes     = require("./routes/payment");
+const testimonialRoutes = require("./routes/testimonial");
+const aboutRoutes       = require("./routes/about");
+const agencyRoutes      = require("./routes/agency");
 
-// ROUTES
-const authRoutes = require("./routes/authRoutes");
-const orderRoutes = require("./routes/orderRoutes");
-const paymentRoutes = require("./routes/paymentRoutes");
-const artworkRoutes = require("./routes/artworkRoutes");
-const testimonialRoutes = require("./routes/testimonialRoutes");
-const aboutRoutes = require("./routes/aboutRoutes");
-const agencyRoutes = require("./routes/agencyRoutes");
-const homepageRoutes = require("./routes/homepageRoutes");
+const app = express();
 
-// ==============================
-// MIDDLEWARE
-// ==============================
-app.use(cors()); // Prioritize CORS
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+// ── Middleware ───────────────────────────────────────────────
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const fs = require('fs');
-const path = require('path');
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-}
-app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
-// Serve frontend static files
-app.use(express.static(path.join(__dirname, "../frontend")));
+// Static files — uploads and frontend
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(express.static(path.join(__dirname, "public"))); // adjust if frontend path differs
 
-// NEW: Serve admin static files
-app.use("/admin", express.static(path.join(__dirname, "../admin")));
-
-// NEW: Explicit /frontend route to support relative paths from admin (../frontend/script.js)
-app.use("/frontend", express.static(path.join(__dirname, "../frontend")));
-
-
-// ROUTE MIDDLEWARE
-app.use("/api/auth", authRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/payment", paymentRoutes);
-app.use("/api/artworks", artworkRoutes);
+// ── API Routes ───────────────────────────────────────────────
+app.use("/api/auth",         authRoutes);
+app.use("/api/artworks",     artworkRoutes);
+app.use("/api/homepage",     homepageRoutes);
+app.use("/api/orders",       orderRoutes);
+app.use("/api/payment",      paymentRoutes);
 app.use("/api/testimonials", testimonialRoutes);
-app.use("/api/about", aboutRoutes);
-app.use("/api/agencies", agencyRoutes);
-app.use("/api/homepage", homepageRoutes);
+app.use("/api/about",        aboutRoutes);
+app.use("/api/agency",       agencyRoutes);
 
-// ==============================
-// MONGODB CONNECTION (FIXED)
-// ==============================
-const PORT = process.env.PORT || 5000;
+// ── Health check ─────────────────────────────────────────────
+app.get("/health", (req, res) => res.json({ status: "ok", db: mongoose.connection.readyState }));
 
-const startServer = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("MongoDB Connected ✅");
-    console.log("DB NAME:", mongoose.connection.name);
-
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server running on http://0.0.0.0:${PORT}`);
-    });
-  } catch (err) {
-    console.error("MongoDB Connection Error:", err);
+// ── ONE connection, ONE server start ─────────────────────────
+async function startServer() {
+  // Fail loudly if MONGO_URI missing — don't let it silently connect to undefined
+  if (!process.env.MONGO_URI) {
+    console.error("❌ FATAL: MONGO_URI is undefined. Check your .env file or PM2 ecosystem config.");
     process.exit(1);
   }
-};
+
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000, // fail fast if Atlas unreachable
+      socketTimeoutMS: 45000,
+    });
+    console.log("✅ MongoDB Connected");
+
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err.message);
+    process.exit(1); // PM2 will auto-restart — don't hang with a broken DB
+  }
+}
 
 startServer();
