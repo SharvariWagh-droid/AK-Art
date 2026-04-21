@@ -123,6 +123,11 @@ async function loadArtworks() {
   const res = await fetch(`http://13.233.50.44/api/artworks?type=${type}`);
   let artworks = await res.json();
 
+  if (!Array.isArray(artworks)) {
+    console.error("Invalid response:", artworks);
+    artworks = [];
+  }
+
   // Apply filtering on the frontend
   artworks = artworks.filter(item => item.type === type);
 
@@ -932,8 +937,17 @@ async function loadDashboardStats() {
       fetch('http://13.233.50.44/api/artworks'),
       fetch('http://13.233.50.44/api/orders')
     ]);
-    const artworks = await artRes.json();
-    const orders = await ordersRes.json();
+    let artworks = await artRes.json();
+    let orders = await ordersRes.json();
+
+    if (!Array.isArray(artworks)) {
+      console.error("Invalid response:", artworks);
+      artworks = [];
+    }
+    if (!Array.isArray(orders)) {
+      console.error("Invalid response:", orders);
+      orders = [];
+    }
 
     const prints = artworks.filter(a => a.type === 'print');
 
