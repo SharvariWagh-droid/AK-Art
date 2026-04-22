@@ -39,7 +39,7 @@ app.use("/api/orders",       orderRoutes);
 app.use("/api/payment",      paymentRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/about",        aboutRoutes);
-app.use("/api/agency",       agencyRoutes);
+app.use("/api/agencies",       agencyRoutes);
 
 
 app.get("/health", (req, res) => res.json({ status: "ok", db: mongoose.connection.readyState }));

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Prints — Admin</title>
+    <title>Published Works — Admin Panel</title>
     <link rel="stylesheet" href="admin.css">
 </head>
 
@@ -26,28 +26,28 @@
             <nav class="sidebar-nav">
                 <a href="dashboard.html">📊 Dashboard</a>
                 <a href="manage-art.html">🎨 Personal Art</a>
-                <a href="published-works.html">📚 Published Works</a>
-                <a href="digital-prints.html" class="active">🖼️ Digital Prints</a>
+                <a href="published-works.html" class="active">📚 Published Works</a>
+                <a href="digital-prints.html">🖼️ Digital Prints</a>
                 <a href="orders.html">📦 Orders</a>
                 <a href="testimonials.html"><span class="nav-icon">💬</span> Testimonials</a>
                 <a href="edit-homepage.html"><span class="nav-icon">🏠</span> Edit Homepage</a>
             </nav>
 
             <div class="sidebar-footer">
-                <a href="#" onclick="logout()">🚪 Logout</a>
+                <a href="#" onclick="logout()">🚪 Sign Out</a>
             </div>
 
         </aside>
 
 
-        <!-- MAIN -->
+        <!-- MAIN CONTENT -->
         <div class="main-content">
 
             <header class="top-header">
 
-                <div class="header-left">
+                <div style="display:flex;align-items:center;gap:10px;">
                     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-                    <h1>Digital Prints</h1>
+                    <h1>Published Works</h1>
                 </div>
 
                 <div class="admin-profile">
@@ -58,19 +58,18 @@
             </header>
 
 
-            <!-- CONTENT -->
             <div class="content-area">
 
                 <div class="section-header">
-                    <h2>All Digital Prints</h2>
+                    <h2>Book Illustrations</h2>
 
-                    <button class="btn btn-primary" onclick="openModal('add-print-modal')">
-                        + Add Print
+                    <button class="btn btn-primary" onclick="openModal('add-pub-modal')">
+                        + Add Published Work
                     </button>
 
                 </div>
 
-                <div class="cards-grid" id="prints-grid"></div>
+                <div class="cards-grid" id="published-grid"></div>
 
             </div>
 
@@ -80,46 +79,53 @@
 
 
 
-    <!-- ADD PRINT MODAL -->
+    <!-- ADD MODAL -->
 
-    <div class="modal-overlay" id="add-print-modal">
+    <div class="modal-overlay" id="add-pub-modal">
 
         <div class="modal">
 
-            <h2>Add Digital Print</h2>
-            <form onsubmit="addPrint(event)">
+            <h2>Add Published Work</h2>
+
+            <form onsubmit="addPublished(event)">
 
                 <div class="form-group">
-                    <label>Print Image</label>
-                    <input type="file" id="art-image" accept="image/*" required>
+                    <label>Book Cover Image</label>
+
+                    <input type="file" id="pub-image" accept="image/*" required onchange="previewPubImage(event)">
+
+                    <img id="pub-preview" style="display:none;margin-top:10px;width:120px;border-radius:6px;">
                 </div>
 
-                <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" id="art-title" placeholder="Enter print title" required>
-                </div>
 
                 <div class="form-group">
-                    <label>Price (₹)</label>
-                    <input type="number" id="print-price" placeholder="Enter price" required>
+                    <label>Book Title</label>
+                    <input type="text" id="pub-title" placeholder="Book title" required>
                 </div>
 
+
                 <div class="form-group">
-                    <label>Attributes (Max 15)</label>
-                    <div id="attributes-container"></div>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="addAttributeField()" style="margin-top: 10px;">
-                        + Add Attribute
-                    </button>
+                    <label>Publisher</label>
+                    <input type="text" id="pub-publisher" placeholder="Publisher name" required>
                 </div>
+
+
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="number" id="pub-year" placeholder="e.g. 2024" required>
+                </div>
+
 
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-danger" onclick="closeModal('add-print-modal')">
+
+                    <button type="button" class="btn btn-danger" onclick="closeModal('add-pub-modal')">
                         Cancel
                     </button>
 
                     <button type="submit" class="btn btn-primary">
-                        Add Print
+                        Add Work
                     </button>
+
                 </div>
 
             </form>
@@ -130,7 +136,7 @@
 
 
 
-    <script src="../frontend/script.js"></script>
+    <script src="/script.js"></script>
   <script src="admin.js"></script>
 
 <div id="toastContainer"></div></body>
