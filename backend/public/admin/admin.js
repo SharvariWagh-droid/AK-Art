@@ -44,31 +44,45 @@ function togglePasswordVisibility() {
   }
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
 
-  var username = document.getElementById('username').value;
-  var password = document.getElementById('password').value;
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
 
-  const savedUser = localStorage.getItem('adminUser') || 'abhilasha';
-  const savedPass = localStorage.getItem('adminPass') || 'admin123';
+  try {
+    const res = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
 
-  if (username === savedUser && password === savedPass) {
-    localStorage.setItem('adminLoggedIn', 'true');
-    window.location.href = 'dashboard.html';
-  } else {
-    showToast('Invalid credentials ❌', 'error');
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem('adminToken', data.token);
+      localStorage.setItem('adminLoggedIn', 'true');
+      showToast("Welcome back! 👋", "success");
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 1000);
+    } else {
+      showToast(data.message || "Invalid credentials ❌", "error");
+    }
+  } catch (err) {
+    showToast("Network error 🌐", "error");
   }
 }
 
 function checkAuth() {
-  if (localStorage.getItem('adminLoggedIn') !== 'true') {
+  if (localStorage.getItem('adminLoggedIn') !== 'true' || !localStorage.getItem('adminToken')) {
     window.location.href = 'admin-login.html';
   }
 }
 
 function logout() {
   localStorage.removeItem('adminLoggedIn');
+  localStorage.removeItem('adminToken');
   window.location.href = 'admin-login.html';
 }
 
@@ -1379,7 +1393,7 @@ async function saveHomepageCMS(e) {
 window.loadHomepageCMS = loadHomepageCMS;
 window.saveHomepageCMS = saveHomepageCMS;
 
-function changeCredentials(e) {
+async function changeCredentials(e) {
   e.preventDefault();
 
   const newUser = document.getElementById('new-username').value;
@@ -1390,13 +1404,97 @@ function changeCredentials(e) {
     return;
   }
 
-  localStorage.setItem('adminUser', newUser);
-  localStorage.setItem('adminPass', newPass);
+  try {
+    const res = await fetch("/api/admin/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: newUser, password: newPass })
+    });
 
-  showToast("Credentials updated 🔥", "success");
+    const data = await res.json();
 
-  e.target.reset();
+    if (res.ok) {
+      showToast("Credentials updated Firebase! 🔥", "success");
+      e.target.reset();
+    } else {
+      showToast(data.message || "Update failed ❌", "error");
+    }
+  } catch (err) {
+    showToast("Network error 🌐", "error");
+  }
 }
+
+// FORGOT PASSWORD LOGIC
+async function handleAdminForgotPassword(e) {
+  e.preventDefault();
+  const email = document.getElementById('forgotEmail').value;
+  const btn = e.target.querySelector('button');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/admin/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast("Reset token generated! (Check console)", "success");
+      console.log("ADMIN RESET TOKEN:", data.token);
+      // Redirect to reset page after a delay
+      setTimeout(() => {
+        window.location.href = `reset-password.html?token=${data.token}`;
+      }, 2000);
+    } else {
+      showToast(data.message || "Error occurred ❌", "error");
+    }
+  } catch (err) {
+    showToast("Network error 🌐", "error");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleAdminResetPassword(e) {
+  e.preventDefault();
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  const password = document.getElementById('resetPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  if (password !== confirmPassword) {
+    showToast("Passwords do not match! ❌", "error");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, password })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast("Password reset successful! ✨", "success");
+      setTimeout(() => {
+        window.location.href = 'admin-login.html';
+      }, 2000);
+    } else {
+      showToast(data.message || "Invalid or expired token", "error");
+    }
+  } catch (err) {
+    showToast("Network error 🌐", "error");
+  }
+}
+
+// ATTACH LISTENERS FOR AUTH PAGES
+document.addEventListener("DOMContentLoaded", () => {
+    const forgotForm = document.getElementById("adminForgotPasswordForm");
+    if (forgotForm) forgotForm.addEventListener("submit", handleAdminForgotPassword);
+
+    const resetForm = document.getElementById("adminResetPasswordForm");
+    if (resetForm) resetForm.addEventListener("submit", handleAdminResetPassword);
+});
 
 window.changeCredentials = changeCredentials;
 

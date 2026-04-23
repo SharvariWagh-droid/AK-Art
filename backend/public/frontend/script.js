@@ -366,9 +366,10 @@ function getImageSrc(img) {
     if (img.startsWith('data:image')) return img;
     if (img.startsWith('https://via.placeholder.com')) return img;
 
-
     const filename = img.split('/').pop();
-    return BACKEND_ORIGIN + "/uploads/" + filename;
+    // Use dynamic origin if BACKEND_ORIGIN is empty, otherwise use BACKEND_ORIGIN
+    const origin = (typeof BACKEND_ORIGIN !== 'undefined' && BACKEND_ORIGIN) ? BACKEND_ORIGIN : window.location.origin;
+    return origin + "/uploads/" + filename;
 }
 
 function getRazorpayImageSrc(img) {
@@ -1141,9 +1142,11 @@ async function loadHeroContent(data) {
 
         slider.innerHTML = "";
 
-        const images = (data.heroImages || []).filter(img => img);
+        let images = (data.heroImages || []).filter(img => img);
 
-        if (images.length === 0) return;
+        if (images.length === 0) {
+            images = ["https://via.placeholder.com/1200x800?text=AK+Art+Portfolio"];
+        }
 
         images.forEach((img, index) => {
             const fullPath = getImageSrc(img);

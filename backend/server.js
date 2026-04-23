@@ -36,7 +36,10 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public/frontend/index.html"));
 });
 
+const adminRoutes      = require("./routes/adminRoutes");
+
 app.use("/api/auth",         authRoutes);
+app.use("/api/admin",        adminRoutes);
 app.use("/api/artworks",     artworkRoutes);
 app.use("/api/homepage",     homepageRoutes);
 app.use("/api/orders",       orderRoutes);

@@ -16,7 +16,6 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    max-width: 100%;
 }
 
 body {
@@ -304,7 +303,6 @@ button:hover, .btn:hover {
     font-size: 14px;
     z-index: 5;
 }
-}
 
 .hero-buttons {
     display: flex;
@@ -482,6 +480,9 @@ button:hover, .btn:hover {
 }
 
 @media (max-width: 480px) {
+    .hero-slider {
+        height: 300px;
+    }
     .art-grid {
         grid-template-columns: 1fr;
     }
