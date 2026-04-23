@@ -23,13 +23,17 @@ app.use(express.urlencoded({ extended: true }));
 
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use(express.static(path.join(__dirname, "public"))); 
+ 
 
-// Serve frontend
-app.use(express.static(path.join(__dirname, "../frontend")));
+// serve frontend
+app.use(express.static(path.join(__dirname, "public/frontend")));
 
+// serve admin
+app.use("/admin", express.static(path.join(__dirname, "public/admin")));
+
+// root route
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+  res.sendFile(path.join(__dirname, "public/frontend/index.html"));
 });
 
 app.use("/api/auth",         authRoutes);
@@ -43,7 +47,6 @@ app.use("/api/agencies",       agencyRoutes);
 
 
 app.get("/health", (req, res) => res.json({ status: "ok", db: mongoose.connection.readyState }));
-
 
 async function startServer() {
   // Fail loudly if MONGO_URI missing — don't let it silently connect to undefined
@@ -66,7 +69,7 @@ async function startServer() {
   } catch (err) {
     console.error("❌ MongoDB connection failed:", err.message);
     process.exit(1); 
-  }
+     }
 }
 
 startServer();
