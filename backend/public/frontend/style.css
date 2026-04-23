@@ -441,57 +441,13 @@ button:hover, .btn:hover {
     box-shadow: 0 10px 25px rgba(0, 0, 0, .15)
 }
 
-@media (max-width: 768px) {
-    .hero {
-        flex-direction: column-reverse;
-        text-align: center;
-    }
-
-    .hero-slider {
-        width: 100%;
-        max-width: 420px;
-        height: 400px;
-        transform: none;
-        margin: 0 auto;
-    }
-
-    #heroTitle {
-        font-size: 28px !important;
-    }
-
-    #heroSubtitle {
-        font-size: 14px !important;
-    }
-
-    .hero-content h1 {
-        font-size: 34px;
-    }
-
-    .hero-content {
-        text-align: center;
-    }
-
-    .hero-content p {
-        margin: 0 auto 20px;
-    }
-
-    .hero-buttons {
-        justify-content: center;
-    }
-
     .art-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
     }
 }
 
-@media (max-width: 480px) {
-    .hero-slider {
-        height: 300px;
-    }
-    .art-grid {
-        grid-template-columns: 1fr;
-    }
-}
+
 
 .art-info p {
     font-size: 14px;
@@ -662,20 +618,7 @@ button:hover, .btn:hover {
     right: 10px;
 }
 
-@media (max-width: 768px) {
-    .modal-content {
-        flex-direction: column;
-        width: 95%;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-    .modal-left {
-        border-right: none;
-        border-bottom: 1px solid #eee;
-    }
-    .prev { left: 10px; }
-    .next { right: 10px; }
-}
+
 
 /* ==============================
    EXPLORE PAGE
@@ -920,11 +863,7 @@ button:hover, .btn:hover {
 }
 
 /* MOBILE */
-@media (max-width: 768px) {
-    .testimonial-grid {
-        grid-template-columns: 1fr;
-    }
-}
+
 
 /* CARD */
 .testimonial-card {
@@ -1628,6 +1567,11 @@ button:hover, .btn:hover {
 }
 
 @media(max-width:900px) {
+    .header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
     .shop-hero h1 {
         font-size: 2.4rem
     }
@@ -1823,49 +1767,17 @@ button:hover, .btn:hover {
 }
 
 /* ==============================
-   RESPONSIVE MEDIA QUERIES (Legacy)
+   CONSOLIDATED RESPONSIVE STYLES
 ============================== */
 
-/* TABLET */
-@media (max-width: 900px) {
+/* SMALL LAPTOP (1024px) */
+@media (max-width: 1024px) {
     .header {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .hero {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .about-container {
-        flex-direction: column;
-        text-align: center;
-        gap: 30px;
-        padding: 40px 5%;
-    }
-
-    .artist-image {
-        flex: 0 0 300px;
-        max-width: 300px;
-        margin: 0 auto;
-    }
-
-    .about-artist {
-        text-align: center;
-    }
-
-    #aboutBio {
-        margin: 0 auto 30px;
-    }
-
-    .checkout-container {
-        flex-direction: column;
-        text-align: center;
+        padding: 20px 5%;
     }
 }
 
-/* MOBILE */
+/* TABLET (768px) */
 @media (max-width: 768px) {
     .navbar {
         padding: 20px;
@@ -1874,24 +1786,112 @@ button:hover, .btn:hover {
     .navbar ul {
         gap: 15px;
         flex-wrap: wrap;
+        padding: 0 10px;
+    }
+
+    .hero {
+        flex-direction: column-reverse;
+        text-align: center;
+        padding: 40px 10%;
+    }
+
+.hero-slider {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+    #heroTitle {
+        font-size: 28px !important;
+    }
+
+    #heroSubtitle {
+        font-size: 14px !important;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-content {
+        text-align: center;
+    }
+
+    .hero-content p {
+        margin: 0 auto 30px;
+    }
+
+    .hero-buttons {
+        justify-content: center;
     }
 
     .about-container {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
         padding: 40px 16px;
+        gap: 30px;
+    }
+
+    .artist-image {
+        flex: 0 0 250px;
+        max-width: 250px;
+        margin: 0 auto;
+    }
+
+    .about-artist {
+        text-align: center;
     }
 
     #aboutName {
         font-size: 2.2rem;
     }
 
+    #aboutBio {
+        margin: 0 auto 30px;
+    }
+
     .section-heading {
         font-size: 1.1rem;
     }
+
+    .testimonial-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        flex-direction: column;
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-left {
+        border-right: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .prev { left: 10px; }
+    .next { right: 10px; }
+
+    .art-grid,
+    .explore-grid,
+    .shop-grid,
+    .prints-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+        gap: 20px;
+    }
 }
 
+/* MOBILE (480px) */
 @media (max-width: 480px) {
     body {
         font-size: 14px;
+    }
+
+    .navbar a {
+        font-size: 14px;
+        padding: 6px 12px;
     }
 
     .hero-content h1 {
@@ -1910,123 +1910,12 @@ button:hover, .btn:hover {
         font-size: 1.5rem;
     }
 
-    /* GRID FIX FOR ALL PAGES */
     .art-grid,
     .shop-grid,
-    .explore-grid {
-        grid-template-columns: 1fr;
-        padding: 30px;
-    }
-
-    /* PROFILE PANEL FULL WIDTH */
-    .profile-panel {
-        width: 100%;
-        right: -100%;
-    }
-
-    .profile-panel.active {
-        right: 0;
-    }
-
-    /* FOOTER */
-    .footer-bottom {
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
-    }
-}
-
-/* ==============================
-   NEW RESPONSIVE IMPROVEMENTS
-============================== */
-
-/* ?? SMALL LAPTOP (1024px) */
-@media (max-width: 1024px) {
-    .header {
-        padding: 20px 5%;
-    }
-
-    .hero-content h1 {
-        font-size: 2.8rem;
-    }
-
-    .about-container {
-        gap: 30px;
-        padding: 60px 8%;
-    }
-
-    .artist-image {
-        flex: 0 0 320px;
-    }
-}
-
-/* ?? TABLET (768px) */
-@media (max-width: 768px) {
-    .navbar ul {
-        flex-wrap: wrap;
-        gap: 15px;
-        padding: 0 10px;
-    }
-
-    .hero {
-        flex-direction: column-reverse;
-        text-align: center;
-        padding: 40px 10%;
-    }
-
-    .hero-content h1 {
-        font-size: 2.5rem;
-    }
-
-    .hero-content p {
-        margin: 0 auto 30px;
-    }
-
-    .hero-buttons {
-        justify-content: center;
-    }
-
-    .about-container {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .artist-image {
-        max-width: 250px;
-        margin: 0 auto;
-    }
-
-    .about-artist {
-        text-align: center;
-    }
-
-    #aboutBio {
-        margin: 0 auto 30px;
-    }
-
-    /* Responsive Grid Modernization */
-    .art-grid,
     .explore-grid,
-    .shop-grid,
     .prints-grid {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
-        gap: 20px;
-    }
-}
-
-/* ?? MOBILE (480px) */
-@media (max-width: 480px) {
-    .hero-content h1 {
-        font-size: 2rem;
-    }
-
-    #aboutName {
-        font-size: 2.2rem;
-    }
-
-    .navbar a {
-        font-size: 14px;
-        padding: 6px 12px;
+        grid-template-columns: 1fr !important;
+        padding: 20px;
     }
 
     .profile-panel {
@@ -2046,24 +1935,8 @@ button:hover, .btn:hover {
         gap: 15px;
         text-align: center;
     }
-
-    /* Grid forced to single column on small mobile */
-    .art-grid,
-    .explore-grid,
-    .shop-grid,
-    .prints-grid {
-        grid-template-columns: 1fr !important;
-        padding: 20px;
-    }
-
-    .checkout-container {
-        padding: 20px;
-    }
-
-    .success-container {
-        padding: 30px 20px;
-    }
 }
+
 /* ==============================
    PRO HERO SLIDER & ADMIN PREVIEWS
    ============================== */
@@ -2207,5 +2080,52 @@ button:hover, .btn:hover {
 
 .margin-top-20 {
     margin-top: 20px;
+}
+
+/* ==============================
+   MOBILE HERO SLIDER VISIBILITY FIX
+============================== */
+@media (max-width: 768px) {
+    .hero-image {
+        width: 100%;
+        min-height: 400px;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    .hero-slider {
+        width: 100%;
+        max-width: 420px;
+        height: 400px !important;
+        display: block !important;
+        visibility: visible !important;
+        margin: 0 auto;
+    }
+
+    .slide {
+        display: block !important;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .slide.active {
+        opacity: 1 !important;
+    }
+
+    .slide img {
+        width: 100%;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-image {
+        min-height: 300px;
+    }
+
+    .hero-slider {
+        height: 300px !important;
+    }
 }
 
