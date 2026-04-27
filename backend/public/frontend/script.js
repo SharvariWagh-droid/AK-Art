@@ -562,7 +562,7 @@ function buyPrint(name, price, image) {
         })
         .then(order => {
             const options = {
-               key: "rzp_test_ScwfKDA2qTOJyf".trim(),
+               key: "rzp_live_SiBFa9jyO3SqKn",
                 amount: order.amount,
                 currency: "INR",
                 name: "AK Art",
