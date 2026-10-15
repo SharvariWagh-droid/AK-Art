@@ -1,0 +1,22 @@
+{
+  "name": "ak-art-backend-tests",
+  "private": true,
+  "description": "Test tooling for the AK Art backend. Kept apart from the app's package.json and its committed node_modules.",
+  "scripts": {
+    "test": "cd .. && tests/node_modules/.bin/jest -c tests/jest.config.js && tests/node_modules/.bin/jest -c tests/jest.browser.config.js",
+    "coverage": "cd .. && tests/node_modules/.bin/jest -c tests/jest.config.js --coverage && tests/node_modules/.bin/jest -c tests/jest.browser.config.js --coverage",
+    "bugs": "cd .. && SHOW_BUGS=1 tests/node_modules/.bin/jest -c tests/jest.config.js; SHOW_BUGS=1 tests/node_modules/.bin/jest -c tests/jest.browser.config.js"
+  },
+  "config": {
+    "mongodbMemoryServer": {
+      "version": "7.0.14"
+    }
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb-memory-server": "^10.4.3",
+    "supertest": "^7.3.1"
+  }
+}
